@@ -1,8 +1,93 @@
 # bot.py
 import configparser
-from datetime import datetime
+from datetime import datetime, timedelta
 import discord
+import math
 import psycopg2
+import re
+import textwrap
+
+"""fletcher=# \d parlay
+                                      Table "public.parlay"
+    Column    |            Type             | Collation | Nullable |           Default            
+--------------+-----------------------------+-----------+----------+------------------------------
+ id           | integer                     |           | not null | generated always as identity
+ name         | character varying(255)      |           |          | 
+ description  | text                        |           |          | 
+ lastmodified | timestamp without time zone |           |          | 
+ members      | bigint[]                    |           |          | 
+ channel      | bigint                      |           |          | 
+ guild        | bigint                      |           |          | 
+ created      | timestamp without time zone |           |          | CURRENT_TIMESTAMP
+ ttl          | interval                    |           |          | 
+Indexes:
+    "parlay_name_must_be_guild_unique" UNIQUE CONSTRAINT, btree (name, guild)
+
+fletcher=# \d sentinel
+                                     Table "public.sentinel"
+    Column    |            Type             | Collation | Nullable |           Default            
+--------------+-----------------------------+-----------+----------+------------------------------
+ id           | integer                     |           | not null | generated always as identity
+ name         | character varying(255)      |           |          | 
+ description  | text                        |           |          | 
+ lastmodified | timestamp without time zone |           |          | 
+ subscribers  | bigint[]                    |           |          | 
+ triggercount | integer                     |           |          | 
+ created      | timestamp without time zone |           |          | CURRENT_TIMESTAMP
+ triggered    | timestamp without time zone |           |          | 
+Indexes:
+    "sentinel_name_must_be_globally_unique" UNIQUE CONSTRAINT, btree (name)
+"""
+
+ordinal = lambda n: "%d%s" % (n,"tsnrhtdd"[(math.floor(n/10)%10!=1)*(n%10<4)*n%10::4])
+
+def smallcaps(text=False):
+    if text:
+        return text.translate(str.maketrans({'a': 'ᴀ', 'b': 'ʙ', 'c': 'ᴄ', 'd': 'ᴅ', 'e': 'ᴇ', 'f': 'ғ', 'g': 'ɢ', 'h': 'ʜ', 'i': 'ɪ', 'j': 'ᴊ', 'k': 'ᴋ', 'l': 'ʟ', 'm': 'ᴍ', 'n': 'ɴ', 'o': 'ᴏ', 'p': 'ᴘ', 'q': 'ǫ', 'r': 'ʀ', 's': 's', 't': 'ᴛ', 'u': 'ᴜ', 'v': 'ᴠ', 'w': 'ᴡ', 'x': 'x', 'y': 'ʏ', 'z': 'ᴢ'}))
+    return None
+
+def pretty_date(time=False):
+    """
+    Get a datetime object or a int() Epoch timestamp and return a
+    pretty string like 'an hour ago', 'Yesterday', '3 months ago',
+    'just now', etc
+    """
+    from datetime import datetime
+    now = datetime.now()
+    if type(time) is int:
+        diff = now - datetime.fromtimestamp(time)
+    elif isinstance(time,datetime):
+        diff = now - time
+    elif not time:
+        diff = now - now
+    second_diff = diff.seconds
+    day_diff = diff.days
+
+    if day_diff < 0:
+        return ''
+
+    if day_diff == 0:
+        if second_diff < 10:
+            return "just now"
+        if second_diff < 60:
+            return str(int(second_diff)) + " seconds ago"
+        if second_diff < 120:
+            return "a minute ago"
+        if second_diff < 3600:
+            return str(int(second_diff / 60)) + " minutes ago"
+        if second_diff < 7200:
+            return "an hour ago"
+        if second_diff < 86400:
+            return str(int(second_diff / 3600)) + " hours ago"
+    if day_diff == 1:
+        return "yesterday"
+    if day_diff < 7:
+        return str(day_diff) + " days ago"
+    if day_diff < 31:
+        return str(int(day_diff / 7)) + " weeks ago"
+    if day_diff < 365:
+        return str(int(day_diff / 30)) + " months ago"
+    return str(int(day_diff / 365)) + " years ago"
 
 # command handler class
 
@@ -16,8 +101,25 @@ class CommandHandler:
     def add_command(self, command):
         self.commands.append(command)
 
+    async def reaction_handler(self, reaction):
+        messageContent = str(reaction.emoji)
+        for command in self.commands:
+            if messageContent.startswith(tuple(command['trigger'])):
+                if command['args_num'] == 0:
+                    channel = self.client.get_channel(reaction.channel_id)
+                    message = await channel.get_message(reaction.message_id)
+                    user = await self.client.get_user_info(reaction.user_id)
+                    if command['async']:
+                        return await command['function'](message, self.client, [reaction, user])
+                        break
+                    else:
+                        return await message.channel.send(str(command['function'](message, self.client, [reaction, user])))
+                        break
+
     async def command_handler(self, message):
         print(message.content)
+        if extract_identifiers_messagelink.search(message.content):
+            return await preview_messagelink_function(message, self.client, None)
         for command in self.commands:
             if message.content.startswith(tuple(command['trigger'])):
                 print(command)
@@ -59,17 +161,23 @@ def listbanners_function(message, client, args):
         cur = conn.cursor()
         cur.execute("SELECT id, name, description, created, triggered, lastmodified, subscribers, triggercount FROM sentinel WHERE lastmodified > NOW() - INTERVAL '30 days';")
         sentuple = cur.fetchone()
-        bannerMessage = ""
+        bannerMessage = "Banner List:\n"
         while sentuple:
-            bannerName = sentuple[1]
+            bannerName = smallcaps(sentuple[1])
             if bannerName is None or bannerName.strip() == "" or " " in bannerName:
                 bannerName = "Banner {}".format(str(sentuple[0]))
-            bannerMessage = bannerMessage + "**{}**".format(bannerName)
+            bannerMessage = bannerMessage + "**{}** ".format(bannerName)
             if sentuple[2]:
-                bannerMessage = bannerMessage + ": " + sentuple[2]
-            bannerMessage = bannerMessage + " ({} pledgers)\nCreated at {}\n".format(str(sentuple[7]), sentuple[3].strftime("%Y-%m-%d %H:%M:%S"))
+                bannerMessage = bannerMessage + sentuple[2]
+            supporterPluralized = "supporters"
+            if len(sentuple[6]) == 1:
+                supporterPluralized = "supporter"
+            goalAchievedVerb = "is"
             if sentuple[4]:
-                bannerMessage = bannerMessage + "Goal reached at {}\n".format(sentuple[4].strftime("%Y-%m-%d %H:%M:%S"))
+                goalAchievedVerb = "was"
+            bannerMessage = bannerMessage + "\n{} {}, goal {} {}\nMᴀᴅᴇ: {}\n".format(str(len(sentuple[6])), supporterPluralized, goalAchievedVerb, str(sentuple[7]), sentuple[3].strftime("%Y-%m-%d %H:%M") + " (" + pretty_date(sentuple[3]) + ")")
+            if sentuple[4]:
+                bannerMessage = bannerMessage + "Mᴇᴛ: {}\n".format(sentuple[4].strftime("%Y-%m-%d %H:%M") +  " (" + pretty_date(sentuple[4]) + ")")
             sentuple = cur.fetchone()
             if sentuple:
                 bannerMessage = bannerMessage + "──────────\n"
@@ -124,6 +232,30 @@ async def teleport_function(message, client, args):
         return 'Portal opened on behalf of {} to {}'.format(message.author, args[0])
     except Exception as e:
         return e
+
+extract_identifiers_messagelink = re.compile('https://discordapp.com/channels/(\d+)/(\d+)/(\d+)', re.IGNORECASE)
+async def preview_messagelink_function(message, client, args):
+    try:
+        # 'https://discordapp.com/channels/{}/{}/{}'.format(message.channel.guild.id, message.channel.id, message.id)
+        urlParts = extract_identifiers_messagelink.search(message.content).groups()
+        if len(urlParts) == 3:
+            guild_id = int(urlParts[0])
+            channel_id = int(urlParts[1])
+            message_id = int(urlParts[2])
+            guild = client.get_guild(guild_id)
+            channel = guild.get_channel(channel_id)
+            target_message = await channel.get_message(message_id)
+            sent_at = target_message.created_at
+            if message.guild.id == guild_id and message.channel.id == channel_id:
+                return await message.channel.send("Message from <@{}> sent at {}:\n{}".format(target_message.author.id, sent_at, target_message.content))
+            elif message.guild.id == guild_id:
+                return await message.channel.send("Message from <@{}> sent in <#{}> at {}:\n{}".format(target_message.author.id, channel_id, sent_at, target_message.content))
+            else:
+                return await message.channel.send("Message from <@{}> sent in #{} ({}) at {}:\n{}".format(target_message.author.id, channel.name, guild.name, sent_at, target_message.content))
+    except Exception as e:
+        await message.channel.send(e)
+        pass # better for there to be no response in that case
+
 
 async def messagelink_function(message, client, args):
     try:
@@ -200,7 +332,7 @@ async def pledge_function(message, client, args):
             return await message.channel.send('You already committed to this banner. `!defect {}` to defect.'.format(" ".join(args)))
         else:
             cur.execute("UPDATE sentinel SET subscribers = array_append(subscribers, %s), lastmodified = CURRENT_TIMESTAMP WHERE id = %s;", [message.author.id, bannerId])
-            cur.execute("SELECT array_length(subscribers, 1), triggercount, name, subscribers FROM sentinel WHERE id = %s;", [bannerId])
+            cur.execute("SELECT array_length(subscribers, 1), triggercount, name, subscribers, triggered FROM sentinel WHERE id = %s;", [bannerId])
             bannerInfo = cur.fetchone()
             if bannerInfo[0] == bannerInfo[1]: # Triggered banner! Yay!
                 cur.execute("UPDATE sentinel SET triggered = CURRENT_TIMESTAMP WHERE id = %s;", [bannerId])
@@ -208,7 +340,7 @@ async def pledge_function(message, client, args):
                 return await message.channel.send('Critical mass reached for banner {}! Paging supporters: <@{}>. Now it\'s up to you to fulfill your goal :)'.format(bannerInfo[2], ">, <@".join([str(userId) for userId in bannerInfo[3]])))
             elif bannerInfo[0] > bannerInfo[1]:
                 conn.commit()
-                return await message.channel.send('Critical mass has already been reached for banner {}!'.format(bannerInfo[2]))
+                return await message.channel.send('Critical mass was reached for banner {} at {}! You are the {} supporter.'.format(bannerInfo[2], bannerInfo[4].strftime("%Y-%m-%d %H:%M:%S"), ordinal(bannerInfo[0])))
             else:
                 conn.commit()
                 return await message.channel.send('You pledged your support for banner {} (one of {} supporters). It needs {} more supporters to reach its goal.'.format(bannerInfo[2], bannerInfo[0], str(bannerInfo[1] - bannerInfo[0])))
@@ -259,6 +391,61 @@ async def defect_function(message, client, args):
             conn.rollback()
         await message.channel.send(e)
 
+async def lastactive_function(message, client, args):
+    try:
+        lastMonth = None
+        before = True
+        try:
+            if args[0]:
+                try:
+                    lastMonth = datetime.utcnow().date() - timedelta(days=int(args[0]))
+                except ValueError:
+                    if args[1]:
+                        if args[0].startswith("a"):
+                            before = False
+                        lastMonth = datetime.utcnow().date() - timedelta(days=int(args[1]))
+                    pass
+        except IndexError:
+                    pass
+        msg = ""
+        for channel in message.channel.guild.text_channels:
+            try:
+                category_pretty = ""
+                if channel.category_id:
+                    category_pretty = " [{}]".format(client.get_channel(channel.category_id).name)
+                created_at = (await channel.history(limit=1).flatten())[0].created_at
+                created_pretty = pretty_date(created_at)
+                if created_pretty:
+                    created_pretty = " ({})".format(created_pretty)
+                if lastMonth:
+                    if (before and lastMonth < created_at.date()) or (not before and lastMonth > created_at.date()):
+                        msg = "{}\n<#{}>{}: {}{}".format(msg, channel.id, category_pretty, created_at.isoformat(timespec='minutes'), created_pretty)
+                else:
+                        msg = "{}\n<#{}>{}: {}{}".format(msg, channel.id, category_pretty, created_at.isoformat(timespec='minutes'), created_pretty)
+            except discord.NotFound as e:
+                pass
+            except discord.Forbidden as e:
+                msg = "{}\n<#{}>{}: Forbidden".format(msg, channel.id, category_pretty)
+                pass
+        msg = '**Channel Activity:**{}'.format(msg)
+        msg_chunks = textwrap.wrap(msg, 2000, replace_whitespace=False)
+        for chunk in msg_chunks:
+            await message.channel.send(chunk)
+    except Exception as e:
+        await message.channel.send(e)
+
+async def bookmark_function(message, client, args):
+    try:
+        if len(args) == 2 and type(args[1]) is discord.User:
+            print("bookmarking via reaction")
+            return await args[1].send("Bookmark to conversation in #{} ({}) https://discordapp.com/channels/{}/{}/{} via reaction to {}".format(message.channel.name, message.channel.guild.name, message.channel.guild.id, message.channel.id, message.id, message.content))
+        else:
+            print("bookmarking via command")
+            await message.author.send("Bookmark to conversation in #{} ({}) https://discordapp.com/channels/{}/{}/{} {}".format(message.channel.name, message.channel.guild.name, message.channel.guild.id, message.channel.id, message.id, " ".join(args)))
+            return await message.add_reaction('✅')
+    except Exception as e:
+        return e
+
 ch.add_command({
     'trigger': ['!help'],
     'function': help_function,
@@ -308,6 +495,14 @@ ch.add_command({
     'description': 'Create a link bridge to another channel'
 })
 ch.add_command({
+    'trigger': ['!bookmark', '🔖'],
+    'function': bookmark_function,
+    'async': True,
+    'args_num': 0,
+    'args_name': [],
+    'description': 'DM the user a bookmark to the current place in conversation',
+})
+ch.add_command({
     'trigger': ['!message'],
     'function': messagelink_function,
     'async': True,
@@ -315,7 +510,22 @@ ch.add_command({
     'args_name': ['string'],
     'description': 'Create a link to the message with ID `!message XXXXXX`'
 })
-## end hello command
+ch.add_command({
+    'trigger': ['!preview'],
+    'function': preview_messagelink_function,
+    'async': True,
+    'args_num': 1,
+    'args_name': ['string'],
+    'description': 'Retrieve message body by link (used internally to unwrap message links in chat)'
+})
+ch.add_command({
+    'trigger': ['!lastactive', '!lastactivity', '!ls'],
+    'function': lastactive_function,
+    'async': True,
+    'args_num': 0,
+    'args_name': [],
+    'description': 'List all available channels and time of last message'
+})
 
 # bot is ready
 @client.event
@@ -325,6 +535,7 @@ async def on_ready():
                 print(client.user.name)
                 print(client.user.id)
                 print('Discord.py Version: {}'.format(discord.__version__))
+                await client.change_presence(activity=discord.Game(name='support me on liberapay.com/novalinium'))
 
     except Exception as e:
         print(e)
@@ -341,6 +552,28 @@ async def on_message(message):
         # try to evaluate with the command handler
         try:
             await ch.command_handler(message)
+
+        # message doesn't contain a command trigger
+        except TypeError as e:
+            pass
+
+        # generic python error
+        except Exception as e:
+            print(e)
+
+# on new rxn
+@client.event
+async def on_raw_reaction_add(reaction):
+    # if the reaction is from the bot itself ignore it
+    if reaction.user_id == client.user.id:
+        pass
+    else:
+
+        # try to evaluate with the command handler
+        try:
+
+            print(reaction.emoji)
+            await ch.reaction_handler(reaction)
 
         # message doesn't contain a command trigger
         except TypeError as e:
