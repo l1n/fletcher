@@ -208,6 +208,7 @@ async def teleport_function(message, client, args):
         targetChannel = args[0].strip()
         channelLookupBy = "Name"
         toChannel = None
+        toGuild = None
         if targetChannel.startswith('<#'):
             targetChannel= targetChannel[2:-1].strip()
             channelLookupBy = "ID"
@@ -215,18 +216,29 @@ async def teleport_function(message, client, args):
             targetChannel= targetChannel[1:].strip()
         print('Target Channel '+channelLookupBy+': '+targetChannel)
         if channelLookupBy == "Name":
-            toChannel = discord.utils.get(fromChannel.guild.text_channels, name=targetChannel)
+            if ":" not in targetChannel:
+                toChannel = discord.utils.get(fromChannel.guild.text_channels, name=targetChannel)
+            else:
+                toChannelParts = targetChannel.split(":")
+                toGuild = discord.utils.get(client.guilds, name=toChannelParts[0].replace("_", " "))
+                toChannel = discord.utils.get(toGuild.text_channels, name=toChannelParts[1])
         elif channelLookupBy == "ID":
             toChannel = client.get_channel(int(targetChannel))
         print('Opening From '+str(fromChannel))
-        fromMessage = await fromChannel.send('Opening Portal To <#{}>'.format(toChannel.id))
+        fromMessage = await fromChannel.send('Opening Portal To <#{}> ({})'.format(toChannel.id, toChannel.guild.name))
         print('Opening To '+str(toChannel))
-        toMessage = await toChannel.send('Opening Portal To <#{}>'.format(fromChannel.id))
+        toMessage = await toChannel.send('Opening Portal To <#{}> ({})'.format(fromChannel.id, fromChannel.guild.name))
         print('Editing From')
-        embedPortal = discord.Embed(title="Portal opened to #{}".format(toChannel.name), description="https://discordapp.com/channels/{}/{}/{} {}".format(toChannel.guild.id, toChannel.id, toMessage.id, " ".join(args[1:]))).set_footer(icon_url="https://download.lin.anticlack.com/fletcher/blue-portal.png",text="On behalf of {}".format(message.author.nick or message.author))
+        embedTitle = "Portal opened to #{}".format(toChannel.name)
+        if toGuild:
+            embedTitle = embedTitle+" ({})".format(toChannel.guild.name)
+        embedPortal = discord.Embed(title=embedTitle, description="https://discordapp.com/channels/{}/{}/{} {}".format(toChannel.guild.id, toChannel.id, toMessage.id, " ".join(args[1:]))).set_footer(icon_url="https://download.lin.anticlack.com/fletcher/blue-portal.png",text="On behalf of {}".format(message.author.nick or message.author))
         tmp = await fromMessage.edit(content=None,embed=embedPortal)
         print('Editing To')
-        embedPortal = discord.Embed(title="Portal opened from #{}".format(fromChannel.name), description="https://discordapp.com/channels/{}/{}/{} {}".format(fromChannel.guild.id, fromChannel.id, fromMessage.id, " ".join(args[1:]))).set_footer(icon_url="https://download.lin.anticlack.com/fletcher/orange-portal.png",text="On behalf of {}".format(message.author.nick or message.author))
+        embedTitle = "Portal opened from #{}".format(fromChannel.name)
+        if toGuild:
+            embedTitle = embedTitle+" ({})".format(fromChannel.guild.name)
+        embedPortal = discord.Embed(title=embedTitle, description="https://discordapp.com/channels/{}/{}/{} {}".format(fromChannel.guild.id, fromChannel.id, fromMessage.id, " ".join(args[1:]))).set_footer(icon_url="https://download.lin.anticlack.com/fletcher/orange-portal.png",text="On behalf of {}".format(message.author.nick or message.author))
         tmp = await toMessage.edit(content=None,embed=embedPortal)
         print('Portal Opened')
         return 'Portal opened on behalf of {} to {}'.format(message.author, args[0])
@@ -582,6 +594,15 @@ async def on_raw_reaction_add(reaction):
         # generic python error
         except Exception as e:
             print(e)
+
+## on new member
+#@client.event
+#async def on_member_join(member):
+#    # if the message is from the bot itself ignore it
+#    if member == client.user:
+#        pass
+#    else:
+#        yield # check if the guild requires containment and contain if so
 
 # start bot
 client.run(token)
