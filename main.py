@@ -8,6 +8,7 @@ import math
 import psycopg2
 import re
 import textwrap
+from sys import exc_info
 
 """fletcher=# \d parlay
                                       Table "public.parlay"
@@ -39,6 +40,20 @@ fletcher=# \d sentinel
  triggered    | timestamp without time zone |           |          | 
 Indexes:
     "sentinel_name_must_be_globally_unique" UNIQUE CONSTRAINT, btree (name)
+
+fletcher=# \d messagemap
+               Table "public.messagemap"
+   Column    |  Type  | Collation | Nullable | Default 
+-------------+--------+-----------+----------+---------
+ fromguild   | bigint |           |          | 
+ toguild     | bigint |           |          | 
+ fromchannel | bigint |           |          | 
+ tochannel   | bigint |           |          | 
+ frommessage | bigint |           |          | 
+ tomessage   | bigint |           |          | 
+Indexes:
+    "messagemap_idx" btree (fromguild, fromchannel, frommessage)
+
 """
 
 ordinal = lambda n: "%d%s" % (n,"tsnrhtdd"[(math.floor(n/10)%10!=1)*(n%10<4)*n%10::4])
@@ -47,6 +62,30 @@ def smallcaps(text=False):
     if text:
         return text.translate(str.maketrans({'a': 'ᴀ', 'b': 'ʙ', 'c': 'ᴄ', 'd': 'ᴅ', 'e': 'ᴇ', 'f': 'ғ', 'g': 'ɢ', 'h': 'ʜ', 'i': 'ɪ', 'j': 'ᴊ', 'k': 'ᴋ', 'l': 'ʟ', 'm': 'ᴍ', 'n': 'ɴ', 'o': 'ᴏ', 'p': 'ᴘ', 'q': 'ǫ', 'r': 'ʀ', 's': 's', 't': 'ᴛ', 'u': 'ᴜ', 'v': 'ᴠ', 'w': 'ᴡ', 'x': 'x', 'y': 'ʏ', 'z': 'ᴢ'}))
     return None
+
+def convert_hex_to_ascii(h):
+    chars_in_reverse = []
+    while h != 0x0:
+        chars_in_reverse.append(chr(h & 0xFF))
+        h = h >> 8
+
+    chars_in_reverse.reverse()
+    return ''.join(chars_in_reverse)
+
+def memfrob(plain=""):
+    plain = list(plain)
+    xok = 0x2a
+    length = len(plain)
+    kek = []
+    for x in range(0,length):
+            kek.append(hex(ord(plain[x])))
+    for x in range(0,length):
+            kek[x] = hex(int(kek[x], 16) ^ int(hex(xok), 16))
+    
+    cipher = ""
+    for x in range(0,length):
+        cipher = cipher + convert_hex_to_ascii(int(kek[x], 16))
+    return cipher
 
 def pretty_date(time=False):
     """
@@ -471,16 +510,30 @@ async def bookmark_function(message, client, args):
 async def rot13_function(message, client, args):
     try:
         if len(args) == 2 and type(args[1]) is discord.User:
-            print("rot13e via reaction")
             return await args[1].send(codecs.encode(message.content, 'rot_13'))
         else:
-            print("rot13e via command")
-            botMessage = await message.channel.send(codecs.encode(" ".join(args), 'rot_13'))
+            messageContent = codecs.encode(" ".join(args), 'rot_13')
+            botMessage = await message.channel.send(messageContent)
             await botMessage.add_reaction('🕜')
             try: 
                 await message.delete()
             except discord.Forbidden as e:
-                print("Forbidden to delete message in "+str(message.channel.name))
+                print("Forbidden to delete message in "+str(message.channel))
+    except Exception as e:
+        return e
+
+async def memfrob_function(message, client, args):
+    try:
+        if len(args) == 2 and type(args[1]) is discord.User:
+            return await args[1].send(memfrob(message.content))
+        else:
+            messageContent = memfrob(" ".join(args))
+            botMessage = await message.channel.send(messageContent)
+            await botMessage.add_reaction('🕦')
+            try: 
+                await message.delete()
+            except discord.Forbidden as e:
+                print("Forbidden to delete message in "+str(message.channel))
     except Exception as e:
         return e
 
@@ -565,12 +618,21 @@ ch.add_command({
     'description': 'List all available channels and time of last message'
 })
 ch.add_command({
-    'trigger': ['!rot13', '!spoiler', '🕜'],
+    'trigger': ['!rot13', '🕜'],
     'function': rot13_function,
     'async': True,
     'args_num': 0,
     'args_name': [],
-    'description': 'Send contents of message to yourself, rot13 encoded or decoded'
+    'description': 'Send contents of message rot13 flipped (deprecated)'
+})
+
+ch.add_command({
+    'trigger': ['!memfrob', '!spoiler', '🕦'],
+    'function': memfrob_function,
+    'async': True,
+    'args_num': 0,
+    'args_name': [],
+    'description': 'Send contents of message to memfrob flipped'
 })
 
 webhook_sync_registry = {
@@ -595,6 +657,7 @@ async def on_ready():
         for guild in client.guilds:
             try:
                 for webhook in await guild.webhooks():
+                    # discord.py/rewrite issue #1242, PR #1745 workaround
                     if webhook.name.startswith(config['discord']['botNavel']+' ('):
                         fromChannelName = guild.name+':'+str(guild.get_channel(webhook.channel_id))
                         webhook_sync_registry[fromChannelName] = {
@@ -624,33 +687,35 @@ async def on_message(message):
         pass
     elif message.author == client.user:
         try:
-            if webhook_sync_registry[message.guild.name+':'+message.channel.name]:
+            if message.guild.name+':'+message.channel.name in webhook_sync_registry:
                 attachments = []
                 for attachment in message.attachments:
                     print("Syncing "+attachment.filename)
                     attachment_blob = io.BytesIO()
                     await attachment.save(attachment_blob)
                     attachments.append(discord.File(attachment_blob, attachment.filename))
-                await webhook_sync_registry[message.guild.name+':'+message.channel.name]['toWebhook'].send(content=message.content, username=message.author.name, avatar_url=message.author.avatar_url, embeds=message.embeds, tts=message.tts, files=attachments)
-        except KeyError as e:
-            # Eat keyerrors from non-synced channels
-            pass
+                # wait=True: blocking call for messagemap insertions to work
+                syncMessage = await webhook_sync_registry[message.guild.name+':'+message.channel.name]['toWebhook'].send(content=message.content, username=message.author.name, avatar_url=message.author.avatar_url, embeds=message.embeds, tts=message.tts, files=attachments, wait=True)
+                cur = conn.cursor()
+                cur.execute("INSERT INTO messagemap (fromguild, fromchannel, frommessage, toguild, tochannel, tomessage) VALUES (%s, %s, %s, %s, %s, %s);", [message.guild.id, message.channel.id, message.id, syncMessage.guild.id, syncMessage.channel.id, syncMessage.id])
+                conn.commit()
         except AttributeError as e:
             # Eat from PMs
             pass
     else:
         try:
-            if webhook_sync_registry[message.guild.name+':'+message.channel.name]:
+            if message.guild.name+':'+message.channel.name in webhook_sync_registry:
                 attachments = []
                 for attachment in message.attachments:
                     print("Syncing "+attachment.filename)
                     attachment_blob = io.BytesIO()
                     await attachment.save(attachment_blob)
                     attachments.append(discord.File(attachment_blob, attachment.filename))
-                await webhook_sync_registry[message.guild.name+':'+message.channel.name]['toWebhook'].send(content=message.content, username=message.author.name, avatar_url=message.author.avatar_url, embeds=message.embeds, tts=message.tts, files=attachments)
-        except KeyError as e:
-            # Eat keyerrors from non-synced channels
-            pass
+                # wait=True: blocking call for messagemap insertions to work
+                syncMessage = await webhook_sync_registry[message.guild.name+':'+message.channel.name]['toWebhook'].send(content=message.content, username=message.author.name, avatar_url=message.author.avatar_url, embeds=message.embeds, tts=message.tts, files=attachments, wait=True)
+                cur = conn.cursor()
+                cur.execute("INSERT INTO messagemap (fromguild, fromchannel, frommessage, toguild, tochannel, tomessage) VALUES (%s, %s, %s, %s, %s, %s);", [message.guild.id, message.channel.id, message.id, syncMessage.guild.id, syncMessage.channel.id, syncMessage.id])
+                conn.commit()
         except AttributeError as e:
             # Eat from PMs
             pass
@@ -665,7 +730,82 @@ async def on_message(message):
 
         # generic python error
         except Exception as e:
-            print(e)
+            exc_type, exc_obj, exc_tb = exc_info()
+            print("OMR[{}]: {}".format(exc_tb.tb_lineno, e))
+
+# on message update (for webhooks only for now)
+@client.event
+async def on_raw_message_edit(payload):
+    try:
+        message_id = payload.message_id
+        message = payload.data
+        fromGuild = client.get_guild(int(message['guild_id']))
+        fromChannel = fromGuild.get_channel(int(message['channel_id']))
+        if fromGuild.name+':'+fromChannel.name in webhook_sync_registry:
+            cur = conn.cursor()
+            cur.execute("SELECT toguild, tochannel, tomessage FROM messagemap WHERE fromguild = %s AND fromchannel = %s AND frommessage = %s LIMIT 1;", [int(message['guild_id']), int(message['channel_id']), message_id])
+            metuple = cur.fetchone()
+            conn.commit()
+            if metuple is not None:
+                toGuild = client.get_guild(metuple[0])
+                toChannel = toGuild.get_channel(metuple[1])
+                toMessage = await toChannel.get_message(metuple[2])
+                fromMessage = await fromChannel.get_message(message_id)
+                await toMessage.delete()
+                attachments = []
+                for attachment in fromMessage.attachments:
+                    print("Syncing "+attachment.filename)
+                    attachment_blob = io.BytesIO()
+                    await attachment.save(attachment_blob)
+                    attachments.append(discord.File(attachment_blob, attachment.filename))
+                syncMessage = await webhook_sync_registry[fromMessage.guild.name+':'+fromMessage.channel.name]['toWebhook'].send(content=fromMessage.content, username=fromMessage.author.name, avatar_url=fromMessage.author.avatar_url, embeds=fromMessage.embeds, tts=fromMessage.tts, files=attachments, wait=True)
+                cur = conn.cursor()
+                cur.execute("UPDATE messagemap SET toguild = %s, tochannel = %s, tomessage = %s WHERE fromguild = %s AND fromchannel = %s AND frommessage = %s;", [syncMessage.guild.id, syncMessage.channel.id, syncMessage.id, int(message['guild_id']), int(message['channel_id']), message_id])
+                conn.commit()
+    except discord.Forbidden as e:
+        print("Forbidden to edit synced message from "+str(fromGuild.name)+":"+str(fromChannel.name))
+    # except KeyError as e:
+    #     # Eat keyerrors from non-synced channels
+    #     pass
+    # except AttributeError as e:
+    #     # Eat from PMs
+    #     pass
+    # generic python error
+    except Exception as e:
+        exc_type, exc_obj, exc_tb = exc_info()
+        print("ORMU[{}]: {}".format(exc_tb.tb_lineno, e))
+
+# on message deletion (for webhooks only for now)
+@client.event
+async def on_raw_message_delete(message):
+    try:
+        fromGuild = client.get_guild(message.guild_id)
+        fromChannel = fromGuild.get_channel(message.channel_id)
+        if fromGuild.name+':'+fromChannel.name in webhook_sync_registry:
+            cur = conn.cursor()
+            cur.execute("SELECT toguild, tochannel, tomessage FROM messagemap WHERE fromguild = %s AND fromchannel = %s AND frommessage = %s LIMIT 1;", [message.guild_id, message.channel_id, message.message_id])
+            metuple = cur.fetchone()
+            if metuple is not None:
+                cur.execute("DELETE FROM messageMap WHERE fromGuild = %s AND fromChannel = %s AND fromMessage = %s", [fromGuild.id, fromChannel.id, message.message_id])
+            conn.commit()
+            if metuple is not None:
+                toGuild = client.get_guild(metuple[0])
+                toChannel = toGuild.get_channel(metuple[1])
+                toMessage = await toChannel.get_message(metuple[2])
+                print("Deleting synced message {}:{}:{}".format(metuple[0], metuple[1], metuple[2]))
+                await toMessage.delete()
+    except discord.Forbidden as e:
+        print("Forbidden to delete synced message from "+str(fromGuild.name)+":"+str(fromChannel.name))
+    except KeyError as e:
+        # Eat keyerrors from non-synced channels
+        pass
+    except AttributeError as e:
+        # Eat from PMs
+        pass
+    # generic python error
+    except Exception as e:
+        exc_type, exc_obj, exc_tb = exc_info()
+        print("ORMD[{}]: {}".format(exc_tb.tb_lineno, e))
 
 # on new rxn
 @client.event
@@ -674,10 +814,8 @@ async def on_raw_reaction_add(reaction):
     if reaction.user_id == client.user.id:
         pass
     else:
-
         # try to evaluate with the command handler
         try:
-
             print(reaction.emoji)
             await ch.reaction_handler(reaction)
 
@@ -687,7 +825,8 @@ async def on_raw_reaction_add(reaction):
 
         # generic python error
         except Exception as e:
-            print(e)
+            exc_type, exc_obj, exc_tb = exc_info()
+            print("ORRA[{}]: {}".format(exc_tb.tb_lineno, e))
 
 
 # on vox change
