@@ -1,4 +1,5 @@
 # bot.py
+import codecs
 import configparser
 from datetime import datetime, timedelta
 import discord
@@ -88,6 +89,13 @@ def pretty_date(time=False):
     if day_diff < 365:
         return str(int(day_diff / 30)) + " months ago"
     return str(int(day_diff / 365)) + " years ago"
+
+def expand_guild_name(guild, prefix='', suffix=':', global_replace=False):
+    acro_mapping = [ ('acn', 'a compelling narrative'), ('ACN', 'a compelling narrative') ]
+    for k, v in acro_mapping:
+        new_guild = guild.replace(prefix+k+suffix, prefix+v+suffix)
+        if not global_replace:
+            return new_guild
 
 # command handler class
 
@@ -219,9 +227,10 @@ async def teleport_function(message, client, args):
             if ":" not in targetChannel:
                 toChannel = discord.utils.get(fromChannel.guild.text_channels, name=targetChannel)
             else:
-                toChannelParts = targetChannel.split(":")
-                toGuild = discord.utils.get(client.guilds, name=toChannelParts[0].replace("_", " "))
-                toChannel = discord.utils.get(toGuild.text_channels, name=toChannelParts[1])
+                targetChannel = expand_guild_name(targetChannel)
+                toTule = targetChannel.split(":")
+                toGuild = discord.utils.get(client.guilds, name=toTuple[0].replace("_", " "))
+                toChannel = discord.utils.get(toGuild.text_channels, name=toTuple[1])
         elif channelLookupBy == "ID":
             toChannel = client.get_channel(int(targetChannel))
         print('Opening From '+str(fromChannel))
@@ -458,6 +467,22 @@ async def bookmark_function(message, client, args):
     except Exception as e:
         return e
 
+async def rot13_function(message, client, args):
+    try:
+        if len(args) == 2 and type(args[1]) is discord.User:
+            print("rot13e via reaction")
+            return await args[1].send(codecs.encode(message.content, 'rot_13'))
+        else:
+            print("rot13e via command")
+            botMessage = await message.channel.send(codecs.encode(" ".join(args), 'rot_13'))
+            await botMessage.add_reaction('🕜')
+            try: 
+                await message.delete()
+            except discord.Forbidden as e:
+                print("Forbidden to delete message in "+str(message.channel.name))
+    except Exception as e:
+        return e
+
 ch.add_command({
     'trigger': ['!help'],
     'function': help_function,
@@ -538,16 +563,54 @@ ch.add_command({
     'args_name': [],
     'description': 'List all available channels and time of last message'
 })
+ch.add_command({
+    'trigger': ['!rot13', '!spoiler', '🕜'],
+    'function': rot13_function,
+    'async': True,
+    'args_num': 0,
+    'args_name': [],
+    'description': 'Send contents of message to yourself, rot13 encoded or decoded'
+})
+
+webhook_sync_registry = {
+        'FromGuild:FromChannelName': {
+            'fromChannelObject': None,
+            'fromWebhook': None,
+            'toChannelObject': None,
+            'toWebhook': None
+            }
+        }
 
 # bot is ready
 @client.event
 async def on_ready():
     try:
         # print bot information
-                print(client.user.name)
-                print(client.user.id)
-                print('Discord.py Version: {}'.format(discord.__version__))
-                await client.change_presence(activity=discord.Game(name='support me on liberapay.com/novalinium'))
+        print(client.user.name)
+        print(client.user.id)
+        print('Discord.py Version: {}'.format(discord.__version__))
+        await client.change_presence(activity=discord.Game(name='liberapay.com/novalinium'))
+        # Webhook handlers
+        for guild in client.guilds:
+            try:
+                for webhook in await guild.webhooks():
+                    if webhook.name.startswith(config['discord']['botNavel']+' ('):
+                        fromChannelName = guild.name+':'+str(guild.get_channel(webhook.channel_id))
+                        webhook_sync_registry[fromChannelName] = {
+                                'fromChannelObject': guild.get_channel(webhook.channel_id),
+                                'fromWebhook': webhook,
+                                'toChannelObject': None,
+                                'toWebhook': None
+                                }
+                        toTuple = webhook.name.split("(")[1].split(")")[0].split(":")
+                        toTuple[0] = expand_guild_name(toTuple[0])
+                        toGuild = discord.utils.get(client.guilds, name=toTuple[0].replace("_", " "))
+                        webhook_sync_registry[fromChannelName]['toChannelObject'] = discord.utils.get(toGuild.text_channels, name=toTuple[1])
+                        webhook_sync_registry[fromChannelName]['toWebhook'] = discord.utils.get(await toGuild.webhooks(), channel__name=toTuple[1])
+            except discord.Forbidden as e:
+                print('Couldn\'t load webhooks for '+str(guild)+', ask an admin to grant additional permissions (https://novalinium.com/go/3/fletcher)')
+        print("Webhooks loaded:")
+        print("\n".join(list(webhook_sync_registry)))
 
     except Exception as e:
         print(e)
@@ -555,11 +618,21 @@ async def on_ready():
 # on new message
 @client.event
 async def on_message(message):
-    # print message content
-    # if the message is from the bot itself ignore it
-    if message.author == client.user:
+    # if the message is from the bot itself or sent via webhook, which is usually done by a bot, ignore it other than sync processing
+    if message.webhook_id:
         pass
+    elif message.author == client.user:
+        try:
+            await webhook_sync_registry[message.guild.name+':'+message.channel.name]['toWebhook'].send(content=message.content, username=message.author.name, avatar_url=message.author.avatar_url, embeds=message.embeds, tts=message.tts)
+        except KeyError as e:
+            # Eat keyerrors from non-synced channels
+            pass
     else:
+        try:
+            await webhook_sync_registry[message.guild.name+':'+message.channel.name]['toWebhook'].send(content=message.content, username=message.author.name, avatar_url=message.author.avatar_url, embeds=message.embeds, tts=message.tts)
+        except KeyError as e:
+            # Eat keyerrors from non-synced channels
+            pass
 
         # try to evaluate with the command handler
         try:
@@ -594,6 +667,17 @@ async def on_raw_reaction_add(reaction):
         # generic python error
         except Exception as e:
             print(e)
+
+
+# on vox change
+@client.event
+async def on_voice_state_update(member, before, after):
+    print('Vox update in '+str(member.guild))
+    if member.guild.id == 417426624779124747 and after.channel is not None and before.channel is None: # Doissetep
+        canticum = client.get_channel(417516464631709698)
+        # bleet = client.get_user(191367077565562880)
+        # nova = client.get_user(382984420321263617)
+        await canticum.send("<@&520113377696284674>: "+str(member.name)+" is in voice channel "+str(after.channel.name)+" in "+str(member.guild.name))
 
 ## on new member
 #@client.event
