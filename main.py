@@ -3,6 +3,7 @@ import codecs
 import configparser
 from datetime import datetime, timedelta
 import discord
+import io
 import math
 import psycopg2
 import re
@@ -623,15 +624,35 @@ async def on_message(message):
         pass
     elif message.author == client.user:
         try:
-            await webhook_sync_registry[message.guild.name+':'+message.channel.name]['toWebhook'].send(content=message.content, username=message.author.name, avatar_url=message.author.avatar_url, embeds=message.embeds, tts=message.tts)
+            if webhook_sync_registry[message.guild.name+':'+message.channel.name]:
+                attachments = []
+                for attachment in message.attachments:
+                    print("Syncing "+attachment.filename)
+                    attachment_blob = io.BytesIO()
+                    await attachment.save(attachment_blob)
+                    attachments.append(discord.File(attachment_blob, attachment.filename))
+                await webhook_sync_registry[message.guild.name+':'+message.channel.name]['toWebhook'].send(content=message.content, username=message.author.name, avatar_url=message.author.avatar_url, embeds=message.embeds, tts=message.tts, files=attachments)
         except KeyError as e:
             # Eat keyerrors from non-synced channels
             pass
+        except AttributeError as e:
+            # Eat from PMs
+            pass
     else:
         try:
-            await webhook_sync_registry[message.guild.name+':'+message.channel.name]['toWebhook'].send(content=message.content, username=message.author.name, avatar_url=message.author.avatar_url, embeds=message.embeds, tts=message.tts)
+            if webhook_sync_registry[message.guild.name+':'+message.channel.name]:
+                attachments = []
+                for attachment in message.attachments:
+                    print("Syncing "+attachment.filename)
+                    attachment_blob = io.BytesIO()
+                    await attachment.save(attachment_blob)
+                    attachments.append(discord.File(attachment_blob, attachment.filename))
+                await webhook_sync_registry[message.guild.name+':'+message.channel.name]['toWebhook'].send(content=message.content, username=message.author.name, avatar_url=message.author.avatar_url, embeds=message.embeds, tts=message.tts, files=attachments)
         except KeyError as e:
             # Eat keyerrors from non-synced channels
+            pass
+        except AttributeError as e:
+            # Eat from PMs
             pass
 
         # try to evaluate with the command handler
