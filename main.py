@@ -290,6 +290,10 @@ async def teleport_function(message, client, args):
         embedPortal = discord.Embed(title=embedTitle, description="https://discordapp.com/channels/{}/{}/{} {}".format(fromChannel.guild.id, fromChannel.id, fromMessage.id, " ".join(args[1:]))).set_footer(icon_url="https://download.lin.anticlack.com/fletcher/orange-portal.png",text="On behalf of {}".format(message.author.nick or message.author))
         tmp = await toMessage.edit(content=None,embed=embedPortal)
         print('Portal Opened')
+        try:
+            await message.delete()
+        except discord.Forbidden:
+            print("Couldn't delete portal request message")
         return 'Portal opened on behalf of {} to {}'.format(message.author, args[0])
     except Exception as e:
         return e
