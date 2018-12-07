@@ -679,6 +679,8 @@ async def on_ready():
                 print('Couldn\'t load webhooks for '+str(guild)+', ask an admin to grant additional permissions (https://novalinium.com/go/3/fletcher)')
         print("Webhooks loaded:")
         print("\n".join(list(webhook_sync_registry)))
+        doissetep_omega = await client.get_guild(417426624779124747).get_channel(417516814394982412).connect();
+        doissetep_omega.play(discord.FFmpegPCMAudio(config['radio']['instreamurl']))
 
     except Exception as e:
         print(e)
