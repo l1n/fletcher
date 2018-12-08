@@ -1,4 +1,5 @@
 # bot.py
+import asyncio
 import codecs
 import configparser
 from datetime import datetime, timedelta
@@ -55,6 +56,8 @@ Indexes:
     "messagemap_idx" btree (fromguild, fromchannel, frommessage)
 
 """
+
+FLETCHER_CONFIG = '/home/lin/fletcher/.fletcherrc'
 
 ordinal = lambda n: "%d%s" % (n,"tsnrhtdd"[(math.floor(n/10)%10!=1)*(n%10<4)*n%10::4])
 
@@ -152,7 +155,7 @@ class CommandHandler:
     async def reaction_handler(self, reaction):
         messageContent = str(reaction.emoji)
         for command in self.commands:
-            if messageContent.startswith(tuple(command['trigger'])):
+            if messageContent.startswith(tuple(command['trigger'])) and (('admin' in command and user.guild_permissions.manage_webhooks) or 'admin' not in command):
                 if command['args_num'] == 0:
                     channel = self.client.get_channel(reaction.channel_id)
                     message = await channel.get_message(reaction.message_id)
@@ -169,7 +172,7 @@ class CommandHandler:
         if extract_identifiers_messagelink.search(message.content):
             return await preview_messagelink_function(message, self.client, None)
         for command in self.commands:
-            if message.content.startswith(tuple(command['trigger'])):
+            if message.content.startswith(tuple(command['trigger'])) and (('admin' in command and message.author.guild_permissions.manage_webhooks) or 'admin' not in command):
                 print(command)
                 args = message.content.split(' ')
                 args.pop(0)
@@ -193,7 +196,7 @@ class CommandHandler:
                         break
 
 config = configparser.ConfigParser()
-config.read('/home/lin/fletcher/.fletcherrc')
+config.read(FLETCHER_CONFIG)
 
 client = discord.Client()
 conn = psycopg2.connect(host=config['database']['host'],database=config['database']['tablespace'], user=config['database']['user'], password=config['database']['password'])
@@ -251,8 +254,11 @@ async def teleport_function(message, client, args):
     try:
         if args[0] == "to":
             args.pop(0)
-            print("to syntax, dropping arg[0]")
         fromChannel = message.channel
+        if fromChannel.id in [int(s) for s in config['teleport']['fromchannel-ban'].split(',')] and not message.author.guild_permissions.manage_webhooks:
+            print('Forbidden teleport')
+            await fromChannel.send('Portals out of this channel have been disabled.', delete_after=60)
+            return
         targetChannel = args[0].strip()
         channelLookupBy = "Name"
         toChannel = None
@@ -332,8 +338,9 @@ async def messagelink_function(message, client, args):
             except discord.NotFound as e:
                 pass
         if msg:
-            return await message.channel.send('Message link on behalf of {}: https://discordapp.com/channels/{}/{}/{}'.format(message.author, message.channel.guild.id, message.channel.id, message.id))
-        return await message.channel.send('Message not found')
+            await message.channel.send('Message link on behalf of {}: https://discordapp.com/channels/{}/{}/{}'.format(message.author, message.channel.guild.id, message.channel.id, message.id))
+            return await message.delete()
+        return await message.channel.send('Message not found', delete_after=60)
     except Exception as e:
         await message.channel.send(e)
 
@@ -497,7 +504,7 @@ async def lastactive_function(message, client, args):
         for chunk in msg_chunks:
             await message.channel.send(chunk)
     except Exception as e:
-        await message.channel.send(e)
+        print(e)
 
 async def bookmark_function(message, client, args):
     try:
@@ -538,6 +545,14 @@ async def memfrob_function(message, client, args):
                 await message.delete()
             except discord.Forbidden as e:
                 print("Forbidden to delete message in "+str(message.channel))
+    except Exception as e:
+        return e
+
+async def reload_function(message, client, args):
+    try:
+        config.read(FLETCHER_CONFIG)
+        await load_webhooks()
+        message.add_reaction('✓')
     except Exception as e:
         return e
 
@@ -617,6 +632,7 @@ ch.add_command({
     'trigger': ['!lastactive', '!lastactivity', '!ls'],
     'function': lastactive_function,
     'async': True,
+    'admin': True,
     'args_num': 0,
     'args_name': [],
     'description': 'List all available channels and time of last message'
@@ -639,6 +655,16 @@ ch.add_command({
     'description': 'Send contents of message to memfrob flipped'
 })
 
+ch.add_command({
+    'trigger': ['!reload <@429368441577930753>'],
+    'function': reload_function,
+    'async': True,
+    'admin': True,
+    'args_num': 0,
+    'args_name': [],
+    'description': 'Reload config (admin only)'
+})
+
 webhook_sync_registry = {
         'FromGuild:FromChannelName': {
             'fromChannelObject': None,
@@ -658,32 +684,36 @@ async def on_ready():
         print('Discord.py Version: {}'.format(discord.__version__))
         await client.change_presence(activity=discord.Game(name='liberapay.com/novalinium'))
         # Webhook handlers
-        for guild in client.guilds:
-            try:
-                for webhook in await guild.webhooks():
-                    # discord.py/rewrite issue #1242, PR #1745 workaround
-                    if webhook.name.startswith(config['discord']['botNavel']+' ('):
-                        fromChannelName = guild.name+':'+str(guild.get_channel(webhook.channel_id))
-                        webhook_sync_registry[fromChannelName] = {
-                                'fromChannelObject': guild.get_channel(webhook.channel_id),
-                                'fromWebhook': webhook,
-                                'toChannelObject': None,
-                                'toWebhook': None
-                                }
-                        toTuple = webhook.name.split("(")[1].split(")")[0].split(":")
-                        toTuple[0] = expand_guild_name(toTuple[0])
-                        toGuild = discord.utils.get(client.guilds, name=toTuple[0].replace("_", " "))
-                        webhook_sync_registry[fromChannelName]['toChannelObject'] = discord.utils.get(toGuild.text_channels, name=toTuple[1])
-                        webhook_sync_registry[fromChannelName]['toWebhook'] = discord.utils.get(await toGuild.webhooks(), channel__name=toTuple[1])
-            except discord.Forbidden as e:
-                print('Couldn\'t load webhooks for '+str(guild)+', ask an admin to grant additional permissions (https://novalinium.com/go/3/fletcher)')
-        print("Webhooks loaded:")
-        print("\n".join(list(webhook_sync_registry)))
-        doissetep_omega = await client.get_guild(417426624779124747).get_channel(417516814394982412).connect();
-        doissetep_omega.play(discord.FFmpegPCMAudio(config['radio']['instreamurl']))
+        await load_webhooks()
+        doissetep_omega = await client.get_guild(int(config['audio']['guild'])).get_channel(int(config['audio']['channel'])).connect();
+        doissetep_omega.play(discord.FFmpegPCMAudio(config['audio']['instreamurl']))
 
     except Exception as e:
         print(e)
+
+async def load_webhooks():
+    webhook_sync_registry = {}
+    for guild in client.guilds:
+        try:
+            for webhook in await guild.webhooks():
+                # discord.py/rewrite issue #1242, PR #1745 workaround
+                if webhook.name.startswith(config['discord']['botNavel']+' ('):
+                    fromChannelName = guild.name+':'+str(guild.get_channel(webhook.channel_id))
+                    webhook_sync_registry[fromChannelName] = {
+                            'fromChannelObject': guild.get_channel(webhook.channel_id),
+                            'fromWebhook': webhook,
+                            'toChannelObject': None,
+                            'toWebhook': None
+                            }
+                    toTuple = webhook.name.split("(")[1].split(")")[0].split(":")
+                    toTuple[0] = expand_guild_name(toTuple[0])
+                    toGuild = discord.utils.get(client.guilds, name=toTuple[0].replace("_", " "))
+                    webhook_sync_registry[fromChannelName]['toChannelObject'] = discord.utils.get(toGuild.text_channels, name=toTuple[1])
+                    webhook_sync_registry[fromChannelName]['toWebhook'] = discord.utils.get(await toGuild.webhooks(), channel__name=toTuple[1])
+        except discord.Forbidden as e:
+            print('Couldn\'t load webhooks for '+str(guild)+', ask an admin to grant additional permissions (https://novalinium.com/go/3/fletcher)')
+    print("Webhooks loaded:")
+    print("\n".join(list(webhook_sync_registry)))
 
 # on new message
 @client.event
@@ -839,11 +869,18 @@ async def on_raw_reaction_add(reaction):
 @client.event
 async def on_voice_state_update(member, before, after):
     print('Vox update in '+str(member.guild))
-    if member.guild.id == 417426624779124747 and after.channel is not None and before.channel is None: # Doissetep
-        canticum = client.get_channel(417516464631709698)
+    # Notify only if: 
+    # Doissetep
+    # New joins only, no transfers
+    # Not me
+    if member.guild.id == int(config['audio']['guild']) and \
+       after.channel is not None and before.channel is None and \
+       member.id != client.user.id:
+        # used to be #canticum, moved to #autochthonia due to spamminess
+        canticum = client.get_channel(int(config['audio']['notificationchannel']))
         # bleet = client.get_user(191367077565562880)
         # nova = client.get_user(382984420321263617)
-        await canticum.send("<@&520113377696284674>: "+str(member.name)+" is in voice channel "+str(after.channel.name)+" in "+str(member.guild.name))
+        await canticum.send("<@&"+str(config['audio']['notificationrole'])+">: "+str(member.name)+" is in voice ("+str(after.channel.name)+") in "+str(member.guild.name))
 
 ## on new member
 #@client.event
