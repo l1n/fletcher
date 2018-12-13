@@ -93,7 +93,7 @@ async def preview_messagelink_function(message, client, args):
                 if len(target_message.attachments) > 1:
                     plural = "s"
                 content = content + "\n "+str(len(target_message.attachments))+" file"+plural+" attached"
-                if target_message.channel.is_nsfw():
+                if target_message.channel.is_nsfw() and not message.channel.is_nsfw():
                     content = content + " from an R18 channel."
                     for attachment in target_message.attachments:
                         content = content + "\n• <"+attachment.url+">"
@@ -105,7 +105,7 @@ async def preview_messagelink_function(message, client, args):
                         attachments.append(discord.File(attachment_blob, attachment.filename))
 
             if args is not None and args[0].isdigit():
-                content = content + "\nSource: https://discordapp.com/channels/{}/{}/{}".format(guild_id, channel_id, message_id)
+                content = content + f'\nSource: https://discordapp.com/channels/{guild_id}/{channel_id}/{message_id}'
             # TODO 🔭 to preview?
             return await message.channel.send(content, files=attachments)
     except Exception as e:
@@ -140,7 +140,10 @@ async def bookmark_function(message, client, args):
     try:
         if len(args) == 2 and type(args[1]) is discord.User:
             print("bookmarking via reaction")
-            return await args[1].send("Bookmark to conversation in #{} ({}) https://discordapp.com/channels/{}/{}/{} via reaction to {}".format(message.channel.name, message.channel.guild.name, message.channel.guild.id, message.channel.id, message.id, message.content))
+            if str(args[0].emoji) == "🔖":
+                return await args[1].send("Bookmark to conversation in #{} ({}) https://discordapp.com/channels/{}/{}/{} via reaction to {}".format(message.channel.name, message.channel.guild.name, message.channel.guild.id, message.channel.id, message.id, message.content))
+            elif str(args[0].emoji) == "🔗":
+                return await args[1].send("https://discordapp.com/channels/{}/{}/{}".format(message.channel.guild.id, message.channel.id, message.id))
         else:
             print("bookmarking via command")
             await message.author.send("Bookmark to conversation in #{} ({}) https://discordapp.com/channels/{}/{}/{} {}".format(message.channel.name, message.channel.guild.name, message.channel.guild.id, message.channel.id, message.id, " ".join(args)))

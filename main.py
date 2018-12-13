@@ -408,7 +408,7 @@ async def reload_function(message=None, client=client, args=[]):
             'description': 'Retrieve message body by link (used internally to unwrap message links in chat)'
             })
         ch.add_command({
-            'trigger': ['!bookmark', '🔖'],
+            'trigger': ['!bookmark', '🔖', '🔗'],
             'function': messagefuncs.bookmark_function,
             'async': True,
             'args_num': 0,
