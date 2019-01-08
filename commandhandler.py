@@ -42,15 +42,12 @@ class CommandHandler:
                 print(command)
                 if command['args_num'] == 0:
                     if str(user.id) in config['moderation']['blacklist-user-usage'].split(','):
-                        print('Blacklisted command attempt by user')
-                        return
+                        raise Exception('Blacklisted command attempt by user')
                     print(command['function'])
                     if command['async']:
                         return await command['function'](message, self.client, [reaction, user])
-                        break
                     else:
                         return await message.channel.send(str(command['function'](message, self.client, [reaction, user])))
-                        break
 
     async def remove_handler(self, member):
         if "Guild "+str(member.guild.id) in config and 'on_member_remove' in config["Guild "+str(member.guild.id)]:
@@ -117,31 +114,25 @@ class CommandHandler:
         searchString = searchString.rstrip()
         for command in self.commands:
             if searchString.lower().startswith(tuple(command['trigger'])) and (('admin' in command and command['admin'] and hasattr(message.author, 'guild_permissions') and message.author.guild_permissions.manage_webhooks) or 'admin' not in command or not command['admin']):
-                print(command)
+                print("[CH] Triggered "+command)
                 args = searchString.split(' ')
                 args = [item for item in args if item]
                 args.pop(0)
                 if str(message.author.id) in config['moderation']['blacklist-user-usage'].split(','):
-                    print('Blacklisted command attempt by user')
-                    return
+                    raise Exception('Blacklisted command attempt by user')
                 if command['args_num'] == 0:
                     if command['async']:
                         return await command['function'](message, self.client, args)
-                        break
                     else:
                         return await message.channel.send(str(command['function'](message, self.client, args)))
-                        break
                 else:
                     if len(args) >= command['args_num']:
                         if command['async']:
                             return await command['function'](message, self.client, args)
-                            break
                         else:
                             return await message.channel.send(str(command['function'](message, self.client, args)))
-                            break
                     else:
                         return await message.channel.send('command "{}" requires {} argument(s) "{}"'.format(command['trigger'][0], command['args_num'], ', '.join(command['args_name'])))
-                        break
 
 def help_function(message, client, args):
     global ch
