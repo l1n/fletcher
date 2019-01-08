@@ -114,7 +114,7 @@ class CommandHandler:
         searchString = searchString.rstrip()
         for command in self.commands:
             if searchString.lower().startswith(tuple(command['trigger'])) and (('admin' in command and command['admin'] and hasattr(message.author, 'guild_permissions') and message.author.guild_permissions.manage_webhooks) or 'admin' not in command or not command['admin']):
-                print("[CH] Triggered "+command)
+                print("[CH] Triggered "+str(command))
                 args = searchString.split(' ')
                 args = [item for item in args if item]
                 args.pop(0)
