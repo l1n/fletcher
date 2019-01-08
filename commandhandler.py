@@ -53,14 +53,14 @@ class CommandHandler:
                         break
 
     async def remove_handler(self, member):
-        if "Guild "+str(member.guild.id) in config and config["Guild "+str(member.guild.id)]['on_member_remove']:
+        if "Guild "+str(member.guild.id) in config and 'on_member_remove' in config["Guild "+str(member.guild.id)]:
             member_remove_actions = config["Guild "+str(member.guild.id)]['on_member_remove'].split(',')
             for member_remove_action in member_remove_actions:
                 if member_remove_action in self.remove_handlers.keys():
                     return await self.remove_handlers[member_remove_action](member, self.client, config["Guild "+str(member.guild.id)])
 
     async def join_handler(self, member):
-        if "Guild "+str(member.guild.id) in config and config["Guild "+str(member.guild.id)]['on_member_join']:
+        if "Guild "+str(member.guild.id) in config and 'on_member_join' in config["Guild "+str(member.guild.id)]:
             member_join_actions = config["Guild "+str(member.guild.id)]['on_member_join'].split(',')
             for member_join_action in member_join_actions:
                 if member_join_action in self.join_handlers.keys():
