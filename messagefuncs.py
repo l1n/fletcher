@@ -19,9 +19,8 @@ async def teleport_function(message, client, args):
             args.pop(0)
         fromChannel = message.channel
         if str(fromChannel.id) in config['teleport']['fromchannel-ban'].split(',') and not message.author.guild_permissions.manage_webhooks:
-            print('Forbidden teleport')
             await fromChannel.send('Portals out of this channel have been disabled.', delete_after=60)
-            return
+            raise Exception('Forbidden teleport')
         targetChannel = args[0].strip()
         channelLookupBy = "Name"
         toChannel = None
@@ -43,17 +42,16 @@ async def teleport_function(message, client, args):
         elif channelLookupBy == "ID":
             toChannel = client.get_channel(int(targetChannel))
         if fromChannel.id == toChannel.id:
-            print('[WARNING] Attempt to open overlapping portal')
-            return await fromChannel.send('You cannot open an overlapping portal! Access denied.')
+            await fromChannel.send('You cannot open an overlapping portal! Access denied.')
+            raise Exception('Attempt to open overlapping portal')
         print('Entering in '+str(fromChannel))
         fromMessage = await fromChannel.send('Opening Portal To <#{}> ({})'.format(toChannel.id, toChannel.guild.name))
         try:
             print('Exiting in '+str(toChannel))
             toMessage = await toChannel.send('Portal Opening From <#{}> ({})'.format(fromChannel.id, fromChannel.guild.name))
         except discord.Forbidden as e:
-            print('[WARNING] Portal collaped half-open!')
-            return await fromMessage.edit(content='Failed to open portal due to missing permissions! Access denied.')
-        print('Editing From')
+            await fromMessage.edit(content='Failed to open portal due to missing permissions! Access denied.')
+            raise Exception('Portal collaped half-open!')
         embedTitle = "Portal opened to #{}".format(toChannel.name)
         if toGuild:
             embedTitle = embedTitle+" ({})".format(toChannel.guild.name)
@@ -63,19 +61,17 @@ async def teleport_function(message, client, args):
             inPortalColor = ["blue", discord.Colour.from_rgb(62,189,236)]
         embedPortal = discord.Embed(title=embedTitle, description="https://discordapp.com/channels/{}/{}/{} {}".format(toChannel.guild.id, toChannel.id, toMessage.id, " ".join(args[1:])), color=inPortalColor[1]).set_footer(icon_url="https://download.lin.anticlack.com/fletcher/"+inPortalColor[0]+"-portal.png",text="On behalf of {}".format(message.author.nick or message.author))
         tmp = await fromMessage.edit(content=None,embed=embedPortal)
-        print('Editing To')
         embedTitle = "Portal opened from #{}".format(fromChannel.name)
         if toGuild:
             embedTitle = embedTitle+" ({})".format(fromChannel.guild.name)
         embedPortal = discord.Embed(title=embedTitle, description="https://discordapp.com/channels/{}/{}/{} {}".format(fromChannel.guild.id, fromChannel.id, fromMessage.id, " ".join(args[1:])), color=discord.Colour.from_rgb(194,64,11)).set_footer(icon_url="https://download.lin.anticlack.com/fletcher/orange-portal.png",text="On behalf of {}".format(message.author.nick or message.author))
         tmp = await toMessage.edit(content=None,embed=embedPortal)
-        print('Portal Opened')
         try:
             if 'snappy' in config['discord'] and config['discord']['snappy']:
                 await message.delete()
             return
         except discord.Forbidden:
-            print("Couldn't delete portal request message")
+            raise Exception("Couldn't delete portal request message")
         return 'Portal opened on behalf of {} to {}'.format(message.author, args[0])
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
