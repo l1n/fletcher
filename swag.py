@@ -47,7 +47,7 @@ async def shindan_function(message, client, args):
         if len(args) == 2 and type(args[1]) is discord.User and message.author.id == client.user.id:
             if message.embeds[0].url.startswith("https://en.shindanmaker.com/"):
                 async with aiohttp.ClientSession() as session:
-                    async with session.post(data=aiohttp.FormData().add_field('u',args[1].display_name), message.embeds[0].url) as resp:
+                    async with session.post(message.embeds[0].url, data=aiohttp.FormData().add_field('u',args[1].display_name)) as resp:
                         request_body = (await resp.read()).decode('UTF-8')
                         root = html.document_fromstring(request_body)
                         return await args[1].send(root.xpath('//div[@class="result2"]')[0].text_content().strip())
@@ -73,7 +73,8 @@ async def shindan_function(message, client, args):
                                         root.xpath('//span[@class="a author_link"]')[0].text_content().strip(),
                                         message.author.display_name
                                         ))
-                    return await message.channel.send(embed=embedPreview)
+                    resp = await message.channel.send(embed=embedPreview)
+                    await resp.add_reaction('🐣')
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
         print("SDF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
