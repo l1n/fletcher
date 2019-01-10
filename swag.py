@@ -44,21 +44,36 @@ async def uwu_function(message, client, args):
 
 async def shindan_function(message, client, args):
     try:
-        async with aiohttp.ClientSession() as session:
-            async with session.get(args[0]) as resp:
-                request_body = (await resp.read()).decode('UTF-8')
-                root = html.document_fromstring(request_body)
-                embedPreview = discord.Embed(
-                        title=root.xpath('//div[@class="shindantitle2"]')[0].text_content().strip(),
-                        description=root.xpath('//div[@class="shindandescription"]')[0].text_content().strip(),
-                        url=args[0]
-                        ).set_footer(
-                                icon_url=message.author.avatar_url,
-                                text="ShindanMaker by {} on behalf of {}".format(
-                                    root.xpath('//span[@class="a author_link"]')[0].text_content().strip(),
-                                    message.author.display_name
-                                    ))
-                return await message.channel.send(embed=embedPreview)
+        if len(args) == 2 and type(args[1]) is discord.User and message.author.id == client.user.id:
+            if message.embeds[0].url.startswith("https://en.shindanmaker.com/"):
+                async with aiohttp.ClientSession() as session:
+                    async with session.post(data=aiohttp.FormData().add_field('u',args[1].display_name), message.embeds[0].url) as resp:
+                        request_body = (await resp.read()).decode('UTF-8')
+                        root = html.document_fromstring(request_body)
+                        return await args[1].send(root.xpath('//div[@class="result2"]')[0].text_content().strip())
+        else:
+            url = None
+            if type(args[0]) is int:
+                url = "https://en.shindanmaker.com/"+str(args[0])
+            elif args[0].startswith("https://en.shindanmaker.com/"):
+                url = args[0]
+            else:
+                return
+            async with aiohttp.ClientSession() as session:
+                async with session.get(url) as resp:
+                    request_body = (await resp.read()).decode('UTF-8')
+                    root = html.document_fromstring(request_body)
+                    embedPreview = discord.Embed(
+                            title=root.xpath('//div[@class="shindantitle2"]')[0].text_content().strip(),
+                            description=root.xpath('//div[@class="shindandescription"]')[0].text_content().strip(),
+                            url=args[0]
+                            ).set_footer(
+                                    icon_url=message.author.avatar_url,
+                                    text="ShindanMaker by {} on behalf of {}".format(
+                                        root.xpath('//span[@class="a author_link"]')[0].text_content().strip(),
+                                        message.author.display_name
+                                        ))
+                    return await message.channel.send(embed=embedPreview)
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
         print("SDF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
@@ -85,12 +100,12 @@ def autoload(ch):
         'hidden': True
         })
     ch.add_command({
-        'trigger': ['!shindan'],
+        'trigger': ['!shindan', '🐣'],
         'function': shindan_function,
         'async': True,
         'admin': True,
         'hidden': True,
-        'args_num': 1,
+        'args_num': 0,
         'args_name': [],
         'description': 'Embed shindan'
         })
