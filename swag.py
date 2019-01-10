@@ -1,3 +1,4 @@
+import aiohttp
 import discord
 import random
 from sys import exc_info
@@ -39,6 +40,27 @@ async def uwu_function(message, client, args):
         exc_type, exc_obj, exc_tb = exc_info()
         print("UWU[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
 
+async def shindan_function(message, client, args):
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.get(args[0]) as resp:
+                request_body = io.BytesIO(await resp.read())
+                root = html.document_fromstring(request_body)
+                embedPortal = discord.Embed(
+                        title=root.xpath('//div[class="shindantitle2"]').text.strip(),
+                        description=root.xpath('//div[class="shindandescription"]').text.strip(),
+                        url=args[0]
+                        ).set_footer(
+                                icon_url=message.author.avatar_url,
+                                text="ShindanMaker by {} on behalf of {}".format(
+                                    root.xpath('//span[class="a author_link"]'),
+                                    message.author.display_name
+                                    ))
+                return await message.channel.send(embed=embed)
+    except Exception as e:
+        exc_type, exc_obj, exc_tb = exc_info()
+        print("SDF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+
 def autoload(ch):
     ch.add_command({
         'trigger': ['!uwu', '<:uwu:445116031204196352>', '<:uwu:269988618909515777>', '<a:rainbowo:493599733571649536>', '<:owo:487739798241542183>', '<:owo:495014441457549312>', '<a:OwO:508311820411338782>', '!good', 'good bot', '!aww'],
@@ -59,4 +81,14 @@ def autoload(ch):
         'function': lambda message, client, args: 'https://www.fimfiction.net/story/62074/8/friendship-is-optimal/',
         'async': False, 'args_num': 0, 'args_name': [], 'description': 'FiO link',
         'hidden': True
+        })
+    ch.add_command({
+        'trigger': ['!shindan'],
+        'function': shindan_function,
+        'async': True,
+        'admin': True,
+        'hidden': True,
+        'args_num': 1,
+        'args_name': [],
+        'description': 'Embed shindan'
         })
