@@ -1,5 +1,6 @@
 import aiohttp
 import discord
+import io
 import random
 from sys import exc_info
 from datetime import datetime, timedelta
