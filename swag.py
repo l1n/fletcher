@@ -2,6 +2,7 @@ import aiohttp
 import discord
 import io
 import random
+from lxml import html
 from sys import exc_info
 from datetime import datetime, timedelta
 # Super Waifu Animated Girlfriend
