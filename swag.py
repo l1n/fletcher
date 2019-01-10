@@ -48,7 +48,7 @@ async def shindan_function(message, client, args):
             async with session.get(args[0]) as resp:
                 request_body = (await resp.read()).decode('UTF-8')
                 root = html.document_fromstring(request_body)
-                embedPortal = discord.Embed(
+                embedPreview = discord.Embed(
                         title=root.xpath('//div[@class="shindantitle2"]')[0].text_content().strip(),
                         description=root.xpath('//div[@class="shindandescription"]')[0].text_content().strip(),
                         url=args[0]
@@ -58,7 +58,7 @@ async def shindan_function(message, client, args):
                                     root.xpath('//span[@class="a author_link"]')[0].text_content().strip(),
                                     message.author.display_name
                                     ))
-                return await message.channel.send(embed=embed)
+                return await message.channel.send(embed=embedPreview)
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
         print("SDF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
