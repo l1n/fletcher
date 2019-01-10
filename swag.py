@@ -46,7 +46,7 @@ async def shindan_function(message, client, args):
     try:
         async with aiohttp.ClientSession() as session:
             async with session.get(args[0]) as resp:
-                request_body = io.BytesIO(await resp.read()).decode('UTF-8')
+                request_body = (await resp.read()).decode('UTF-8')
                 root = html.document_fromstring(request_body)
                 embedPortal = discord.Embed(
                         title=root.xpath('//div[class="shindantitle2"]').text.strip(),
