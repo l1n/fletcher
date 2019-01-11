@@ -119,6 +119,8 @@ class CommandHandler:
                 args = [item for item in args if item]
                 args.pop(0)
                 if str(message.author.id) in config['moderation']['blacklist-user-usage'].split(','):
+                    await message.add_reaction('💔')
+                    await message.channel.send("I'll only talk to you when you stop being mean to me, "+message.author.display_name+"!")
                     raise Exception('Blacklisted command attempt by user')
                 if command['args_num'] == 0:
                     if command['async']:
