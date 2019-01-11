@@ -106,7 +106,6 @@ def autoload(ch):
         'trigger': ['!shindan', '🐣'],
         'function': shindan_function,
         'async': True,
-        'hidden': True,
         'args_num': 0,
         'args_name': [],
         'description': 'Embed shindan'
