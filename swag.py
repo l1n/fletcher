@@ -30,14 +30,14 @@ uwu_responses = {
             ]
         }
 
-async def uwu_function(message, client, args):
+async def uwu_function(message, client, args, responses=uwu_responses):
     try:
         if len(args) == 2 and type(args[1]) is discord.User and message.author.id == client.user.id:
-            return await args[1].send(random.choice(uwu_responses['private']))
+            return await args[1].send(random.choice(responses['private']))
         elif len(args) == 0 or 'fletch' in message.clean_content.lower() or message.content[0] == "!" or "good bot" in message.content.lower():
             if random.randint(0, 100) < 20:
-                await message.add_reaction(random.choice(uwu_responses['reaction']))
-            return await message.channel.send(random.choice(uwu_responses['public']))
+                await message.add_reaction(random.choice(responses['reaction']))
+            return await message.channel.send(random.choice(responses['public']))
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
         print("UWU[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
@@ -104,7 +104,6 @@ def autoload(ch):
         'trigger': ['!shindan', '🐣'],
         'function': shindan_function,
         'async': True,
-        'admin': True,
         'hidden': True,
         'args_num': 0,
         'args_name': [],
