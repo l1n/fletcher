@@ -68,7 +68,7 @@ async def shindan_function(message, client, args):
                     embedPreview = discord.Embed(
                             title=root.xpath('//div[@class="shindantitle2"]')[0].text_content().strip(),
                             description=root.xpath('//div[@class="shindandescription"]')[0].text_content().strip(),
-                            url=args[0]
+                            url=url
                             ).set_footer(
                                     icon_url=message.author.avatar_url,
                                     text="ShindanMaker by {} on behalf of {}".format(
