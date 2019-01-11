@@ -186,11 +186,11 @@ def pretty_date(time=False):
 async def rot13_function(message, client, args):
     try:
         if len(args) == 2 and type(args[1]) is discord.User:
-            return await args[1].send("Spoiler from conversation in #{} ({}) https://discordapp.com/channels/{}/{}/{}: {}".format(message.channel.name, message.channel.guild.name, message.channel.guild.id, message.channel.id, message.id, message.content, codecs.encode(message.content, 'rot_13')))
+            return await args[1].send("Spoiler from conversation in #{} ({}) <https://discordapp.com/channels/{}/{}/{}>:\n{}".format(message.channel.name, message.channel.guild.name, message.channel.guild.id, message.channel.id, message.id, message.content, codecs.encode(message.content, 'rot_13')))
         elif len(args) == 2 and args[1] == 'INTPROC':
             return codecs.encode(args[0], 'rot_13')
         else:
-            messageContent = "**"+message.author.name+"**: "+codecs.encode(" ".join(args), 'rot_13')
+            messageContent = "**"+message.author.display_name+"**: "+codecs.encode(" ".join(args), 'rot_13')
             botMessage = await message.channel.send(messageContent)
             await botMessage.add_reaction('🕜')
             try: 
@@ -205,9 +205,9 @@ async def rot13_function(message, client, args):
 async def memfrob_function(message, client, args):
     try:
         if len(args) == 2 and type(args[1]) is discord.User:
-            return await args[1].send("Spoiler from conversation in #{} ({}) https://discordapp.com/channels/{}/{}/{}: {}".format(message.channel.name, message.channel.guild.name, message.channel.guild.id, message.channel.id, message.id, message.content, memfrob(message.content.split(': ', 1)[1]).replace("\n"," ")))
+            return await args[1].send("Spoiler from conversation in #{} ({}) <https://discordapp.com/channels/{}/{}/{}>:\n{}".format(message.channel.name, message.channel.guild.name, message.channel.guild.id, message.channel.id, message.id, message.content, memfrob(message.content.split(': ', 1)[1]).replace("\n"," ")))
         else:
-            messageContent = "**"+message.author.name+"**: "+memfrob("\n".join(args))
+            messageContent = "**"+message.author.display_name+"**: "+memfrob("\n".join(args))
             botMessage = await message.channel.send(messageContent)
             await botMessage.add_reaction('🕦')
             try: 
