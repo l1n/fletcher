@@ -53,6 +53,7 @@ digraph fletcher {
     Admin -> LastActiveUser [ label = "List all available users\nand time of last message" ];
     CommandHandler -> SWAG [ label = "Sugar snacks for the chatter" ];
     SWAG -> uwu [ label = "Say cute stuff" ];
+    SWAG -> ShindanMaker [ label = "Allow interacting with shindanmaker.com without hitting the site" ];
     SWAG -> Pony;
     Pony -> CanIUploadMyself;
     Pony -> FriendshipIsOptimal;

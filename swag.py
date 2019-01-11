@@ -65,14 +65,17 @@ async def shindan_function(message, client, args):
                 async with session.get(url) as resp:
                     request_body = (await resp.read()).decode('UTF-8')
                     root = html.document_fromstring(request_body)
+                    author = ""
+                    if root.xpath('//span[@class="a author_link"]'):
+                        author = " by "+root.xpath('//span[@class="a author_link"]')[0].text_content().strip()
                     embedPreview = discord.Embed(
                             title=root.xpath('//div[@class="shindantitle2"]')[0].text_content().strip(),
                             description=root.xpath('//div[@class="shindandescription"]')[0].text_content().strip(),
                             url=url
                             ).set_footer(
                                     icon_url=message.author.avatar_url,
-                                    text="ShindanMaker by {} on behalf of {}".format(
-                                        root.xpath('//span[@class="a author_link"]')[0].text_content().strip(),
+                                    text="ShindanMaker {} on behalf of {}".format(
+                                        author,
                                         message.author.display_name
                                         ))
                     resp = await message.channel.send(embed=embedPreview)
