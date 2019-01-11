@@ -29,7 +29,7 @@ async def scramble_function(message, client, args):
     try:
         input_image_blob = io.BytesIO()
         await message.attachments[0].save(input_image_blob)
-        if len(args) != 2 or type(args[1]) is not discord.User:
+        if len(args) != 2 or type(args[1]) is not discord.User or (type(message.channel) == discord.DMChannel and message.author.id == client.user.id):
             try:
                 await message.delete()
             except discord.Forbidden as e:
