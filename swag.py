@@ -44,7 +44,7 @@ async def uwu_function(message, client, args, responses=uwu_responses):
 
 async def shindan_function(message, client, args):
     try:
-        if len(args) == 2 and type(args[1]) is discord.User and message.author.id == client.user.id:
+        if len(args) == 2 and type(args[1]) is discord.User:
             if message.embeds[0].url.startswith("https://en.shindanmaker.com/"):
                 async with aiohttp.ClientSession() as session:
                     params = aiohttp.FormData()
