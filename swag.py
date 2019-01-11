@@ -55,8 +55,8 @@ async def shindan_function(message, client, args):
                         return await args[1].send(root.xpath('//div[@class="result2"]')[0].text_content().strip())
         else:
             url = None
-            if type(args[0]) is int:
-                url = "https://en.shindanmaker.com/"+str(args[0])
+            if args[0].isdigit():
+                url = "https://en.shindanmaker.com/"+args[0]
             elif args[0].startswith("https://en.shindanmaker.com/"):
                 url = args[0]
             else:
