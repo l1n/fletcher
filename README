@@ -47,12 +47,13 @@ Fletcher to your own Discord server using the OAuth grant link at
 https://novalinium.com/go/4/fletcher.
 
 Documentation:
-Documentation for this code is in progress, but the author strives to make the
-code readable without much trouble. This area is under development. Currently,
-the bot can self-report loaded commands with the `!help' command, as well as
-some additional information with the `verbose' parameter. In addition, a
-command flow diagram is included in commandflow.dot, as well as a PNG (Warning:
-large file) at https://novalinium.com/rationality/fletcher.png.
+Documentation for this code is in progress at https://man.sr.ht/~nova/fletcher,
+but the author strives to make the code readable without much trouble. This area
+is under development. Currently, the bot can self-report loaded commands with
+the `!help' command, as well as some additional information with the `verbose'
+parameter. In addition, a command flow diagram is included in controlflow.dot,
+as well as a PNG (Warning: large file) at
+https://novalinium.com/rationality/fletcher.png.
 
 Development:
 Development can be tracked via the project issue tracker at
