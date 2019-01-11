@@ -47,7 +47,9 @@ async def shindan_function(message, client, args):
         if len(args) == 2 and type(args[1]) is discord.User and message.author.id == client.user.id:
             if message.embeds[0].url.startswith("https://en.shindanmaker.com/"):
                 async with aiohttp.ClientSession() as session:
-                    async with session.post(message.embeds[0].url, data=aiohttp.FormData().add_field('u',args[1].display_name)) as resp:
+                    params = aiohttp.FormData()
+                    params.add_field('u',args[1].display_name)
+                    async with session.post(message.embeds[0].url, data=params) as resp:
                         request_body = (await resp.read()).decode('UTF-8')
                         root = html.document_fromstring(request_body)
                         return await args[1].send(root.xpath('//div[@class="result2"]')[0].text_content().strip())
