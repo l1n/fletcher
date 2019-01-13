@@ -54,7 +54,7 @@ def autoload(ch):
         'async': True, 'args_num': 1, 'args_name': [], 'description': 'Show Fletcher issue information'
         })
     ch.add_command({
-        'trigger': ['!status', 'what\'s up'],
+        'trigger': ['!status'],
         'function': status_function,
         'async': False, 'args_num': 0, 'args_name': [], 'description': 'Tell user about the status'
         })

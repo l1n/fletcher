@@ -86,18 +86,12 @@ async def shindan_function(message, client, args):
 
 def autoload(ch):
     ch.add_command({
-        'trigger': ['!uwu', '<:uwu:445116031204196352>', '<:uwu:269988618909515777>', '<a:rainbowo:493599733571649536>', '<:owo:487739798241542183>', '<:owo:495014441457549312>', '<a:OwO:508311820411338782>', '!good', 'good bot', '!aww'],
+        'trigger': ['!uwu', '<:uwu:445116031204196352>', '<:uwu:269988618909515777>', '<a:rainbowo:493599733571649536>', '<:owo:487739798241542183>', '<:owo:495014441457549312>', '<a:OwO:508311820411338782>', '!good', '!aww'],
         'function': uwu_function,
         'async': True,
         'args_num': 0,
         'args_name': [],
         'description': 'uwu'
-        })
-    ch.add_command({
-        'trigger': ['can i upload myself as a pony yet'],
-        'function': lambda message, client, args: 'https://i.imgur.com/K4BFRec.jpg',
-        'async': False, 'args_num': 0, 'args_name': [], 'description': 'Well, can I?',
-        'hidden': True
         })
     ch.add_command({
         'trigger': ['!fio', '!optimal'],
