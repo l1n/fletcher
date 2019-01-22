@@ -252,17 +252,28 @@ async def on_message(message):
         return
     try:
         if message.guild.name+':'+message.channel.name in webhook_sync_registry:
+            content = message.clean_content
             attachments = []
-            for attachment in message.attachments:
-                print("Syncing "+attachment.filename)
-                attachment_blob = io.BytesIO()
-                await attachment.save(attachment_blob)
-                attachments.append(discord.File(attachment_blob, attachment.filename))
+            if len(message.attachments) > 0:
+                plural = ""
+                if len(message.attachments) > 1:
+                    plural = "s"
+                content = content + "\n "+str(len(message.attachments))+" file"+plural+" attached"
+                if message.channel.is_nsfw() and not webhook_sync_registry[message.guild.name+':'+message.channel.name]['toChannelObject'].is_nsfw():
+                    content = content + " from an R18 channel."
+                    for attachment in message.attachments:
+                        content = content + "\n• <"+attachment.url+">"
+                else:
+                    for attachment in message.attachments:
+                        print("Syncing "+attachment.filename)
+                        attachment_blob = io.BytesIO()
+                        await attachment.save(attachment_blob)
+                        attachments.append(discord.File(attachment_blob, attachment.filename))
             # wait=True: blocking call for messagemap insertions to work
             fromMessageName = message.author.display_name
             if webhook_sync_registry[message.guild.name+':'+message.channel.name]['toChannelObject'].guild.get_member(message.author.id) is not None:
                 fromMessageName = webhook_sync_registry[message.guild.name+':'+message.channel.name]['toChannelObject'].guild.get_member(message.author.id).display_name
-            syncMessage = await webhook_sync_registry[message.guild.name+':'+message.channel.name]['toWebhook'].send(content=message.clean_content, username=fromMessageName, avatar_url=message.author.avatar_url, embeds=message.embeds, tts=message.tts, files=attachments, wait=True)
+            syncMessage = await webhook_sync_registry[message.guild.name+':'+message.channel.name]['toWebhook'].send(content=content, username=fromMessageName, avatar_url=message.author.avatar_url, embeds=message.embeds, tts=message.tts, files=attachments, wait=True)
             cur = conn.cursor()
             cur.execute("INSERT INTO messagemap (fromguild, fromchannel, frommessage, toguild, tochannel, tomessage) VALUES (%s, %s, %s, %s, %s, %s);", [message.guild.id, message.channel.id, message.id, syncMessage.guild.id, syncMessage.channel.id, syncMessage.id])
             conn.commit()
@@ -304,16 +315,27 @@ async def on_raw_message_edit(payload):
                 toMessage = await toChannel.get_message(metuple[2])
                 fromMessage = await fromChannel.get_message(message_id)
                 await toMessage.delete()
+                content = fromMessage.clean_content
                 attachments = []
-                for attachment in fromMessage.attachments:
-                    print("Syncing "+attachment.filename)
-                    attachment_blob = io.BytesIO()
-                    await attachment.save(attachment_blob)
-                    attachments.append(discord.File(attachment_blob, attachment.filename))
+                if len(fromMessage.attachments) > 0:
+                    plural = ""
+                    if len(fromMessage.attachments) > 1:
+                        plural = "s"
+                    content = content + "\n "+str(len(fromMessage.attachments))+" file"+plural+" attached"
+                    if fromMessage.channel.is_nsfw() and not webhook_sync_registry[fromMessage.guild.name+':'+fromMessage.channel.name]['toChannelObject'].is_nsfw():
+                        content = content + " from an R18 channel."
+                        for attachment in fromMessage.attachments:
+                            content = content + "\n• <"+attachment.url+">"
+                    else:
+                        for attachment in fromMessage.attachments:
+                            print("Syncing "+attachment.filename)
+                            attachment_blob = io.BytesIO()
+                            await attachment.save(attachment_blob)
+                            attachments.append(discord.File(attachment_blob, attachment.filename))
                 fromMessageName = fromMessage.author.display_name
                 if toGuild.get_member(fromMessage.author.id) is not None:
                     fromMessageName = toGuild.get_member(fromMessage.author.id).display_name
-                syncMessage = await webhook_sync_registry[fromMessage.guild.name+':'+fromMessage.channel.name]['toWebhook'].send(content=fromMessage.clean_content, username=fromMessageName, avatar_url=fromMessage.author.avatar_url, embeds=fromMessage.embeds, tts=fromMessage.tts, files=attachments, wait=True)
+                syncMessage = await webhook_sync_registry[fromMessage.guild.name+':'+fromMessage.channel.name]['toWebhook'].send(content=content, username=fromMessageName, avatar_url=fromMessage.author.avatar_url, embeds=fromMessage.embeds, tts=fromMessage.tts, files=attachments, wait=True)
                 cur = conn.cursor()
                 cur.execute("UPDATE messagemap SET toguild = %s, tochannel = %s, tomessage = %s WHERE fromguild = %s AND fromchannel = %s AND frommessage = %s;", [syncMessage.guild.id, syncMessage.channel.id, syncMessage.id, int(message['guild_id']), int(message['channel_id']), message_id])
                 conn.commit()
