@@ -24,7 +24,7 @@ def renderLatex(formula, fontsize=12, dpi=300, format='svg', file=None):
 
 async def latex_render_function(message, client, args):
     try:
-        renderstring = "$$"+" ".join(args)+"$$"
+        renderstring = "$"+" ".join(args)+"$"
         await message.channel.send("`"+renderstring+"`", file=discord.File(renderLatex(renderstring, format='png'), filename="fletcher-render.png"))
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
