@@ -108,9 +108,10 @@ class CommandHandler:
                 return await messagefuncs.preview_messagelink_function(message, self.client, None)
         searchString = message.content
         searchString = self.tag_id_as_command.sub('!', searchString)
-        if len(searchString) and searchString[-1] == "!":
-            searchString = "!"+searchString[:-1]
-        searchString = self.bang_remover.sub('!', searchString)
+        if config['interactivity']['enhanced-command-finding'] == "on":
+            if len(searchString) and searchString[-1] == "!":
+                searchString = "!"+searchString[:-1]
+            searchString = self.bang_remover.sub('!', searchString)
         searchString = searchString.rstrip()
         for command in self.commands:
             if searchString.lower().startswith(tuple(command['trigger'])) and (('admin' in command and command['admin'] and hasattr(message.author, 'guild_permissions') and message.author.guild_permissions.manage_webhooks) or 'admin' not in command or not command['admin']):
