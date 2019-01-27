@@ -73,7 +73,6 @@ Indexes:
 
 FLETCHER_CONFIG = os.getenv('FLETCHER_CONFIG', './.fletcherrc')
 
-
 config = configparser.ConfigParser()
 config.read(FLETCHER_CONFIG)
 
@@ -171,6 +170,11 @@ async def reload_function(message=None, client=client, args=[]):
     global doissetep_omega
     try:
         config.read(FLETCHER_CONFIG)
+        if 'extra' in config and 'rc-path' in config['extra'] and os.path.isdir(config['extra']['rc-path']):
+            for f in os.listdir(config['extra']['rc-path']):
+                if f.isdigit():
+                    config["Guild "+f] = configparser.ConfigParser()
+                    config["Guild "+f].read(f)
         await animate_startup('📝', message)
         await load_webhooks()
         if message:
