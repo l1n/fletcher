@@ -178,7 +178,7 @@ async def reload_function(message=None, client=client, args=[]):
                     guild_config.read(f)
                     try:
                         config.add_section("Guild "+f)
-                    except TypeError:
+                    except configparser.DuplicateSectionError:
                         print("RM: Duplicate section definition, merging")
                         pass
                     for k, v in guild_config.items(''):
