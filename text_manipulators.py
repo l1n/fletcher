@@ -57,7 +57,7 @@ async def scramble_function(message, client, args):
         output_image_blob.seek(0)
         await output_message.delete()
         output_message = await output_message.channel.send(content='Scrambled for '+message.author.display_name, files=[discord.File(output_image_blob, message.attachments[0].filename)])
-        await output_message.add_reaction('🔞')
+        await output_message.add_reaction('🔎')
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
         print("SIF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
@@ -239,7 +239,7 @@ def autoload(ch):
         })
 
     ch.add_command({
-        'trigger': ['!scramble', '🔞'],
+        'trigger': ['!scramble', '🔎', '🔞'],
         'function': scramble_function,
         'async': True,
         'args_num': 0,
