@@ -169,6 +169,7 @@ async def reload_function(message=None, client=client, args=[]):
     global versioninfo
     global doissetep_omega
     try:
+        config = configparser.ConfigParser()
         config.read(FLETCHER_CONFIG)
         if 'extra' in config and 'rc-path' in config['extra'] and os.path.isdir(config['extra']['rc-path']):
             for f in os.listdir(config['extra']['rc-path']):
