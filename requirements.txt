@@ -14,6 +14,7 @@ google-auth-oauthlib==0.2.0
 html5lib==1.0.1
 idna==2.8
 lxml==4.2.5
+matplotlib==3.0.2
 mpmath==1.1.0
 multidict==4.5.2
 nltk==3.4
