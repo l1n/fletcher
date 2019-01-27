@@ -174,8 +174,9 @@ async def reload_function(message=None, client=client, args=[]):
         if 'extra' in config and 'rc-path' in config['extra'] and os.path.isdir(config['extra']['rc-path']):
             for f in os.listdir(config['extra']['rc-path']):
                 if f.isdigit():
-                    config["Guild "+f] = configparser.ConfigParser()
-                    config["Guild "+f].read(f)
+                    guild_config = configparser.ConfigParser()
+                    guild_config.read(f)
+                    config["Guild "+f] = guild_config
         await animate_startup('📝', message)
         await load_webhooks()
         if message:
