@@ -17,6 +17,13 @@ class VersionInfo:
     def latest_commit_log(self):
         return list(self.repo.iter_commits('master', max_count=1))[0].message.strip()
 
+def whereami_function(message, client, args):
+    global config
+    scoped_config = None
+    if "Guild "+str(message.guild.id) in config:
+        scoped_config = config["Guild "+str(message.guild.id)]
+    return scoped_config["whereami"]
+
 def status_function(message, client, args):
     global versioninfo
     return "Not much, just "+VersionInfo().latest_commit_log()+". How about you?"
@@ -52,6 +59,11 @@ def autoload(ch):
         'trigger': ['!issue'],
         'function': buglist_function,
         'async': True, 'args_num': 1, 'args_name': [], 'description': 'Show Fletcher issue information'
+        })
+    ch.add_command({
+        'trigger': ['!whereami'],
+        'function': whereami_function,
+        'async': False, 'hidden': True, 'args_num': 0, 'args_name': [], 'description': 'Tell user where they are'
         })
     ch.add_command({
         'trigger': ['!status'],
