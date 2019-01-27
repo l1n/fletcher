@@ -181,7 +181,7 @@ async def reload_function(message=None, client=client, args=[]):
                     except configparser.DuplicateSectionError:
                         print("RM: Duplicate section definition, merging")
                         pass
-                    for k, v in guild_config.items(''):
+                    for k, v in guild_config.items(configparser.DEFAULTSECT):
                         config.set("Guild "+f, k, v)
         await animate_startup('📝', message)
         await load_webhooks()
