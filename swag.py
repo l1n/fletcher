@@ -60,6 +60,7 @@ async def shindan_function(message, client, args):
             elif args[0].startswith("https://en.shindanmaker.com/"):
                 url = args[0]
             else:
+                await message.channel.send('Please specify a name-based shindan to use from https://en.shindanmaker.com/')
                 return
             async with aiohttp.ClientSession() as session:
                 async with session.get(url) as resp:
