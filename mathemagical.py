@@ -10,7 +10,7 @@ def renderLatex(formula, fontsize=12, dpi=300, format='svg', file=None):
     """Renders LaTeX formula into image or prints to file.
     """
     fig = plt.figure(figsize=(0.01, 0.01))
-    fig.text(0, 0, u'${}$'.format(formula), fontsize=fontsize)
+    fig.text(0, 0, u'{}'.format(formula), fontsize=fontsize)
 
     output = io.BytesIO() if file is None else file
     fig.savefig(output, dpi=dpi, transparent=True, format=format,
