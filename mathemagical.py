@@ -13,7 +13,7 @@ def renderLatex(formula, fontsize=12, dpi=300, format='svg', file=None):
     fig.text(0, 0, u'{}'.format(formula), fontsize=fontsize)
 
     output = io.BytesIO() if file is None else file
-    fig.savefig(output, dpi=dpi, transparent=True, format=format,
+    fig.savefig(output, dpi=dpi, transparent=False, format=format,
        bbox_inches='tight', pad_inches=0.001, frameon=False)
 
     plt.close(fig)
