@@ -176,7 +176,13 @@ async def reload_function(message=None, client=client, args=[]):
                 if f.isdigit():
                     guild_config = configparser.ConfigParser()
                     guild_config.read(f)
-                    config["Guild "+f] = guild_config
+                    try:
+                        config.add_section("Guild "+f)
+                    except TypeError:
+                        print("RM: Duplicate section definition, merging")
+                        pass
+                    for k, v in guild_config.items(''):
+                        config.set("Guild "+f, k, v)
         await animate_startup('📝', message)
         await load_webhooks()
         if message:
