@@ -193,7 +193,7 @@ async def rot13_function(message, client, args):
             messageContent = "**"+message.author.display_name+"**: "+codecs.encode(" ".join(args), 'rot_13')
             botMessage = await message.channel.send(messageContent)
             await botMessage.add_reaction('🕜')
-            await botMessage.add_reaction(botMessage, discord.utils.get(client.get_all_emojis(), id=539568301861371905))
+            await botMessage.add_reaction(client.get_emojis(539568301861371905))
             try: 
                 await message.delete()
             except discord.Forbidden as e:
