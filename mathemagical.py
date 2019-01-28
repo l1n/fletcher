@@ -9,12 +9,15 @@ import matplotlib.pyplot as plt
 def renderLatex(formula, fontsize=12, dpi=300, format='svg', file=None):
     """Renders LaTeX formula into image or prints to file.
     """
+    plt.rc('text', usetex=True)
+    plt.rc('font', family='serif')
     fig = plt.figure(figsize=(0.01, 0.01))
-    fig.text(0, 0, u'{}'.format(formula), fontsize=fontsize)
+    fig.text(0, 0, u'{}'.format(formula), fontsize=fontsize, verticalalignment='center_baseline', clip_on=True)
+    plt.tight_layout()
 
     output = io.BytesIO() if file is None else file
     fig.savefig(output, dpi=dpi, transparent=False, format=format,
-       bbox_inches='tight', pad_inches=0.001, frameon=False)
+       bbox_inches='tight', pad_inches=None, frameon=True)
 
     plt.close(fig)
 
