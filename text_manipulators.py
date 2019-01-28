@@ -192,7 +192,6 @@ async def rot13_function(message, client, args):
         else:
             messageContent = "**"+message.author.display_name+"**: "+codecs.encode(" ".join(args), 'rot_13')
             botMessage = await message.channel.send(messageContent)
-            await botMessage.add_reaction('🕜')
             await botMessage.add_reaction(client.get_emoji(539568301861371905))
             try: 
                 await message.delete()
