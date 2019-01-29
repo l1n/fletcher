@@ -113,6 +113,8 @@ class CommandHandler:
                 searchString = "!"+searchString[:-1]
             searchString = self.bang_remover.sub('!', searchString)
         searchString = searchString.rstrip()
+        if not searchString.startswith("!"):
+            return
         for command in self.commands:
             if searchString.lower().startswith(tuple(command['trigger'])) and (('admin' in command and command['admin'] and hasattr(message.author, 'guild_permissions') and message.author.guild_permissions.manage_webhooks) or 'admin' not in command or not command['admin']):
                 print("[CH] Triggered "+str(command))
