@@ -80,7 +80,7 @@ async def shindan_function(message, client, args):
                                         message.author.display_name
                                         ))
                     resp = await message.channel.send(embed=embedPreview)
-                    await resp.add_reaction('🐣')
+                    await resp.add_reaction('📛')
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
         print("SDF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
@@ -101,7 +101,7 @@ def autoload(ch):
         'hidden': True
         })
     ch.add_command({
-        'trigger': ['!shindan', '🐣'],
+        'trigger': ['!shindan', '📛'],
         'function': shindan_function,
         'async': True,
         'args_num': 0,
