@@ -115,9 +115,8 @@ async def load_webhooks():
     webhook_sync_registry = {}
     for guild in client.guilds:
         try:
-            if "synchronize" in config["Guild "+guild.id] and config["Guild "+guild.id]["synchronize"] == "on":
+            if "synchronize" in config["Guild "+str(guild.id)] and config["Guild "+str(guild.id)]["synchronize"] == "on":
                 for webhook in await guild.webhooks():
-                    # discord.py/rewrite issue #1242, PR #1745 workaround
                     if webhook.name.startswith(config['discord']['botNavel']+' ('):
                         toChannelName = guild.name+':'+str(guild.get_channel(webhook.channel_id))
                         fromTuple = webhook.name.split("(")[1].split(")")[0].split(":")
