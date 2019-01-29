@@ -110,33 +110,35 @@ webhook_sync_registry = {
         }
 
 async def load_webhooks():
+    global config
     global webhook_sync_registry
     webhook_sync_registry = {}
     for guild in client.guilds:
         try:
-            for webhook in await guild.webhooks():
-                # discord.py/rewrite issue #1242, PR #1745 workaround
-                if webhook.name.startswith(config['discord']['botNavel']+' ('):
-                    toChannelName = guild.name+':'+str(guild.get_channel(webhook.channel_id))
-                    fromTuple = webhook.name.split("(")[1].split(")")[0].split(":")
-                    fromTuple[0] = messagefuncs.expand_guild_name(fromTuple[0])
-                    fromGuild = discord.utils.get(client.guilds, name=fromTuple[0].replace("_", " "))
-                    fromChannelName = fromTuple[0].replace("_", " ")+":"+fromTuple[1]
-                    webhook_sync_registry[fromChannelName] = {
-                            'toChannelObject': guild.get_channel(webhook.channel_id),
-                            'toWebhook': webhook,
-                            'toChannelName': toChannelName,
-                            'fromChannelObject': None,
-                            'fromWebhook': None
-                            }
-                    webhook_sync_registry[fromChannelName]['fromChannelObject'] = discord.utils.get(fromGuild.text_channels, name=fromTuple[1])
-                    webhook_sync_registry[fromChannelName]['fromWebhook'] = discord.utils.get(await fromGuild.webhooks(), channel__name=fromTuple[1])
+            if "synchronize" in config["Guild "+guild.id] and config["Guild "+guild.id]["synchronize"] == "on":
+                for webhook in await guild.webhooks():
+                    # discord.py/rewrite issue #1242, PR #1745 workaround
+                    if webhook.name.startswith(config['discord']['botNavel']+' ('):
+                        toChannelName = guild.name+':'+str(guild.get_channel(webhook.channel_id))
+                        fromTuple = webhook.name.split("(")[1].split(")")[0].split(":")
+                        fromTuple[0] = messagefuncs.expand_guild_name(fromTuple[0])
+                        fromGuild = discord.utils.get(client.guilds, name=fromTuple[0].replace("_", " "))
+                        fromChannelName = fromTuple[0].replace("_", " ")+":"+fromTuple[1]
+                        webhook_sync_registry[fromChannelName] = {
+                                'toChannelObject': guild.get_channel(webhook.channel_id),
+                                'toWebhook': webhook,
+                                'toChannelName': toChannelName,
+                                'fromChannelObject': None,
+                                'fromWebhook': None
+                                }
+                        webhook_sync_registry[fromChannelName]['fromChannelObject'] = discord.utils.get(fromGuild.text_channels, name=fromTuple[1])
+                        webhook_sync_registry[fromChannelName]['fromWebhook'] = discord.utils.get(await fromGuild.webhooks(), channel__name=fromTuple[1])
         except discord.Forbidden as e:
             print('Couldn\'t load webhooks for '+str(guild)+', ask an admin to grant additional permissions (https://novalinium.com/go/4/fletcher)')
         except AttributeError:
             pass
     print("Webhooks loaded:")
-    print("\n".join([key+" to "+webhook_sync_registry[key]['toChannelName'] for key in list(webhook_sync_registry)]))
+    print("\n".join([key+" to "+webhook_sync_registry[key]['toChannelName']+' (Guild '+webhook_sync_registry[key]['toChannelObject'].guild.id+')' for key in list(webhook_sync_registry)]))
 canticum_message = None
 doissetep_omega =  None
 
