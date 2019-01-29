@@ -138,7 +138,7 @@ async def load_webhooks():
         except AttributeError:
             pass
     print("Webhooks loaded:")
-    print("\n".join([key+" to "+webhook_sync_registry[key]['toChannelName']+' (Guild '+webhook_sync_registry[key]['toChannelObject'].guild.id+')' for key in list(webhook_sync_registry)]))
+    print("\n".join([key+" to "+webhook_sync_registry[key]['toChannelName']+' (Guild '+str(webhook_sync_registry[key]['toChannelObject'].guild.id)+')' for key in list(webhook_sync_registry)]))
 canticum_message = None
 doissetep_omega =  None
 
