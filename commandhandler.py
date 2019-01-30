@@ -105,7 +105,10 @@ class CommandHandler:
             pass
         if messagefuncs.extract_identifiers_messagelink.search(message.content):
             if str(message.author.id) not in config['moderation']['blacklist-user-usage'].split(','):
-                return await messagefuncs.preview_messagelink_function(message, self.client, None)
+                await messagefuncs.preview_messagelink_function(message, self.client, None)
+        if 'rot13' in message.content:
+            if str(message.author.id) not in config['moderation']['blacklist-user-usage'].split(','):
+                await message.add_reaction(self.client.get_emoji(int(config['discord']['rot13'])))
         searchString = message.content
         searchString = self.tag_id_as_command.sub('!', searchString)
         if config['interactivity']['enhanced-command-finding'] == "on":

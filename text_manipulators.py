@@ -184,6 +184,7 @@ def pretty_date(time=False):
     return str(int(day_diff / 365)) + " years ago"
 
 async def rot13_function(message, client, args):
+    global config
     try:
         if len(args) == 2 and type(args[1]) is discord.User:
             if ': ' in message.content:
@@ -195,7 +196,7 @@ async def rot13_function(message, client, args):
         else:
             messageContent = "**"+message.author.display_name+"**: "+codecs.encode(" ".join(args), 'rot_13')
             botMessage = await message.channel.send(messageContent)
-            await botMessage.add_reaction(client.get_emoji(539568301861371905))
+            await botMessage.add_reaction(client.get_emoji(int(config['discord']['rot13'])))
             try: 
                 await message.delete()
             except discord.Forbidden as e:
@@ -212,7 +213,7 @@ async def memfrob_function(message, client, args):
         else:
             messageContent = "**"+message.author.display_name+"**: "+memfrob(message.clean_content.split(' ', 1)[1].replace(' ',"\n")).swapcase()
             botMessage = await message.channel.send(messageContent)
-            await botMessage.add_reaction('🕦')
+            await botMessage.add_reaction('🙈')
             try: 
                 await message.delete()
             except discord.Forbidden as e:
@@ -233,7 +234,7 @@ def autoload(ch):
         })
 
     ch.add_command({
-        'trigger': ['!memfrob', '!spoiler', '🕦'],
+        'trigger': ['!spoiler', '🙈', '!memfrob', '🕦'],
         'function': memfrob_function,
         'async': True,
         'args_num': 0,
