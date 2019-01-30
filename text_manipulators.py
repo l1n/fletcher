@@ -217,15 +217,18 @@ async def rot13_function(message, client, args):
         exc_type, exc_obj, exc_tb = exc_info()
         print("R13F[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
 
-async def memfrob_function(message, client, args):
+async def spoiler_function(message, client, args):
     try:
+        rotate_function = memfrob
+        if len(message.content) != len(message.content.encode()):
+            rotate_function = rot32768
         if len(args) == 2 and type(args[1]) is discord.User:
             if message.author.id == 429368441577930753:
-                return await args[1].send("Spoiler from conversation in <#{}> ({}) <https://discordapp.com/channels/{}/{}/{}>\n{}: {}".format(message.channel.id, message.channel.guild.name, message.channel.guild.id, message.channel.id, message.id, message.clean_content.split(': ', 1)[0], rot32768(swapcasealpha(message.clean_content.split(': ', 1)[1])).replace("\n"," ")))
+                return await args[1].send("Spoiler from conversation in <#{}> ({}) <https://discordapp.com/channels/{}/{}/{}>\n{}: {}".format(message.channel.id, message.channel.guild.name, message.channel.guild.id, message.channel.id, message.id, message.clean_content.split(': ', 1)[0], rotate_function(swapcasealpha(message.clean_content.split(': ', 1)[1])).replace("\n"," ")))
             else:
                 print("MFF: Backing out, not my message.")
         else:
-            messageContent = "**"+message.author.display_name+"**: "+swapcasealpha(rot32768(message.clean_content.split(' ', 1)[1].replace(' ',"\n")))
+            messageContent = "**"+message.author.display_name+"**: "+swapcasealpha(rotate_function(message.clean_content.split(' ', 1)[1].replace(' ',"\n")))
             botMessage = await message.channel.send(messageContent)
             await botMessage.add_reaction('🙈')
             try: 
@@ -249,7 +252,7 @@ def autoload(ch):
 
     ch.add_command({
         'trigger': ['!spoiler', '🙈', '!memfrob', '🕦'],
-        'function': memfrob_function,
+        'function': spoiler_function,
         'async': True,
         'args_num': 0,
         'args_name': [],
