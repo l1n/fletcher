@@ -186,7 +186,10 @@ def pretty_date(time=False):
 async def rot13_function(message, client, args):
     try:
         if len(args) == 2 and type(args[1]) is discord.User:
-            return await args[1].send("Spoiler from conversation in <#{}> ({}) <https://discordapp.com/channels/{}/{}/{}>\n{}: {}".format(message.channel.id, message.channel.guild.name, message.channel.guild.id, message.channel.id, message.id, message.content.split(': ', 1)[0], codecs.encode(message.content.split(': ', 1)[1], 'rot_13')))
+            if ': ' in message.content:
+                return await args[1].send("Spoiler from conversation in <#{}> ({}) <https://discordapp.com/channels/{}/{}/{}>\n{}: {}".format(message.channel.id, message.channel.guild.name, message.channel.guild.id, message.channel.id, message.id, message.content.split(': ', 1)[0], codecs.encode(message.content.split(': ', 1)[1], 'rot_13')))
+            else:
+                return await args[1].send("Spoiler from conversation in <#{}> ({}) <https://discordapp.com/channels/{}/{}/{}>\n{}: {}".format(message.channel.id, message.channel.guild.name, message.channel.guild.id, message.channel.id, message.id, message.author.display_name, codecs.encode(message.content, 'rot_13')))
         elif len(args) == 2 and args[1] == 'INTPROC':
             return codecs.encode(args[0], 'rot_13')
         else:
