@@ -220,8 +220,12 @@ async def rot13_function(message, client, args):
 async def spoiler_function(message, client, args):
     try:
         rotate_function = memfrob
-        if len(message.content) != len(message.content.encode()):
-            rotate_function = rot32768
+        if message.author.id == 429368441577930753:
+            if len(message.clean_content.split(': ', 1)[1]) != len(message.clean_content.split(': ', 1)[1].encode()):
+                rotate_function = rot32768
+        else:
+            if len(message.clean_content) != len(message.clean_content.encode()):
+                rotate_function = rot32768
         if len(args) == 2 and type(args[1]) is discord.User:
             if message.author.id == 429368441577930753:
                 return await args[1].send("Spoiler from conversation in <#{}> ({}) <https://discordapp.com/channels/{}/{}/{}>\n{}: {}".format(message.channel.id, message.channel.guild.name, message.channel.guild.id, message.channel.id, message.id, message.clean_content.split(': ', 1)[0], rotate_function(swapcasealpha(message.clean_content.split(': ', 1)[1])).replace("\n"," ")))
