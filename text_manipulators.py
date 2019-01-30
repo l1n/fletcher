@@ -210,7 +210,7 @@ async def memfrob_function(message, client, args):
         if len(args) == 2 and type(args[1]) is discord.User:
             return await args[1].send("Spoiler from conversation in <#{}> ({}) <https://discordapp.com/channels/{}/{}/{}>\n{}: {}".format(message.channel.id, message.channel.guild.name, message.channel.guild.id, message.channel.id, message.id, message.content.split(': ', 1)[0], memfrob(message.content.split(': ', 1)[1].swapcase()).replace("\n"," ")))
         else:
-            messageContent = "**"+message.author.display_name+"**: "+memfrob("\n".join(args).swapcase())
+            messageContent = "**"+message.author.display_name+"**: "+memfrob("\n".join(args)).swapcase()
             botMessage = await message.channel.send(messageContent)
             await botMessage.add_reaction('🕦')
             try: 
