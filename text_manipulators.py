@@ -224,7 +224,7 @@ async def memfrob_function(message, client, args):
 
 def autoload(ch):
     ch.add_command({
-        'trigger': ['!rot13', '🕜', '<:rot13:539568301861371905>'],
+        'trigger': ['!rot13', '🕜', '<:rot13:539568301861371905>', '<:rot13:527988322879012894>'],
         'function': rot13_function,
         'async': True,
         'args_num': 0,
