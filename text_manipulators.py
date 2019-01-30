@@ -13,6 +13,11 @@ def smallcaps(text=False):
         return text.translate(str.maketrans({'a': 'ᴀ', 'b': 'ʙ', 'c': 'ᴄ', 'd': 'ᴅ', 'e': 'ᴇ', 'f': 'ғ', 'g': 'ɢ', 'h': 'ʜ', 'i': 'ɪ', 'j': 'ᴊ', 'k': 'ᴋ', 'l': 'ʟ', 'm': 'ᴍ', 'n': 'ɴ', 'o': 'ᴏ', 'p': 'ᴘ', 'q': 'ǫ', 'r': 'ʀ', 's': 's', 't': 'ᴛ', 'u': 'ᴜ', 'v': 'ᴠ', 'w': 'ᴡ', 'x': 'x', 'y': 'ʏ', 'z': 'ᴢ'}))
     return None
 
+def swapcasealpha(text=False):
+    if text:
+        return text.translate(str.maketrans({'a': 'A', 'b': 'B', 'c': 'C', 'd': 'D', 'e': 'E', 'f': 'F', 'g': 'G', 'h': 'H', 'i': 'I', 'j': 'J', 'k': 'K', 'l': 'L', 'm': 'M', 'n': 'N', 'o': 'O', 'p': 'P', 'q': 'Q', 'r': 'R', 's': 'S', 't': 'T', 'u': 'U', 'v': 'V', 'w': 'W', 'x': 'X', 'y': 'Y', 'z': 'Z', 'A': 'a', 'B': 'b', 'C': 'c', 'D': 'd', 'E': 'e', 'F': 'f', 'G': 'g', 'H': 'h', 'I': 'i', 'J': 'j', 'K': 'k', 'L': 'l', 'M': 'm', 'N': 'n', 'O': 'o', 'P': 'p', 'Q': 'q', 'R': 'r', 'S': 's', 'T': 't', 'U': 'u', 'V': 'v', 'W': 'w', 'X': 'x', 'Y': 'y', 'Z': 'z'}))
+    return None
+
 ordinal = lambda n: "%d%s" % (n,"tsnrhtdd"[(math.floor(n/10)%10!=1)*(n%10<4)*n%10::4])
 
 def convert_hex_to_ascii(h):
@@ -210,11 +215,11 @@ async def memfrob_function(message, client, args):
     try:
         if len(args) == 2 and type(args[1]) is discord.User:
             if message.author.id == 429368441577930753:
-                return await args[1].send("Spoiler from conversation in <#{}> ({}) <https://discordapp.com/channels/{}/{}/{}>\n{}: {}".format(message.channel.id, message.channel.guild.name, message.channel.guild.id, message.channel.id, message.id, message.clean_content.split(': ', 1)[0], memfrob(message.clean_content.split(': ', 1)[1].swapcase()).replace("\n"," ")))
+                return await args[1].send("Spoiler from conversation in <#{}> ({}) <https://discordapp.com/channels/{}/{}/{}>\n{}: {}".format(message.channel.id, message.channel.guild.name, message.channel.guild.id, message.channel.id, message.id, message.clean_content.split(': ', 1)[0], memfrob(swapcasealpha(message.clean_content.split(': ', 1)[1])).replace("\n"," ")))
             else:
                 print("MFF: Backing out, not my message.")
         else:
-            messageContent = "**"+message.author.display_name+"**: "+memfrob(message.clean_content.split(' ', 1)[1].replace(' ',"\n")).swapcase()
+            messageContent = "**"+message.author.display_name+"**: "+swapcasealpha(memfrob(message.clean_content.split(' ', 1)[1].replace(' ',"\n")))
             botMessage = await message.channel.send(messageContent)
             await botMessage.add_reaction('🙈')
             try: 
