@@ -228,7 +228,7 @@ async def spoiler_function(message, client, args):
                 rotate_function = rot32768
         if len(args) == 2 and type(args[1]) is discord.User:
             if message.author.id == 429368441577930753:
-                return await args[1].send("Spoiler from conversation in <#{}> ({}) <https://discordapp.com/channels/{}/{}/{}>\n{}: {}".format(message.channel.id, message.channel.guild.name, message.channel.guild.id, message.channel.id, message.id, message.clean_content.split(': ', 1)[0], rotate_function(swapcasealpha(message.clean_content.split(': ', 1)[1])).replace("\n"," ")))
+                return await args[1].send("Spoiler from conversation in <#{}> ({}) <https://discordapp.com/channels/{}/{}/{}>\n{}: {}".format(message.channel.id, message.channel.guild.name, message.channel.guild.id, message.channel.id, message.id, message.clean_content.split('**: ', 1)[0], rotate_function(swapcasealpha(message.clean_content.split('**: ', 1)[1])).replace("\n"," ")))
             else:
                 print("MFF: Backing out, not my message.")
         else:
