@@ -187,7 +187,7 @@ async def rot13_function(message, client, args):
     global config
     try:
         if len(args) == 2 and type(args[1]) is discord.User:
-            if ': ' in message.content:
+            if message.author.id == 429368441577930753:
                 return await args[1].send("Spoiler from conversation in <#{}> ({}) <https://discordapp.com/channels/{}/{}/{}>\n{}: {}".format(message.channel.id, message.channel.guild.name, message.channel.guild.id, message.channel.id, message.id, message.content.split(': ', 1)[0], codecs.encode(message.content.split(': ', 1)[1], 'rot_13')))
             else:
                 return await args[1].send("Spoiler from conversation in <#{}> ({}) <https://discordapp.com/channels/{}/{}/{}>\n{}: {}".format(message.channel.id, message.channel.guild.name, message.channel.guild.id, message.channel.id, message.id, message.author.display_name, codecs.encode(message.content, 'rot_13')))
@@ -211,6 +211,8 @@ async def memfrob_function(message, client, args):
         if len(args) == 2 and type(args[1]) is discord.User:
             if message.author.id == 429368441577930753:
                 return await args[1].send("Spoiler from conversation in <#{}> ({}) <https://discordapp.com/channels/{}/{}/{}>\n{}: {}".format(message.channel.id, message.channel.guild.name, message.channel.guild.id, message.channel.id, message.id, message.clean_content.split(': ', 1)[0], memfrob(message.clean_content.split(': ', 1)[1].swapcase()).replace("\n"," ")))
+            else:
+                print("MFF: Backing out, not my message.")
         else:
             messageContent = "**"+message.author.display_name+"**: "+memfrob(message.clean_content.split(' ', 1)[1].replace(' ',"\n")).swapcase()
             botMessage = await message.channel.send(messageContent)

@@ -46,6 +46,7 @@ async def shindan_function(message, client, args):
     try:
         if len(args) == 2 and type(args[1]) is discord.User:
             if message.author.id != 429368441577930753:
+                print("SDF: Backing out, not my message.")
                 return
             if message.embeds[0].url.startswith("https://en.shindanmaker.com/"):
                 async with aiohttp.ClientSession() as session:
