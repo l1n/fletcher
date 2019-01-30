@@ -146,6 +146,12 @@ def memfrob(plain=""):
         cipher = cipher + convert_hex_to_ascii(int(kek[x], 16))
     return cipher
 
+def rot32768(s):
+    y = ''
+    for x in s:
+            y += chr(ord(x) ^ 0x8000)
+    return y
+
 def pretty_date(time=False):
     """
     Get a datetime object or a int() Epoch timestamp and return a
@@ -215,11 +221,11 @@ async def memfrob_function(message, client, args):
     try:
         if len(args) == 2 and type(args[1]) is discord.User:
             if message.author.id == 429368441577930753:
-                return await args[1].send("Spoiler from conversation in <#{}> ({}) <https://discordapp.com/channels/{}/{}/{}>\n{}: {}".format(message.channel.id, message.channel.guild.name, message.channel.guild.id, message.channel.id, message.id, message.clean_content.split(': ', 1)[0], memfrob(swapcasealpha(message.clean_content.split(': ', 1)[1])).replace("\n"," ")))
+                return await args[1].send("Spoiler from conversation in <#{}> ({}) <https://discordapp.com/channels/{}/{}/{}>\n{}: {}".format(message.channel.id, message.channel.guild.name, message.channel.guild.id, message.channel.id, message.id, message.clean_content.split(': ', 1)[0], rot32768(swapcasealpha(message.clean_content.split(': ', 1)[1])).replace("\n"," ")))
             else:
                 print("MFF: Backing out, not my message.")
         else:
-            messageContent = "**"+message.author.display_name+"**: "+swapcasealpha(memfrob(message.clean_content.split(' ', 1)[1].replace(' ',"\n")))
+            messageContent = "**"+message.author.display_name+"**: "+swapcasealpha(rot32768(message.clean_content.split(' ', 1)[1].replace(' ',"\n")))
             botMessage = await message.channel.send(messageContent)
             await botMessage.add_reaction('🙈')
             try: 
