@@ -31,7 +31,7 @@ class CommandHandler:
         channel = self.client.get_channel(reaction.channel_id)
         message = await channel.get_message(reaction.message_id)
         if type(channel) is discord.TextChannel:
-            print("#"+channel.name+" <"+user.name+"> reacting with "+messageContent+" to "+str(message.id))
+            print("#"+channel.guild.name+":"+channel.name+" <"+user.name+"> reacting with "+messageContent+" to "+str(message.id))
         elif type(message.channel) is discord.DMChannel:
             print("@"+channel.recipient.name+" <"+user.name+"> reacting with "+messageContent+" to "+str(message.id))
         else:
