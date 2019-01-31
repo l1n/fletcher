@@ -1,7 +1,7 @@
 # bot.py
 import asyncio
 import configparser
-from datetime import datetime, timedelta
+from datetime import datetime
 import discord
 import importlib
 import io
@@ -313,6 +313,8 @@ async def on_message(message):
 
     # try to evaluate with the command handler
     try:
+        while ch is None:
+            await asyncio.sleep(1)
         await ch.command_handler(message)
 
     # message doesn't contain a command trigger
