@@ -177,6 +177,7 @@ async def reload_function(message=None, client=client, args=[]):
     global versioninfo
     global doissetep_omega
     try:
+        await client.change_presence(activity=discord.Game(name='Reloading: The Game'))
         config = configparser.ConfigParser()
         config.read(FLETCHER_CONFIG)
         if 'extra' in config and 'rc-path' in config['extra'] and os.path.isdir(config['extra']['rc-path']):
@@ -242,7 +243,7 @@ async def reload_function(message=None, client=client, args=[]):
         canticum_message = None
         await animate_startup('✅', message)
         await client.change_presence(activity=discord.Game(
-            name='!help | https://todo.sr.ht/~nova/fletcher',
+            name='fletcher.fun | !help',
             start=datetime.now()
             ))
     except Exception as e:
