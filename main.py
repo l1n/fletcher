@@ -241,21 +241,22 @@ async def reload_function(message=None, client=client, args=[]):
         # Reset canticum_message when reloaded [workaround for https://todo.sr.ht/~nova/fletcher/6]
         canticum_message = None
         await animate_startup('✅', message)
-        await client.change_presence(activity=discord.Activity(
-            name='!help',
-            type=discord.ActivityType.playing,
-            start=datetime.now(),
+        await client.change_presence(game=discord.Game(
+            name='!help for help',
             url='https://liberapay.com/novalinium'
-            ))
+            )
+            start=datetime.now(),
+            status='https://todo.sr.ht/~nova/fletcher'
+            )
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
         print("RM[{}]: {}".format(exc_tb.tb_lineno, e))
         await animate_startup('🚫', message)
-        await client.change_presence(activity=discord.Activity(
-            name='Error Reloading',
-            type=discord.ActivityType.playing,
-            details="RM[{}]: {}".format(exc_tb.tb_lineno, e)
-            ))
+        await client.change_presence(game=discord.Game(
+            name='Error Reloading'
+            ),
+            status="RM[{}]: {}".format(exc_tb.tb_lineno, e)
+            )
 
 # bot is ready
 @client.event
