@@ -242,8 +242,8 @@ async def reload_function(message=None, client=client, args=[]):
         canticum_message = None
         await animate_startup('✅', message)
         await client.change_presence(activity=discord.Activity(
-            name=' For Commands',
-            type=discord.ActivityType.listening,
+            name='!help',
+            type=discord.ActivityType.playing,
             start=datetime.now(),
             url='https://liberapay.com/novalinium'
             ))
