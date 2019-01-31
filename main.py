@@ -244,7 +244,7 @@ async def reload_function(message=None, client=client, args=[]):
         await client.change_presence(activity=discord.Activity(
             name=' For Commands',
             type=discord.ActivityType.listening,
-            start=datetime.datetime.now(),
+            start=datetime.now(),
             url='https://liberapay.com/novalinium'
             ))
     except Exception as e:
@@ -253,7 +253,7 @@ async def reload_function(message=None, client=client, args=[]):
         await animate_startup('🚫', message)
         await client.change_presence(activity=discord.Activity(
             name='Error Reloading',
-            type=discord.ActivityType.watching,
+            type=discord.ActivityType.playing,
             details="RM[{}]: {}".format(exc_tb.tb_lineno, e)
             ))
 
