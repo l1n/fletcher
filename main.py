@@ -242,7 +242,7 @@ async def reload_function(message=None, client=client, args=[]):
         canticum_message = None
         await animate_startup('✅', message)
         await client.change_presence(activity=discord.Game(
-            name='!help | https://todo.sr.ht/~nova/fletcher'
+            name='!help | https://todo.sr.ht/~nova/fletcher',
             start=datetime.now()
             ))
     except Exception as e:
@@ -250,7 +250,7 @@ async def reload_function(message=None, client=client, args=[]):
         print("RM[{}]: {}".format(exc_tb.tb_lineno, e))
         await animate_startup('🚫', message)
         await client.change_presence(activity=discord.Game(
-            name='Error Reloading: RM[{}]: {}'.format(exc_tb.tb_lineno, e)
+            name='Error Reloading: RM[{}]: {}'.format(exc_tb.tb_lineno, e),
             start=datetime.now()
             ))
 
