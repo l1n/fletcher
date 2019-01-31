@@ -244,7 +244,7 @@ async def reload_function(message=None, client=client, args=[]):
         await client.change_presence(game=discord.Game(
             name='!help for help',
             url='https://liberapay.com/novalinium'
-            )
+            ),
             start=datetime.now(),
             status='https://todo.sr.ht/~nova/fletcher'
             )
