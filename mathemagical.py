@@ -10,6 +10,7 @@ def renderLatex(formula, fontsize=12, dpi=300, format='svg', file=None):
     """Renders LaTeX formula into image or prints to file.
     """
     plt.rc('text', usetex=True)
+    plt.rc('text.latex', preamble=r'\usepackage{amsmath}')
     plt.rc('font', family='serif')
     fig = plt.figure(figsize=(0.01, 0.01))
     fig.text(0, 0, u'{}'.format(formula), fontsize=fontsize, verticalalignment='center_baseline', clip_on=True)
