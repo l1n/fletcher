@@ -11,6 +11,8 @@ def expand_guild_name(guild, prefix='', suffix=':', global_replace=False):
         new_guild = new_guild.replace(prefix+k+suffix, prefix+v+suffix)
         if not global_replace and new_guild != guild:
             return new_guild
+        if k == new_guild:
+            return v
     return new_guild
 
 extract_identifiers_messagelink = re.compile('(?<!<)https://discordapp.com/channels/(\d+)/(\d+)/(\d+)', re.IGNORECASE)
