@@ -6,10 +6,12 @@ from sys import exc_info
 def expand_guild_name(guild, prefix='', suffix=':', global_replace=False):
     # TODO refactor into config file
     acro_mapping = [ ('acn', 'a compelling narrative'), ('ACN', 'a compelling narrative'), ('EAC', 'EA Corner'), ('D', 'Doissetep'), ('bocu', 'Book of Creation Undone') ]
+    new_guild = guild
     for k, v in acro_mapping:
-        new_guild = guild.replace(prefix+k+suffix, prefix+v+suffix)
-        if not global_replace:
+        new_guild = new_guild.replace(prefix+k+suffix, prefix+v+suffix)
+        if not global_replace and new_guild != guild:
             return new_guild
+    return new_guild
 
 extract_identifiers_messagelink = re.compile('(?<!<)https://discordapp.com/channels/(\d+)/(\d+)/(\d+)', re.IGNORECASE)
 async def teleport_function(message, client, args):
