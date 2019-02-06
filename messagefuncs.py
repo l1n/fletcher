@@ -15,7 +15,7 @@ def expand_guild_name(guild, prefix='', suffix=':', global_replace=False):
             return v
     return new_guild
 
-extract_identifiers_messagelink = re.compile('(?<!<)https://discordapp.com/channels/(\d+)/(\d+)/(\d+)', re.IGNORECASE)
+extract_identifiers_messagelink = re.compile('(?<!<)https://(?:ptb\.)?discordapp.com/channels/(\d+)/(\d+)/(\d+)', re.IGNORECASE)
 async def teleport_function(message, client, args):
     global config
     try:
