@@ -63,13 +63,13 @@ async def teleport_function(message, client, args):
             inPortalColor = ["red", discord.Colour.from_rgb(194,0,11)]
         else:
             inPortalColor = ["blue", discord.Colour.from_rgb(62,189,236)]
-        embedPortal = discord.Embed(title=embedTitle, description="https://discordapp.com/channels/{}/{}/{} {}".format(toChannel.guild.id, toChannel.id, toMessage.id, " ".join(args[1:])), color=inPortalColor[1]).set_footer(icon_url="https://download.lin.anticlack.com/fletcher/"+inPortalColor[0]+"-portal.png",text="On behalf of {}".format(message.author.nick or message.author))
-        tmp = await fromMessage.edit(content=None,embed=embedPortal)
+        embedPortal = discord.Embed(description=" ".join(args[1:]), color=inPortalColor[1]).set_author(icon_url="https://download.lin.anticlack.com/fletcher/"+inPortalColor[0]+"-portal.png",name="{}".format(message.author.display_name))
+        tmp = await fromMessage.edit(content="{} <https://discordapp.com/channels/{}/{}/{}>".format(embedTitle, toChannel.guild.id, toChannel.id, toMessage.id), embed=embedPortal)
         embedTitle = "Portal opened from #{}".format(fromChannel.name)
         if toGuild:
             embedTitle = embedTitle+" ({})".format(fromChannel.guild.name)
-        embedPortal = discord.Embed(title=embedTitle, description="https://discordapp.com/channels/{}/{}/{} {}".format(fromChannel.guild.id, fromChannel.id, fromMessage.id, " ".join(args[1:])), color=discord.Colour.from_rgb(194,64,11)).set_footer(icon_url="https://download.lin.anticlack.com/fletcher/orange-portal.png",text="On behalf of {}".format(message.author.nick or message.author))
-        tmp = await toMessage.edit(content=None,embed=embedPortal)
+        embedPortal = discord.Embed(description=" ".join(args[1:]), color=discord.Colour.from_rgb(194,64,11)).set_author(icon_url="https://download.lin.anticlack.com/fletcher/orange-portal.png",name="{}".format(message.author.dsplay_name))
+        tmp = await toMessage.edit(content="{} <https://discordapp.com/channels/{}/{}/{}>".format(embedTitle, fromChannel.guild.id, fromChannel.id, fromMessage.id), embed=embedPortal)
         try:
             if 'snappy' in config['discord'] and config['discord']['snappy']:
                 await message.delete()
