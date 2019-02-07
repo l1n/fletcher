@@ -67,7 +67,7 @@ async def teleport_function(message, client, args):
         if config['teleport']['embeds'] == "on":
             tmp = await fromMessage.edit(content=None,embed=embedPortal)
         else:
-            tmp = await fromMessage.edit(content="**{}** <https://discordapp.com/channels/{}/{}/{}>\n<@{}>\n{}".format(embedTitle, toChannel.guild.id, toChannel.id, toMessage.id, " ".join(args[1:]), message.author.id))
+            tmp = await fromMessage.edit(content="**{}** <https://discordapp.com/channels/{}/{}/{}>\nOn behalf of {}\n{}".format(embedTitle, toChannel.guild.id, toChannel.id, toMessage.id, message.author.display_name, " ".join(args[1:])))
         embedTitle = "Portal opened from #{}".format(fromChannel.name)
         if toGuild:
             embedTitle = embedTitle+" ({})".format(fromChannel.guild.name)
@@ -75,7 +75,7 @@ async def teleport_function(message, client, args):
         if config['teleport']['embeds'] == "on":
             tmp = await fromMessage.edit(content=None,embed=embedPortal)
         else:
-            tmp = await fromMessage.edit(content="**{}** <https://discordapp.com/channels/{}/{}/{}>\n<@{}>\n{}".format(embedTitle, fromChannel.guild.id, fromChannel.id, fromMessage.id, " ".join(args[1:]), message.author.id))
+            tmp = await fromMessage.edit(content="**{}** <https://discordapp.com/channels/{}/{}/{}>\nOn behalf of {}\n{}".format(embedTitle, fromChannel.guild.id, fromChannel.id, fromMessage.id, message.author.display_name, " ".join(args[1:])))
         try:
             if 'snappy' in config['discord'] and config['discord']['snappy']:
                 await message.delete()
