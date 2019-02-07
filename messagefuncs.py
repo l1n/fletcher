@@ -64,12 +64,12 @@ async def teleport_function(message, client, args):
         else:
             inPortalColor = ["blue", discord.Colour.from_rgb(62,189,236)]
         embedPortal = discord.Embed(description=" ".join(args[1:]), color=inPortalColor[1]).set_author(icon_url="https://download.lin.anticlack.com/fletcher/"+inPortalColor[0]+"-portal.png",name="{}".format(message.author.display_name))
-        tmp = await fromMessage.edit(content="{} <https://discordapp.com/channels/{}/{}/{}>".format(embedTitle, toChannel.guild.id, toChannel.id, toMessage.id), embed=embedPortal)
+        tmp = await fromMessage.edit(content="**{}** <https://discordapp.com/channels/{}/{}/{}>".format(embedTitle, toChannel.guild.id, toChannel.id, toMessage.id), embed=embedPortal)
         embedTitle = "Portal opened from #{}".format(fromChannel.name)
         if toGuild:
             embedTitle = embedTitle+" ({})".format(fromChannel.guild.name)
-        embedPortal = discord.Embed(description=" ".join(args[1:]), color=discord.Colour.from_rgb(194,64,11)).set_author(icon_url="https://download.lin.anticlack.com/fletcher/orange-portal.png",name="{}".format(message.author.dsplay_name))
-        tmp = await toMessage.edit(content="{} <https://discordapp.com/channels/{}/{}/{}>".format(embedTitle, fromChannel.guild.id, fromChannel.id, fromMessage.id), embed=embedPortal)
+        embedPortal = discord.Embed(description=" ".join(args[1:]), color=discord.Colour.from_rgb(194,64,11)).set_author(icon_url="https://download.lin.anticlack.com/fletcher/orange-portal.png",name="{}".format(message.author.display_name))
+        tmp = await toMessage.edit(content="**{}** <https://discordapp.com/channels/{}/{}/{}>".format(embedTitle, fromChannel.guild.id, fromChannel.id, fromMessage.id), embed=embedPortal)
         try:
             if 'snappy' in config['discord'] and config['discord']['snappy']:
                 await message.delete()
