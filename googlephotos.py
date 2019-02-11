@@ -66,13 +66,16 @@ def listalbums_function(message, client, args):
 async def twilestia_function(message, client, args):
     global config
     global gphotos
+    global twilestia_list
     try:
-        image = random.choice(list(gphotos.mediaItems().search(body={"albumId":config['google-photos']['twilestia']}).execute().get("mediaItems")))
+        if twilestia_list is None or len(twilestia_list) == 0:
+            twilestia_list = list(gphotos.mediaItems().search(body={"albumId":config['google-photos']['twilestia']}).execute().get("mediaItems"))
+        image = twilestia_list.pop(random.randint(0, len(twilestia_list)))
         fullSizeImage = "{}=w{}-h{}".format(image.get("baseUrl"), image.get("mediaMetadata").get("width"), image.get("mediaMetadata").get("height"))
         async with aiohttp.ClientSession() as session:
             async with session.get(fullSizeImage) as resp:
                 buffer = io.BytesIO(await resp.read())
-                return await message.channel.send(files=[discord.File(buffer, image.get("filename"))])
+                await message.channel.send(files=[discord.File(buffer, image.get("filename"))])
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
         print("TCF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
