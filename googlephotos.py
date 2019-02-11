@@ -83,6 +83,7 @@ async def twilestia_function(message, client, args):
 def autoload(ch):
     global config 
     global gphotos
+    global twilestia_list
     # if gphotos is not None:
     #     return
     ch.add_command({
@@ -117,3 +118,4 @@ def autoload(ch):
     if 'refresh_token' not in config['google-photos']:
         return authorize_googlephotos_function()
     gphotos = build('photoslibrary', 'v1', credentials=google.oauth2.credentials.Credentials(config['google-photos']['token'], refresh_token=config['google-photos']['refresh_token'], token_uri=config['google-photos']['token_uri'], client_id=config['google-photos']['client_id'], client_secret=config['google-photos']['client_secret']))
+    twilestia_list = []
