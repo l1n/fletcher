@@ -68,14 +68,25 @@ async def twilestia_function(message, client, args):
     global gphotos
     global twilestia_list
     try:
-        if twilestia_list is None or len(twilestia_list) == 0:
-            twilestia_list = list(gphotos.mediaItems().search(body={"albumId":config['google-photos']['twilestia']}).execute().get("mediaItems"))
-        image = twilestia_list.pop(random.randint(0, len(twilestia_list)))
-        fullSizeImage = "{}=w{}-h{}".format(image.get("baseUrl"), image.get("mediaMetadata").get("width"), image.get("mediaMetadata").get("height"))
-        async with aiohttp.ClientSession() as session:
-            async with session.get(fullSizeImage) as resp:
-                buffer = io.BytesIO(await resp.read())
-                await message.channel.send(files=[discord.File(buffer, image.get("filename"))])
+        for counter in range(5):
+            try:
+                image = twilestia_list.pop()
+                fullSizeImage = "{}=w{}-h{}".format(image.get("baseUrl"), image.get("mediaMetadata").get("width"), image.get("mediaMetadata").get("height"))
+                async with aiohttp.ClientSession() as session:
+                    async with session.get(fullSizeImage) as resp:
+                        buffer = io.BytesIO(await resp.read())
+                        if resp.status != 200:
+                            raise aiohttp.HttpProcessingError(resp.status, message="Retrieving image failed!")
+                        await message.channel.send(files=[discord.File(buffer, image.get("filename"))])
+                        break
+            except (ValueError, IndexError, AttributeError, aiohttp.HttpProcessingError) as e:
+                # Retry!
+                exc_type, exc_obj, exc_tb = exc_info()
+                print("TCF[{}]: {} {}, counter is at {}".format(exc_tb.tb_lineno, type(e).__name__, e, counter))
+                print("TCF: Refreshing twilestia_list")
+                twilestia_list = list(gphotos.mediaItems().search(body={"albumId":config['google-photos']['twilestia']}).execute().get("mediaItems"))
+                random.shuffle(twilestia_list)
+                continue
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
         print("TCF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
@@ -84,8 +95,6 @@ def autoload(ch):
     global config 
     global gphotos
     global twilestia_list
-    # if gphotos is not None:
-    #     return
     ch.add_command({
         'trigger': ['!twilestia'],
         'function': twilestia_function,
@@ -117,5 +126,11 @@ def autoload(ch):
         })
     if 'refresh_token' not in config['google-photos']:
         return authorize_googlephotos_function()
-    gphotos = build('photoslibrary', 'v1', credentials=google.oauth2.credentials.Credentials(config['google-photos']['token'], refresh_token=config['google-photos']['refresh_token'], token_uri=config['google-photos']['token_uri'], client_id=config['google-photos']['client_id'], client_secret=config['google-photos']['client_secret']))
-    twilestia_list = []
+    try:
+        gphotos.albums().list().execute()['albums']])
+    except Exception:
+        gphotos = build('photoslibrary', 'v1', credentials=google.oauth2.credentials.Credentials(config['google-photos']['token'], refresh_token=config['google-photos']['refresh_token'], token_uri=config['google-photos']['token_uri'], client_id=config['google-photos']['client_id'], client_secret=config['google-photos']['client_secret']))
+    try:
+        print("GPAL: length(twilestia_list)="+str(len(twilestia_list)))
+    except Exception:
+        twilestia_list = []
