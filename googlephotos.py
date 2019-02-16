@@ -76,10 +76,10 @@ async def twilestia_function(message, client, args):
                     async with session.get(fullSizeImage) as resp:
                         buffer = io.BytesIO(await resp.read())
                         if resp.status != 200:
-                            raise aiohttp.HttpProcessingError(resp.status, message="Retrieving image failed!")
+                            raise aiohttp.errors.HttpProcessingError(resp.status, message="Retrieving image failed!")
                         await message.channel.send(files=[discord.File(buffer, image.get("filename"))])
                         break
-            except (ValueError, IndexError, AttributeError, aiohttp.HttpProcessingError) as e:
+            except (ValueError, IndexError, AttributeError, aiohttp.errors.HttpProcessingError) as e:
                 # Retry!
                 exc_type, exc_obj, exc_tb = exc_info()
                 print("TCF[{}]: {} {}, counter is at {}".format(exc_tb.tb_lineno, type(e).__name__, e, counter))
