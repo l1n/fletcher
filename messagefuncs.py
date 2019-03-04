@@ -22,6 +22,7 @@ async def teleport_function(message, client, args):
         if args[0] == "to":
             args.pop(0)
         fromChannel = message.channel
+        fromGuild = message.guild
         if str(fromChannel.id) in config['teleport']['fromchannel-ban'].split(',') and not message.author.guild_permissions.manage_webhooks:
             await fromChannel.send('Portals out of this channel have been disabled.', delete_after=60)
             raise Exception('Forbidden teleport')
@@ -33,11 +34,12 @@ async def teleport_function(message, client, args):
             targetChannel = targetChannel[2:-1].strip()
             channelLookupBy = "ID"
         elif targetChannel.startswith('#'):
-            targetChannel= targetChannel[1:].strip()
+            targetChannel = targetChannel[1:].strip()
         print('Target Channel '+channelLookupBy+': '+targetChannel)
         if channelLookupBy == "Name":
             if ":" not in targetChannel:
-                toChannel = discord.utils.get(fromChannel.guild.text_channels, name=targetChannel)
+                toChannel = discord.utils.get(fromGuild.text_channels, name=targetChannel)
+                toGuild = fromGuild
             else:
                 targetChannel = expand_guild_name(targetChannel)
                 toTuple = targetChannel.split(":")
@@ -45,37 +47,40 @@ async def teleport_function(message, client, args):
                 toChannel = discord.utils.get(toGuild.text_channels, name=toTuple[1])
         elif channelLookupBy == "ID":
             toChannel = client.get_channel(int(targetChannel))
+            toGuild = toChannel.guild
         if fromChannel.id == toChannel.id:
             await fromChannel.send('You cannot open an overlapping portal! Access denied.')
             raise Exception('Attempt to open overlapping portal')
         print('Entering in '+str(fromChannel))
-        fromMessage = await fromChannel.send('Opening Portal To <#{}> ({})'.format(toChannel.id, toChannel.guild.name))
+        fromMessage = await fromChannel.send('Opening Portal To <#{}> ({})'.format(toChannel.id, toGuild.name))
         try:
             print('Exiting in '+str(toChannel))
-            toMessage = await toChannel.send('Portal Opening From <#{}> ({})'.format(fromChannel.id, fromChannel.guild.name))
+            toMessage = await toChannel.send('Portal Opening From <#{}> ({})'.format(fromChannel.id, fromGuild.name))
         except discord.Forbidden as e:
             await fromMessage.edit(content='Failed to open portal due to missing permissions! Access denied.')
             raise Exception('Portal collaped half-open!')
         embedTitle = "Portal opened to #{}".format(toChannel.name)
-        if toGuild:
-            embedTitle = embedTitle+" ({})".format(toChannel.guild.name)
+        if toGuild != fromGuild:
+            embedTitle = embedTitle+" ({})".format(toGuild.name)
         if toChannel.name == "hell":
             inPortalColor = ["red", discord.Colour.from_rgb(194,0,11)]
         else:
             inPortalColor = ["blue", discord.Colour.from_rgb(62,189,236)]
-        embedPortal = discord.Embed(title=embedTitle, description="https://discordapp.com/channels/{}/{}/{} {}".format(toChannel.guild.id, toChannel.id, toMessage.id, " ".join(args[1:])), color=inPortalColor[1]).set_footer(icon_url="https://download.lin.anticlack.com/fletcher/"+inPortalColor[0]+"-portal.png",text="On behalf of {}".format(message.author.nick or message.author))
+        behest = localizeName(message.author, fromGuild)
+        embedPortal = discord.Embed(title=embedTitle, description="https://discordapp.com/channels/{}/{}/{} {}".format(toGuild.id, toChannel.id, toMessage.id, " ".join(args[1:])), color=inPortalColor[1]).set_footer(icon_url="https://download.lin.anticlack.com/fletcher/"+inPortalColor[0]+"-portal.png",text="On behalf of {}".format(behest))
         if config['teleport']['embeds'] == "on":
             tmp = await fromMessage.edit(content=None,embed=embedPortal)
         else:
-            tmp = await fromMessage.edit(content="**{}** <https://discordapp.com/channels/{}/{}/{}>\nOn behalf of {}\n{}".format(embedTitle, toChannel.guild.id, toChannel.id, toMessage.id, message.author.display_name, " ".join(args[1:])))
+            tmp = await fromMessage.edit(content="**{}** <https://discordapp.com/channels/{}/{}/{}>\nOn behalf of {}\n{}".format(embedTitle, toGuild.id, toChannel.id, toMessage.id, behest, " ".join(args[1:])))
         embedTitle = "Portal opened from #{}".format(fromChannel.name)
-        if toGuild:
-            embedTitle = embedTitle+" ({})".format(fromChannel.guild.name)
-        embedPortal = discord.Embed(title=embedTitle, description="https://discordapp.com/channels/{}/{}/{} {}".format(fromChannel.guild.id, fromChannel.id, fromMessage.id, " ".join(args[1:])), color=discord.Colour.from_rgb(194,64,11)).set_footer(icon_url="https://download.lin.anticlack.com/fletcher/orange-portal.png",text="On behalf of {}".format(message.author.nick or message.author))
+        behest = localizeName(message.author, toGuild)
+        if toGuild != fromGuild:
+            embedTitle = embedTitle+" ({})".format(fromGuild.name)
+        embedPortal = discord.Embed(title=embedTitle, description="https://discordapp.com/channels/{}/{}/{} {}".format(fromGuild.id, fromChannel.id, fromMessage.id, " ".join(args[1:])), color=discord.Colour.from_rgb(194,64,11)).set_footer(icon_url="https://download.lin.anticlack.com/fletcher/orange-portal.png",text="On behalf of {}".format(behest))
         if config['teleport']['embeds'] == "on":
             tmp = await toMessage.edit(content=None,embed=embedPortal)
         else:
-            tmp = await toMessage.edit(content="**{}** <https://discordapp.com/channels/{}/{}/{}>\nOn behalf of {}\n{}".format(embedTitle, fromChannel.guild.id, fromChannel.id, fromMessage.id, message.author.display_name, " ".join(args[1:])))
+            tmp = await toMessage.edit(content="**{}** <https://discordapp.com/channels/{}/{}/{}>\nOn behalf of {}\n{}".format(embedTitle, fromGuild.id, fromChannel.id, fromMessage.id, behest, " ".join(args[1:])))
         try:
             if 'snappy' in config['discord'] and config['discord']['snappy']:
                 await message.delete()
@@ -183,6 +188,14 @@ async def bookmark_function(message, client, args):
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
         print("BMF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+
+def localizeName(user, guild):
+    localized = guild.get_member(user.id)
+    if localized is None:
+        localizeName = user.name
+    else:
+        localized = localized.display_name
+    return localized
 
 # Register this module's commands
 def autoload(ch):
