@@ -76,10 +76,10 @@ async def twilestia_function(message, client, args):
                     async with session.get(fullSizeImage) as resp:
                         buffer = io.BytesIO(await resp.read())
                         if resp.status != 200:
-                            raise aiohttp.errors.HttpProcessingError(resp.status, message="Retrieving image failed!")
+                            raise Exception('HttpProcessingError: '+str(resp.status)+" Retrieving image failed!")
                         await message.channel.send(files=[discord.File(buffer, image.get("filename"))])
                         break
-            except (ValueError, IndexError, AttributeError, aiohttp.errors.HttpProcessingError) as e:
+            except (ValueError, BrokenPipeError, IndexError, AttributeError, Exception) as e:
                 # Retry!
                 exc_type, exc_obj, exc_tb = exc_info()
                 print("TCF[{}]: {} {}, counter is at {}".format(exc_tb.tb_lineno, type(e).__name__, e, counter))
@@ -127,7 +127,7 @@ def autoload(ch):
     if 'refresh_token' not in config['google-photos']:
         return authorize_googlephotos_function()
     try:
-        gphotos.albums().list().execute()['albums']])
+        gphotos.albums().list().execute()['albums']
     except Exception:
         gphotos = build('photoslibrary', 'v1', credentials=google.oauth2.credentials.Credentials(config['google-photos']['token'], refresh_token=config['google-photos']['refresh_token'], token_uri=config['google-photos']['token_uri'], client_id=config['google-photos']['client_id'], client_secret=config['google-photos']['client_secret']))
     try:
