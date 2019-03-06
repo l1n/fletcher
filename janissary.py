@@ -265,11 +265,7 @@ async def lastactive_channel_function(message, client, args):
                 category_pretty = ""
                 if channel.category_id:
                     category_pretty = " [{}]".format(client.get_channel(channel.category_id).name)
-                try:
-                    created_at = (await channel.history(limit=1).flatten())[0].created_at
-                catch IndexError:
-                    print("LACF: "+channel.name+" has no history")
-                    continue;
+                created_at = (await channel.history(limit=1).flatten())[0].created_at
                 created_pretty = text_manipulators.pretty_date(created_at)
                 if created_pretty:
                     created_pretty = " ({})".format(created_pretty)
@@ -279,6 +275,9 @@ async def lastactive_channel_function(message, client, args):
                 else:
                         msg = "{}\n<#{}>{}: {}{}".format(msg, channel.id, category_pretty, created_at.isoformat(timespec='minutes'), created_pretty)
             except discord.NotFound as e:
+                pass
+            except IndexError as e:
+                msg = "{}\n<#{}>{}: Bad History".format(msg, channel.id, category_pretty)
                 pass
             except discord.Forbidden as e:
                 msg = "{}\n<#{}>{}: Forbidden".format(msg, channel.id, category_pretty)
