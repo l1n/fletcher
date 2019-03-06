@@ -45,7 +45,11 @@ async def addrole_function(message, client, args):
                         err = err + " An administrator can `!assign "+role.name+" to @"+str(message.author.id)+"` to add this role to you."
                 return await message.channel.send(err)
             else:
-                role = await message.channel.guild.create_role(name=roleProperties["name"], colour=roleProperties["colour"], mentionable=True, reason="Role added on behalf of "+str(message.author))
+                role = await message.channel.guild.create_role(
+                        name   = roleProperties["name"],
+                        colour = roleProperties["colour"],
+                        mentionable = True,
+                        reason="Role added on behalf of "+str(message.author.id))
                 await message.channel.send("Role "+role.mention+" successfully created.")
                 await role.edit(mentionable=roleProperties["mentionable"])
                 if 'snappy' in config['discord'] and config['discord']['snappy']:
@@ -280,7 +284,8 @@ async def lastactive_channel_function(message, client, args):
         for chunk in msg_chunks:
             await message.channel.send(chunk)
     except Exception as e:
-        print(e)
+        exc_type, exc_obj, exc_tb = exc_info()
+        print("LACF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
 
 async def lastactive_user_function(message, client, args):
     try:
