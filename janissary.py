@@ -265,7 +265,11 @@ async def lastactive_channel_function(message, client, args):
                 category_pretty = ""
                 if channel.category_id:
                     category_pretty = " [{}]".format(client.get_channel(channel.category_id).name)
-                created_at = (await channel.history(limit=1).flatten())[0].created_at
+                try:
+                    created_at = (await channel.history(limit=1).flatten())[0].created_at
+                catch IndexError:
+                    print("LACF: "+channel.name+" has no history")
+                    continue;
                 created_pretty = text_manipulators.pretty_date(created_at)
                 if created_pretty:
                     created_pretty = " ({})".format(created_pretty)
