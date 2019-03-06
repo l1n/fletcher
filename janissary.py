@@ -104,7 +104,7 @@ async def revokerole_function(message, client, args):
             role_list = message.channel.guild.roles
             argString = " ".join(args)
             if argString.endswith(" from me"):
-                argString = argString[:-6]
+                argString = argString[:-8]
             roleProperties = {
                     "name": None
                     }
