@@ -88,7 +88,7 @@ async def assignrole_function(message, client, args):
                         err = err + " An administrator can `!assign "+role.name+" to @"+str(message.author.id)+"` to add this role to you."
                 return await message.channel.send(err)
             else:
-                await message.channel.send("Role "roleProperties["name"]+" does not exist, use the addrole command to create it.")
+                await message.channel.send("Role "+roleProperties["name"]+" does not exist, use the addrole command to create it.")
                 if 'snappy' in config['discord'] and config['discord']['snappy']:
                     await message.delete()
     except Exception as e:
