@@ -34,12 +34,12 @@ async def addrole_function(message, client, args):
             if role is not None:
                 err = "Role already exists!"
                 if not role.mentionable or message.channel.permissions_for(message.author).manage_messages:
-                    if role in message.author.roles.get_roles():
+                    if role in message.author.roles:
                         err = err + " `!revoke "+role.name+" from me` to remove this role from yourself."
                     else:
                         err = err + " `!assign "+role.name+" to me` to add this role to yourself."
                 else:
-                    if role in message.author.roles.get_roles():
+                    if role in message.author.roles:
                         err = err + " An administrator can `!revoke "+role.name+" from @"+str(message.author.id)+"` to remove this role from you."
                     else:
                         err = err + " An administrator can `!assign "+role.name+" to @"+str(message.author.id)+"` to add this role to you."
