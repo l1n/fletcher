@@ -54,6 +54,47 @@ async def addrole_function(message, client, args):
         exc_type, exc_obj, exc_tb = exc_info()
         print("ARF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
 
+async def assignrole_function(message, client, args):
+    global config
+    try:
+        if len(args) == 2 and type(args[1]) is discord.User:
+            pass # Reaction
+        else:
+            role_list = message.channel.guild.roles
+            argString = " ".join(args)
+            if argString.endswith(" to me"):
+                argString = argString[:-6]
+            roleProperties = {
+                    "name": None
+                    }
+            roleProperties["name"] = argString
+
+            role = discord.utils.get(role_list, name=roleProperties["name"])
+            if role is not None:
+                if not role.mentionable or message.channel.permissions_for(message.author).manage_messages:
+                    if role in message.author.roles:
+                        return await message.channel.send("You already have that role, `!revoke "+role.name+" from me` to remove this role from yourself.")
+                    else:
+                        if 'snappy' in config['discord'] and config['discord']['snappy']:
+                            await message.delete()
+                        await message.author.add_roles([role], reason="Self-assigned", atomic=False)
+                        return await message.channel.send("Role assigned, `!revoke "+role.name+" from me` to remove this role from yourself.")
+                else:
+                    # TODO unimplemented
+                    pass;
+                    if role in message.author.roles:
+                        err = err + " An administrator can `!revoke "+role.name+" from @"+str(message.author.id)+"` to remove this role from you."
+                    else:
+                        err = err + " An administrator can `!assign "+role.name+" to @"+str(message.author.id)+"` to add this role to you."
+                return await message.channel.send(err)
+            else:
+                await message.channel.send("Role "roleProperties["name"]+" does not exist, use the addrole command to create it.")
+                if 'snappy' in config['discord'] and config['discord']['snappy']:
+                    await message.delete()
+    except Exception as e:
+        exc_type, exc_obj, exc_tb = exc_info()
+        print("ASRF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+
 async def delrole_function(message, client, args):
     global config
     try:
