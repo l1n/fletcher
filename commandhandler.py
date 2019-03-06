@@ -3,6 +3,7 @@ import messagefuncs
 import janissary
 import re
 from sys import exc_info
+import textwrap
 
 class CommandHandler:
 
