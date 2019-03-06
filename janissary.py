@@ -306,6 +306,15 @@ def autoload(ch):
         'description': 'Delete role'
         })
     ch.add_command({
+        'trigger': ['!assign'],
+        'function': assignrole_function,
+        'async': True,
+        'admin': True,
+        'args_num': 1,
+        'args_name': [],
+        'description': 'Assign role `!assign rolename to me`'
+        })
+    ch.add_command({
         'trigger': ['!modping'],
         'function': modping_function,
         'async': True,
