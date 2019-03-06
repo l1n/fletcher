@@ -30,7 +30,7 @@ async def addrole_function(message, client, args):
             else:
                 roleProperties["name"] = argString
 
-            role = discord.utils.get(role_list, name=roleProperties["name"])
+            role = discord.utils.find(role_list, name=roleProperties["name"])
             if role is not None:
                 err = "Role already exists!"
                 if not role.mentionable or message.channel.permissions_for(message.author).manage_messages:
@@ -69,7 +69,7 @@ async def assignrole_function(message, client, args):
                     }
             roleProperties["name"] = argString
 
-            role = discord.utils.get(role_list, name=roleProperties["name"])
+            role = discord.utils.find(role_list, name=roleProperties["name"])
             if role is not None:
                 if not role.mentionable or message.channel.permissions_for(message.author).manage_messages:
                     if role in message.author.roles:
@@ -108,7 +108,7 @@ async def delrole_function(message, client, args):
                     }
             roleProperties["name"] = argString
 
-            role = discord.utils.get(role_list, name=roleProperties["name"])
+            role = discord.utils.find(role_list, name=roleProperties["name"])
             if role is not None:
                 if message.channel.permissions_for(message.author).manage_messages:
                     await role.delete(reason="On behalf of "+str(message.author))
@@ -143,7 +143,7 @@ async def modping_function(message, client, args):
                 except asyncio.TimeoutError:
                     raise Exception('Timed out waiting for approval')
             role_list = message.channel.guild.roles
-            role = discord.utils.get(role_list, name=" ".join(args).lstrip("@"))
+            role = discord.utils.find(role_list, name=" ".join(args).lstrip("@"))
             lay_mentionable = role.mentionable
             if not lay_mentionable:
                 await role.edit(mentionable=True)
