@@ -77,7 +77,7 @@ async def assignrole_function(message, client, args):
                     else:
                         if 'snappy' in config['discord'] and config['discord']['snappy']:
                             await message.delete()
-                        await message.author.add_roles([role], reason="Self-assigned", atomic=False)
+                        await message.author.add_roles(role, reason="Self-assigned", atomic=False)
                         return await message.channel.send("Role assigned, `!revoke "+role.name+" from me` to remove this role from yourself.")
                 else:
                     # TODO unimplemented
