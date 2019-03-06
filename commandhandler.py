@@ -142,7 +142,7 @@ class CommandHandler:
                     else:
                         return await message.channel.send('command "{}" requires {} argument(s) "{}"'.format(command['trigger'][0], command['args_num'], ', '.join(command['args_name'])))
 
-def help_function(message, client, args):
+async def help_function(message, client, args):
     global ch
     try:
         if hasattr(message.author, 'guild_permissions') and message.author.guild_permissions.manage_webhooks and len(args) > 0 and args[0] == "verbose":
@@ -156,7 +156,9 @@ def help_function(message, client, args):
             helpMessageBody = "\n".join(["`{}`: {}\nArguments ({}): {}".format("` or `".join(command['trigger']), command['description'], command['args_num'], " ".join(command['args_name'])) for command in accessible_commands])
         else:
             helpMessageBody = "\n".join(["`{}`: {}".format("` or `".join(command['trigger'][:2]), command['description']) for command in accessible_commands])
-        return helpMessageBody
+        msg_chunks = textwrap.wrap(helpMessageBody, 2000, replace_whitespace=False)
+        for chunk in msg_chunks:
+            await message.channel.send(chunk)
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
         print("HF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
@@ -180,7 +182,7 @@ def autoload(ch):
     ch.add_command({
         'trigger': ['!help'],
         'function': help_function,
-        'async': False,
+        'async': True,
         'args_num': 0,
         'args_name': [],
         'description': 'List commands and arguments'
