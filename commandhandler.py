@@ -77,7 +77,7 @@ class CommandHandler:
                     reload_actions = config["Guild "+str(guild.id)]['on_reload'].split(',')
                     for reload_action in reload_actions:
                         if reload_action in self.reload_handlers.keys():
-                            await self.join_handlers[reload_action](guild, self.client, config["Guild "+str(member.guild.id)])
+                            await self.reload_handlers[reload_action](guild, self.client, config["Guild "+str(member.guild.id)])
         except Exception as e:
             exc_type, exc_obj, exc_tb = exc_info()
             print("RH[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
