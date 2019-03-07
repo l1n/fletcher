@@ -93,7 +93,7 @@ async def printhello_reload_function(guild, client, config):
 
 async def chanban_join_function(member, client, config):
     print('CBJF: '+str(member)+' '+str(config['chanban_younger_than'])+' '+str(member.guild.get_channel(int(config['chanban_channel'])).name))
-    await member.guild.get_channel(int(config['chanban_channel'])).set_permissions(member, read_messages=False, send_messages=False)
+    await member.guild.get_channel(int(config['chanban_channel'])).set_permissions(member, read_messages=False, send_messages=False, embed_links=False)
 
 async def chanban_reload_function(guild, client, config):
     channel = guild.get_channel(int(config['chanban_channel']))
