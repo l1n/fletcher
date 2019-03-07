@@ -119,7 +119,7 @@ def autoload(ch):
             'printhello',
             printhello_reload_function
             )
-    ch.chanban_reload_handler(
+    ch.add_reload_handler(
             'chanban',
             chanban_reload_function
             )
