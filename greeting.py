@@ -3,7 +3,7 @@ import discord
 import io
 import random
 from sys import exc_info
-from datetime import datetime
+from datetime import datetime, timedelta
 # global conn set by reload_function
 
 async def restorerole_function(member, client, config):
@@ -97,7 +97,7 @@ async def chanban_join_function(member, client, config):
 
 async def chanban_reload_function(guild, client, config):
     print('CBRF: '+str(config['chanban_younger_than'])+' '+str(guild.get_channel(int(config['chanban_channel'])).name))
-    age_of_consent = datetime.now() - datetime.timedelta(seconds=int(config['chanban_younger_than']))
+    age_of_consent = datetime.now() - timedelta(seconds=int(config['chanban_younger_than']))
     younglings = [member for member in guild.members if member.joined_at > age_of_consent]
     for member in younglings:
         await guild.get_channel(int(config['chanban_channel'])).set_permissions(member, read_messages=False, send_messages=False)
