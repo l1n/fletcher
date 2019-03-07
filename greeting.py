@@ -91,6 +91,10 @@ async def randomize_role_function(member, client, config):
 async def printhello_reload_function(guild, client, config):
     print("PHRF: Hello to guild "+guild.name+" at "+str(datetime.now())+"!")
 
+async def chanban_join_function(member, client, config):
+    print('CBJF: '+str(member)+' '+str(config['chanban_younger_than'])+' '+str(member.guild.get_channel(int(config['chanban_channel'])).name))
+    await member.guild.get_channel(int(config['chanban_channel'])).set_permissions(member, read_messages=False, send_messages=False)
+
 async def chanban_reload_function(guild, client, config):
     print('CBRF: '+str(config['chanban_younger_than'])+' '+str(guild.get_channel(int(config['chanban_channel'])).name))
     age_of_consent = datetime.now() - datetime.timedelta(seconds=int(config['chanban_younger_than']))
@@ -119,6 +123,10 @@ def autoload(ch):
     ch.add_reload_handler(
             'printhello',
             printhello_reload_function
+            )
+    ch.add_join_handler(
+            'chanban',
+            chanban_join_function
             )
     ch.add_reload_handler(
             'chanban',
