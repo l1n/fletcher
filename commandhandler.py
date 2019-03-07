@@ -70,13 +70,18 @@ class CommandHandler:
                     await self.join_handlers[member_join_action](member, self.client, config["Guild "+str(member.guild.id)])
 
     async def reload_handler(self):
-        # Trigger reload handlers
-        for guild in self.client.guilds:
-            if "Guild "+str(guild.id) in config and 'on_reload' in config["Guild "+str(guild.id)]:
-                reload_actions = config["Guild "+str(guild.id)]['on_reload'].split(',')
-                for reload_action in reload_actions:
-                    if reload_action in self.reload_handlers.keys():
-                        await self.join_handlers[reload_action](guild, self.client, config["Guild "+str(member.guild.id)])
+        try:
+            # Trigger reload handlers
+            for guild in self.client.guilds:
+                if "Guild "+str(guild.id) in config and 'on_reload' in config["Guild "+str(guild.id)]:
+                    reload_actions = config["Guild "+str(guild.id)]['on_reload'].split(',')
+                    for reload_action in reload_actions:
+                        if reload_action in self.reload_handlers.keys():
+                            await self.join_handlers[reload_action](guild, self.client, config["Guild "+str(member.guild.id)])
+        except Exception as e:
+            exc_type, exc_obj, exc_tb = exc_info()
+            print("RH[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+
     async def command_handler(self, message):
         global config
         global sid
