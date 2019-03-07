@@ -88,6 +88,9 @@ async def randomize_role_function(member, client, config):
         exc_type, exc_obj, exc_tb = exc_info()
         print("RRF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
 
+async def printhello_reload_function(guild, client, config):
+    print("PHRF: Hello to guild "+guild.name+" at "+str(datetime.now)+"!")
+
 # Register functions in client
 def autoload(ch):
     ch.add_remove_handler(
@@ -105,4 +108,8 @@ def autoload(ch):
     ch.add_join_handler(
             'randomize_role',
             randomize_role_function
+            )
+    ch.add_reload_handler(
+            'printhello',
+            printhello_reload_function
             )

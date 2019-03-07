@@ -1,3 +1,4 @@
+from datetime import datetime
 import discord
 import messagefuncs
 import janissary
@@ -13,6 +14,7 @@ class CommandHandler:
         self.commands = []
         self.join_handlers = {}
         self.remove_handlers = {}
+        self.reload_handlers = {}
         self.tag_id_as_command = re.compile('(?:^(?:Oh)?\s*(?:<@'+str(client.user.id)+'>|Fletch[er]*)[, .]*)|(?:[, .]*(?:<@'+str(client.user.id)+'>|Fletch[er]*)[, .]*$)', re.IGNORECASE)
         self.bang_remover = re.compile('^!+')
 
@@ -24,6 +26,9 @@ class CommandHandler:
 
     def add_join_handler(self, func_name, func):
         self.join_handlers[func_name] = func
+
+    def add_reload_handler(self, func_name, func):
+        self.reload_handlers[func_name] = func
 
     async def reaction_handler(self, reaction):
         global config
@@ -55,15 +60,23 @@ class CommandHandler:
             member_remove_actions = config["Guild "+str(member.guild.id)]['on_member_remove'].split(',')
             for member_remove_action in member_remove_actions:
                 if member_remove_action in self.remove_handlers.keys():
-                    return await self.remove_handlers[member_remove_action](member, self.client, config["Guild "+str(member.guild.id)])
+                    await self.remove_handlers[member_remove_action](member, self.client, config["Guild "+str(member.guild.id)])
 
     async def join_handler(self, member):
         if "Guild "+str(member.guild.id) in config and 'on_member_join' in config["Guild "+str(member.guild.id)]:
             member_join_actions = config["Guild "+str(member.guild.id)]['on_member_join'].split(',')
             for member_join_action in member_join_actions:
                 if member_join_action in self.join_handlers.keys():
-                    return await self.join_handlers[member_join_action](member, self.client, config["Guild "+str(member.guild.id)])
+                    await self.join_handlers[member_join_action](member, self.client, config["Guild "+str(member.guild.id)])
 
+    async def reload_handler(self):
+        # Trigger reload handlers
+        for guild in client.guilds:
+            if "Guild "+str(guild.id) in config and 'on_reload' in config["Guild "+str(guild.id)]:
+                reload_actions = config["Guild "+str(guild.id)]['on_reload'].split(',')
+                for reload_action in reload_actions:
+                    if reload_action in self.reload_handlers.keys():
+                        await self.join_handlers[reload_action](guild, self.client, config["Guild "+str(member.guild.id)])
     async def command_handler(self, message):
         global config
         global sid
