@@ -98,8 +98,9 @@ async def chanban_join_function(member, client, config):
 async def chanban_reload_function(guild, client, config):
     channel = guild.get_channel(int(config['chanban_channel']))
     print('CBRF: '+str(config['chanban_younger_than'])+' '+channel.name)
-    age_of_consent = datetime.now() - timedelta(seconds=int(config['chanban_younger_than']))
-    younglings = [member for member in guild.members if member.joined_at > age_of_consent]
+    now = datetime.utcnow()
+    age_of_consent = timedelta(seconds=int(config['chanban_younger_than']))
+    younglings = [member for member in guild.members if now - member.joined_at < age_of_consent]
     member_overrides = [member for (member, permissions) in channel.overwrites if isinstance(member, discord.Member)]
     for member in younglings:
         if member not in member_overrides:
@@ -107,7 +108,7 @@ async def chanban_reload_function(guild, client, config):
             await channel.set_permissions(member, read_messages=False, send_messages=False, embed_links=False)
     for member in member_overrides:
         permissions = channel.overwrites_for(member)
-        if member.joined_at < age_of_consent and not permissions.read_messages and not permissions.send_messages and not permissions.embed_links:
+        if now - member.joined_at > age_of_consent and permissions.read_messages == False and permissions.send_messages == False and permissions.embed_links == False:
             print('CBRF: Unbanning '+str(member))
             await channel.set_permissions(member, overwrite=None)
 
