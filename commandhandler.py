@@ -181,6 +181,7 @@ async def help_function(message, client, args):
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
         print("HF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+
 def dumpconfig_function(message, client, args):
     print("Channels Loaded:")
     for channel in client.get_all_channels():
