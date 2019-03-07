@@ -91,6 +91,12 @@ async def randomize_role_function(member, client, config):
 async def printhello_reload_function(guild, client, config):
     print("PHRF: Hello to guild "+guild.name+" at "+str(datetime.now())+"!")
 
+async def chanban_reload_function(guild, client, config):
+    age_of_consent = datetime.now() - datetime.timedelta(seconds=config['chanban_younger_than'])
+    younglings = [member for member in guild.members if member.joined_at > age_of_consent]
+    for member in younglings:
+        await guild.get_channel(config['chanban_channel']).set_permissions(member, read_messages=False, send_messages=False)
+
 # Register functions in client
 def autoload(ch):
     ch.add_remove_handler(
@@ -112,4 +118,8 @@ def autoload(ch):
     ch.add_reload_handler(
             'printhello',
             printhello_reload_function
+            )
+    ch.chanban_reload_handler(
+            'chanban',
+            chanban_reload_function
             )
