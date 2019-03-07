@@ -71,7 +71,7 @@ class CommandHandler:
 
     async def reload_handler(self):
         # Trigger reload handlers
-        for guild in client.guilds:
+        for guild in self.client.guilds:
             if "Guild "+str(guild.id) in config and 'on_reload' in config["Guild "+str(guild.id)]:
                 reload_actions = config["Guild "+str(guild.id)]['on_reload'].split(',')
                 for reload_action in reload_actions:
