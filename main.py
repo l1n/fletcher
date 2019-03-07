@@ -244,7 +244,7 @@ async def reload_function(message=None, client=client, args=[]):
         # Reset canticum_message when reloaded [workaround for https://todo.sr.ht/~nova/fletcher/6]
         canticum_message = None
         # Trigger reload handlers
-        await client.reload_handler()
+        await ch.reload_handler()
         await animate_startup('🔁', message)
         await animate_startup('✅', message)
         await client.change_presence(activity=discord.Game(
