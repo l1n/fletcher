@@ -89,7 +89,7 @@ async def randomize_role_function(member, client, config):
         print("RRF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
 
 async def printhello_reload_function(guild, client, config):
-    print("PHRF: Hello to guild "+guild.name+" at "+str(datetime.now)+"!")
+    print("PHRF: Hello to guild "+guild.name+" at "+str(datetime.now())+"!")
 
 # Register functions in client
 def autoload(ch):
