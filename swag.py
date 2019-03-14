@@ -94,7 +94,7 @@ pick_regex = re.compile(",\s*(and|or|but|nor|for|so|yet)\s*")
 async def pick_function(message, client, args):
     try:
         many = 1
-        choices = pick_regex.split(" ".join(args).rtrim("?"))
+        choices = pick_regex.split(" ".join(args).rstrip("?"))
         if len(choices) == 1:
             choices = args
         return await message.channel.send(random.sample(choices, many))
