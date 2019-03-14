@@ -100,7 +100,7 @@ async def pick_function(message, client, args):
                 args = args[2:]
         except ValueError:
             pass
-        choices = pick_regex.split(" ".join(args).rstrip(" ?.!"))
+        choices = [choice.strip() for choice in pick_regex.split(" ".join(args).rstrip(" ?.!")) if choice.strip()]
         if len(choices) == 1:
             choices = args
         return await message.channel.send("I'd say "+", ".join(random.sample(choices, many)))
