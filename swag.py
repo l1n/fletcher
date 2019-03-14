@@ -94,6 +94,12 @@ pick_regex = re.compile(r'[,\s]\s*(?:and|or|but|nor|for|so|yet)?\s*')
 async def pick_function(message, client, args):
     try:
         many = 1
+        try:
+            if len(args) > 2:
+                many = int(args[0])
+                args = args[2:]
+        except ValueError:
+            pass
         choices = pick_regex.split(" ".join(args).rstrip(" ?.!"))
         if len(choices) == 1:
             choices = args
