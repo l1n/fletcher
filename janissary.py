@@ -247,15 +247,16 @@ async def lastactive_channel_function(message, client, args):
     try:
         lastMonth = None
         before = True
+        now = datetime.utcnow()
         try:
             if args[0]:
                 try:
-                    lastMonth = datetime.utcnow().date() - timedelta(days=int(args[0]))
+                    lastMonth = now.date() - timedelta(days=int(args[0]))
                 except ValueError:
                     if args[1]:
                         if args[0].startswith("a"):
                             before = False
-                        lastMonth = datetime.utcnow().date() - timedelta(days=int(args[1]))
+                        lastMonth = now.date() - timedelta(days=int(args[1]))
                     pass
         except IndexError:
                     pass
@@ -294,15 +295,16 @@ async def lastactive_user_function(message, client, args):
     try:
         lastMonth = None
         before = True
+        now = datetime.utcnow()
         try:
             if args[0]:
                 try:
-                    lastMonth = datetime.utcnow().date() - timedelta(days=int(args[0]))
+                    lastMonth = now.date() - timedelta(days=int(args[0]))
                 except ValueError:
                     if args[1]:
                         if args[0].startswith("a"):
                             before = False
-                        lastMonth = datetime.utcnow().date() - timedelta(days=int(args[1]))
+                        lastMonth = now.date() - timedelta(days=int(args[1]))
                     pass
         except IndexError:
                     pass

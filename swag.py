@@ -88,6 +88,19 @@ async def shindan_function(message, client, args):
         exc_type, exc_obj, exc_tb = exc_info()
         print("SDF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
 
+pick_regex = re.compile(",\s*(and|or|but|nor|for|so|yet)\s*")
+
+async def pick_function(message, client, args):
+    try:
+        many = 1
+        choices = pick_regex.split(" ".join(args).rtrim("?"))
+        if len(choices) == 1:
+            choices = args
+        return await message.channel.send(random.sample(choices, many))
+    except Exception as e:
+        exc_type, exc_obj, exc_tb = exc_info()
+        print("PF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+
 def autoload(ch):
     ch.add_command({
         'trigger': ['!uwu', '<:uwu:445116031204196352>', '<:uwu:269988618909515777>', '<a:rainbowo:493599733571649536>', '<:owo:487739798241542183>', '<:owo:495014441457549312>', '<a:OwO:508311820411338782>', '!good', '!aww'],
@@ -96,6 +109,14 @@ def autoload(ch):
         'args_num': 0,
         'args_name': [],
         'description': 'uwu'
+        })
+    ch.add_command({
+        'trigger': ['!pick'],
+        'function': pick_function,
+        'async': True,
+        'args_num': 1,
+        'args_name': [],
+        'description': 'pick among comma seperated choices'
         })
     ch.add_command({
         'trigger': ['!fio', '!optimal'],
