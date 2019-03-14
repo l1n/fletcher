@@ -89,7 +89,7 @@ async def shindan_function(message, client, args):
         exc_type, exc_obj, exc_tb = exc_info()
         print("SDF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
 
-pick_regex = re.compile(",\s*(and|or|but|nor|for|so|yet)\s*")
+pick_regex = re.compile(",\s*(and|or|but|nor|for|so|yet)?\s*")
 
 async def pick_function(message, client, args):
     try:
@@ -97,7 +97,7 @@ async def pick_function(message, client, args):
         choices = pick_regex.split(" ".join(args).rstrip("?"))
         if len(choices) == 1:
             choices = args
-        return await message.channel.send(random.sample(choices, many))
+        return await message.channel.send("I'd say "+", ".join(random.sample(choices, many)))
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
         print("PF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
