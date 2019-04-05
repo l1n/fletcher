@@ -360,7 +360,7 @@ async def lockout_user_function(message, client, args):
             else:
                 for channel in channels:
                     logMessage = str(member)+" from non-category channel "+str(channel)+" in "+str(member.guild)
-                    print("LUF: "+logMesage)
+                    print("LUF: "+logMessage)
                     log = log + "\n" + logMessage
                     if mode == "reset":
                         await channel.set_permissions(member, overwrite=None, reason="Admin reset lockout obo "+message.author.name)
