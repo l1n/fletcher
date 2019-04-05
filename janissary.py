@@ -86,10 +86,10 @@ async def assignrole_function(message, client, args):
                 else:
                     # TODO unimplemented
                     pass;
-                    if role in message.author.roles:
-                        err = err + " An administrator can `!revoke "+role.name+" from @"+str(message.author.id)+"` to remove this role from you."
-                    else:
-                        err = err + " An administrator can `!assign "+role.name+" to @"+str(message.author.id)+"` to add this role to you."
+                if role in message.author.roles:
+                    err = err + " An administrator can `!revoke "+role.name+" from @"+str(message.author.id)+"` to remove this role from you."
+                else:
+                    err = err + " An administrator can `!assign "+role.name+" to @"+str(message.author.id)+"` to add this role to you."
                 return await message.channel.send(err)
             else:
                 await message.channel.send("Role "+roleProperties["name"]+" does not exist, use the addrole command to create it.")
@@ -127,10 +127,10 @@ async def revokerole_function(message, client, args):
                 else:
                     # TODO unimplemented
                     pass;
-                    if role in message.author.roles:
-                        err = err + " An administrator can `!revoke "+role.name+" from @"+str(message.author.id)+"` to remove this role from you."
-                    else:
-                        err = err + " An administrator can `!assign "+role.name+" to @"+str(message.author.id)+"` to add this role to you."
+                if role in message.author.roles:
+                    err = err + " An administrator can `!revoke "+role.name+" from @"+str(message.author.id)+"` to remove this role from you."
+                else:
+                    err = err + " An administrator can `!assign "+role.name+" to @"+str(message.author.id)+"` to add this role to you."
                 return await message.channel.send(err)
             else:
                 await message.channel.send("Role "+roleProperties["name"]+" does not exist, use the addrole command to create it.")
@@ -225,14 +225,14 @@ async def modreport_function(message, client, args):
         else:
             report_content = report_content + plaintext
         if "Guild "+str(message.guild.id) in config:
-            scoped_config = config["Guild "+str(message.guild.id)]
+        scoped_config = config["Guild "+str(message.guild.id)]
+    else:
+        raise Exception("No guild-specific configuration for moderation on guild "+str(message.guild))
+    if "moderation" in scoped_config and scoped_config["moderation"] == "On":
+        if automod:
+            users = scoped_config['mod-users'].split(',')
         else:
-            raise Exception("No guild-specific configuration for moderation on guild "+str(message.guild))
-        if "moderation" in scoped_config and scoped_config["moderation"] == "On":
-            if automod:
-                users = scoped_config['mod-users'].split(',')
-            else:
-                users = scoped_config['manual-mod-users'].split(',')
+            users = scoped_config['manual-mod-users'].split(',')
             for user_id in users:
                 modmail = await client.get_user(int(user_id)).send(report_content)
                 if message.channel.is_nsfw():
@@ -259,7 +259,7 @@ async def lastactive_channel_function(message, client, args):
                         lastMonth = now.date() - timedelta(days=int(args[1]))
                     pass
         except IndexError:
-                    pass
+            pass
         msg = ""
         for channel in message.channel.guild.text_channels:
             try:
@@ -274,7 +274,7 @@ async def lastactive_channel_function(message, client, args):
                     if (before and lastMonth < created_at.date()) or (not before and lastMonth > created_at.date()):
                         msg = "{}\n<#{}>{}: {}{}".format(msg, channel.id, category_pretty, created_at.isoformat(timespec='minutes'), created_pretty)
                 else:
-                        msg = "{}\n<#{}>{}: {}{}".format(msg, channel.id, category_pretty, created_at.isoformat(timespec='minutes'), created_pretty)
+                    msg = "{}\n<#{}>{}: {}{}".format(msg, channel.id, category_pretty, created_at.isoformat(timespec='minutes'), created_pretty)
             except discord.NotFound as e:
                 pass
             except IndexError as e:
@@ -307,10 +307,10 @@ async def lastactive_user_function(message, client, args):
                         lastMonth = now.date() - timedelta(days=int(args[1]))
                     pass
         except IndexError:
-                    pass
+            pass
         if message.guild.large:
             client.request_offline_members(message.guild)
-        users = {}
+                    users = {}
         for m in message.guild.members:
             users[m.id] = datetime.today() + timedelta(days=1)
         for channel in message.channel.guild.text_channels:
@@ -336,6 +336,31 @@ async def lastactive_user_function(message, client, args):
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
         print("LSU[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+
+async def lockout_user_function(message, client, args):
+    try:
+        member = message.mentions[0]
+        if len(args) == 2 and args[1] == "reset":
+            mode = "reset"
+        else:
+            mode = "hide"
+        for category, channels in member.guild.by_category():
+            if category is not None:
+                print("LUF: "+str(member)+" from category "+str(category)+" in "+str(member.guild))
+                if mode == "reset":
+                    await category.set_permissions(member, overwrite=None, reason="Admin reset lockout")
+                else:
+                    await category.set_permissions(member, read_messages=False, read_message_history=False, send_messages=False, reason="Admin requested lockout")
+            else:
+                for channel in channels:
+                    print("LUF: "+str(member)+" from non-category channel "+str(channel)+" in "+str(member.guild))
+                    if mode == "reset":
+                        await channel.set_permissions(member, overwrite=None, reason="Admin reset lockout")
+                    else:
+                        await channel.set_permissions(member, read_messages=False, read_message_history=False, send_messages=False, reason="Admin requested lockout")
+    except Exception as e:
+        exc_type, exc_obj, exc_tb = exc_info()
+        print("LUF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
 
 def autoload(ch):
     ch.add_command({
@@ -408,4 +433,13 @@ def autoload(ch):
         'args_num': 0,
         'args_name': [],
         'description': 'List all available users and time of last message (Admin)'
+        })
+    ch.add_command({
+        'trigger': ['!lockout'],
+        'function': lockout_user_function,
+        'async': True,
+        'admin': True,
+        'args_num': 1,
+        'args_name': ['@user', 'reset|hide'],
+        'description': 'Lockout or reset user permissions'
         })
