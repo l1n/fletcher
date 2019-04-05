@@ -86,10 +86,10 @@ async def assignrole_function(message, client, args):
                 else:
                     # TODO unimplemented
                     pass;
-                if role in message.author.roles:
-                    err = err + " An administrator can `!revoke "+role.name+" from @"+str(message.author.id)+"` to remove this role from you."
-                else:
-                    err = err + " An administrator can `!assign "+role.name+" to @"+str(message.author.id)+"` to add this role to you."
+                    if role in message.author.roles:
+                        err = err + " An administrator can `!revoke "+role.name+" from @"+str(message.author.id)+"` to remove this role from you."
+                    else:
+                        err = err + " An administrator can `!assign "+role.name+" to @"+str(message.author.id)+"` to add this role to you."
                 return await message.channel.send(err)
             else:
                 await message.channel.send("Role "+roleProperties["name"]+" does not exist, use the addrole command to create it.")
@@ -127,10 +127,10 @@ async def revokerole_function(message, client, args):
                 else:
                     # TODO unimplemented
                     pass;
-                if role in message.author.roles:
-                    err = err + " An administrator can `!revoke "+role.name+" from @"+str(message.author.id)+"` to remove this role from you."
-                else:
-                    err = err + " An administrator can `!assign "+role.name+" to @"+str(message.author.id)+"` to add this role to you."
+                    if role in message.author.roles:
+                        err = err + " An administrator can `!revoke "+role.name+" from @"+str(message.author.id)+"` to remove this role from you."
+                    else:
+                        err = err + " An administrator can `!assign "+role.name+" to @"+str(message.author.id)+"` to add this role to you."
                 return await message.channel.send(err)
             else:
                 await message.channel.send("Role "+roleProperties["name"]+" does not exist, use the addrole command to create it.")
@@ -225,14 +225,14 @@ async def modreport_function(message, client, args):
         else:
             report_content = report_content + plaintext
         if "Guild "+str(message.guild.id) in config:
-        scoped_config = config["Guild "+str(message.guild.id)]
-    else:
-        raise Exception("No guild-specific configuration for moderation on guild "+str(message.guild))
-    if "moderation" in scoped_config and scoped_config["moderation"] == "On":
-        if automod:
-            users = scoped_config['mod-users'].split(',')
+            scoped_config = config["Guild "+str(message.guild.id)]
         else:
-            users = scoped_config['manual-mod-users'].split(',')
+            raise Exception("No guild-specific configuration for moderation on guild "+str(message.guild))
+        if "moderation" in scoped_config and scoped_config["moderation"] == "On":
+            if automod:
+                users = scoped_config['mod-users'].split(',')
+            else:
+                users = scoped_config['manual-mod-users'].split(',')
             for user_id in users:
                 modmail = await client.get_user(int(user_id)).send(report_content)
                 if message.channel.is_nsfw():
@@ -259,7 +259,7 @@ async def lastactive_channel_function(message, client, args):
                         lastMonth = now.date() - timedelta(days=int(args[1]))
                     pass
         except IndexError:
-            pass
+                    pass
         msg = ""
         for channel in message.channel.guild.text_channels:
             try:
@@ -274,7 +274,7 @@ async def lastactive_channel_function(message, client, args):
                     if (before and lastMonth < created_at.date()) or (not before and lastMonth > created_at.date()):
                         msg = "{}\n<#{}>{}: {}{}".format(msg, channel.id, category_pretty, created_at.isoformat(timespec='minutes'), created_pretty)
                 else:
-                    msg = "{}\n<#{}>{}: {}{}".format(msg, channel.id, category_pretty, created_at.isoformat(timespec='minutes'), created_pretty)
+                        msg = "{}\n<#{}>{}: {}{}".format(msg, channel.id, category_pretty, created_at.isoformat(timespec='minutes'), created_pretty)
             except discord.NotFound as e:
                 pass
             except IndexError as e:
@@ -307,10 +307,10 @@ async def lastactive_user_function(message, client, args):
                         lastMonth = now.date() - timedelta(days=int(args[1]))
                     pass
         except IndexError:
-            pass
+                    pass
         if message.guild.large:
             client.request_offline_members(message.guild)
-                    users = {}
+        users = {}
         for m in message.guild.members:
             users[m.id] = datetime.today() + timedelta(days=1)
         for channel in message.channel.guild.text_channels:
