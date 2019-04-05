@@ -339,7 +339,10 @@ async def lastactive_user_function(message, client, args):
 
 async def lockout_user_function(message, client, args):
     try:
-        member = message.mentions[0]
+        if len(message.mentions) >= 1:
+            member = message.mentions[0]
+        else:
+            member = message.guild.get_member(int(args[0]))
         if len(args) == 2 and args[1] == "reset":
             mode = "reset"
         else:
