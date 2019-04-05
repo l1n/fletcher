@@ -340,10 +340,11 @@ async def on_raw_message_edit(payload):
             return # No DM processing pls
         fromGuild = client.get_guild(int(message['guild_id']))
         fromChannel = fromGuild.get_channel(int(message['channel_id']))
+        fromMessage = await fromChannel.get_message(message_id)
         if type(fromChannel) is discord.TextChannel:
-            print(str(message.id)+" #"+fromGuild.name+":"+fromChannel.name+" <"+message.author.name+"> [Edit] "+message.content)
+            print(str(message_id)+" #"+fromGuild.name+":"+fromChannel.name+" <"+fromMessage.author.name+"> [Edit] "+fromMessage.content)
         elif type(fromChannel) is discord.DMChannel:
-            print(str(message.id)+" @"+fromChannel.recipient.name+" <"+message.author.name+"> [Edit] "+message.content)
+            print(str(message_id)+" @"+fromChannel.recipient.name+" <"+fromMessage.author.name+"> [Edit] "+fromMessage.content)
         else:
             # Group Channels don't support bots so neither will we
             pass
@@ -356,7 +357,6 @@ async def on_raw_message_edit(payload):
                 toGuild = client.get_guild(metuple[0])
                 toChannel = toGuild.get_channel(metuple[1])
                 toMessage = await toChannel.get_message(metuple[2])
-                fromMessage = await fromChannel.get_message(message_id)
                 await toMessage.delete()
                 content = fromMessage.clean_content
                 attachments = []
