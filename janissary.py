@@ -348,16 +348,16 @@ async def lockout_user_function(message, client, args):
             if category is not None:
                 print("LUF: "+str(member)+" from category "+str(category)+" in "+str(member.guild))
                 if mode == "reset":
-                    await category.set_permissions(member, overwrite=None, reason="Admin reset lockout obo "+message.author)
+                    await category.set_permissions(member, overwrite=None, reason="Admin reset lockout obo "+message.author.name)
                 else:
-                    await category.set_permissions(member, read_messages=False, read_message_history=False, send_messages=False, reason="Admin requested lockout obo "+message.author)
+                    await category.set_permissions(member, read_messages=False, read_message_history=False, send_messages=False, reason="Admin requested lockout obo "+message.author.name)
             else:
                 for channel in channels:
                     print("LUF: "+str(member)+" from non-category channel "+str(channel)+" in "+str(member.guild))
                     if mode == "reset":
-                        await channel.set_permissions(member, overwrite=None, reason="Admin reset lockout obo "+message.author)
+                        await channel.set_permissions(member, overwrite=None, reason="Admin reset lockout obo "+message.author.name)
                     else:
-                        await channel.set_permissions(member, read_messages=False, read_message_history=False, send_messages=False, reason="Admin requested lockout obo "+message.author)
+                        await channel.set_permissions(member, read_messages=False, read_message_history=False, send_messages=False, reason="Admin requested lockout obo "+message.author.name)
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
         print("LUF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
