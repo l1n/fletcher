@@ -178,6 +178,7 @@ async def reload_function(message=None, client=client, args=[]):
     global sid
     global versioninfo
     global doissetep_omega
+    now = datetime.utcnow()
     try:
         await client.change_presence(activity=discord.Game(name='Reloading: The Game'))
         config = configparser.ConfigParser()
@@ -249,7 +250,7 @@ async def reload_function(message=None, client=client, args=[]):
         await animate_startup('✅', message)
         await client.change_presence(activity=discord.Game(
             name='fletcher.fun | !help',
-            start=datetime.now()
+            start=now
             ))
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
@@ -257,7 +258,7 @@ async def reload_function(message=None, client=client, args=[]):
         await animate_startup('🚫', message)
         await client.change_presence(activity=discord.Game(
             name='Error Reloading: RM[{}]: {}'.format(exc_tb.tb_lineno, e),
-            start=datetime.now()
+            start=now
             ))
 
 # bot is ready
@@ -339,6 +340,13 @@ async def on_raw_message_edit(payload):
             return # No DM processing pls
         fromGuild = client.get_guild(int(message['guild_id']))
         fromChannel = fromGuild.get_channel(int(message['channel_id']))
+        if type(message.channel) is discord.TextChannel:
+            print(str(message.id)+" #"+message.guild.name+":"+message.channel.name+" <"+message.author.name+"> [Edit] "+message.content)
+        elif type(message.channel) is discord.DMChannel:
+            print(str(message.id)+" @"+message.channel.recipient.name+" <"+message.author.name+"> [Edit] "+message.content)
+        else:
+            # Group Channels don't support bots so neither will we
+            pass
         if fromGuild.name+':'+fromChannel.name in webhook_sync_registry:
             cur = conn.cursor()
             cur.execute("SELECT toguild, tochannel, tomessage FROM messagemap WHERE fromguild = %s AND fromchannel = %s AND frommessage = %s LIMIT 1;", [int(message['guild_id']), int(message['channel_id']), message_id])
