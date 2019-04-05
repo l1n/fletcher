@@ -361,6 +361,7 @@ async def lockout_user_function(message, client, args):
                         await channel.set_permissions(member, overwrite=None, reason="Admin reset lockout obo "+message.author.name)
                     else:
                         await channel.set_permissions(member, read_messages=False, read_message_history=False, send_messages=False, reason="Admin requested lockout obo "+message.author.name)
+        await message.author.send("Lockout "+mode+" completed for "+member.name)
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
         print("LUF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
