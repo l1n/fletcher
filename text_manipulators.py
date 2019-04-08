@@ -249,7 +249,7 @@ async def spoiler_function(message, client, args):
 
 async def reaction_request_function(message, client, args):
     try:
-        emoji = discord.utils.find(lambda m: m.name == args[0], client.emojis).flatten()
+        emoji = list(filter(lambda m: m.name == args[0], client.emojis))
         if len(args) >= 2:
             emoji = emoji[int(args[1])]
         else:
