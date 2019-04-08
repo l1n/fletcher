@@ -258,7 +258,13 @@ async def reaction_request_function(message, client, args):
         if emoji:
             target = await message.channel.history(before=message, limit=1).flatten()
             target = target[0]
-            return target.add_reaction(emoji)
+            await target.add_reaction(emoji)
+        try:
+            if 'snappy' in config['discord'] and config['discord']['snappy']:
+                await message.delete()
+        except discord.Forbidden:
+            print("XRF: Couldn't delete message but snappy mode is on")
+            pass
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
         print("XRF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
