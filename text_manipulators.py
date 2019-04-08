@@ -247,6 +247,17 @@ async def spoiler_function(message, client, args):
         exc_type, exc_obj, exc_tb = exc_info()
         print("MFF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
 
+async def reaction_request_function(message, client, args):
+    try:
+        emoji = discord.utils.get(client.emojis, name=args[0])
+        # FIXME if used in empty channel this breaks
+        if emoji:
+            target = await message.channel.history(before=message, limit=1).flatten[0]
+            target.add_reaction(emoji)
+    except Exception as e:
+        exc_type, exc_obj, exc_tb = exc_info()
+        print("XRF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+
 def autoload(ch):
     ch.add_command({
         'trigger': ['!rot13', '🕜', '<:rot13:539568301861371905>', '<:rot13:527988322879012894>'],
@@ -273,4 +284,13 @@ def autoload(ch):
         'args_num': 0,
         'args_name': [],
         'description': 'Send contents of image deep fried'
+        })
+
+    ch.add_command({
+        'trigger': ['!xreact'],
+        'function': reaction_request_function,
+        'async': True,
+        'args_num': 1,
+        'args_name': [],
+        'description': 'Request reaction (x-server)'
         })
