@@ -249,10 +249,15 @@ async def spoiler_function(message, client, args):
 
 async def reaction_request_function(message, client, args):
     try:
-        emoji = discord.utils.get(client.emojis, name=args[0])
+        emoji = discord.utils.find(lambda m: m.name == args[0], client.emojis).flatten()
+        if len(args) >= 2:
+            emoji = emoji[int(args[1])]
+        else:
+            emoji = emoji[0]
         # FIXME if used in empty channel this breaks
         if emoji:
-            target = await message.channel.history(before=message, limit=1).flatten[0]
+            target = await message.channel.history(before=message, limit=1).flatten()
+            target = target[0]
             target.add_reaction(emoji)
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
