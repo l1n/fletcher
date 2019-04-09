@@ -115,7 +115,7 @@ async def load_webhooks():
     webhook_sync_registry = {}
     for guild in client.guilds:
         try:
-            if "synchronize" in config["Guild "+str(guild.id)] and config["Guild "+str(guild.id)]["synchronize"] == "on":
+            if "Guild "+str(guild.id) in config and "synchronize" in config["Guild "+str(guild.id)] and config["Guild "+str(guild.id)]["synchronize"] == "on":
                 print("LWH: Querying "+guild.name)
                 for webhook in await guild.webhooks():
                     print("LWH: * "+webhook.name)
