@@ -5,7 +5,7 @@ from sys import exc_info
 
 def expand_guild_name(guild, prefix='', suffix=':', global_replace=False):
     # TODO refactor into config file
-    acro_mapping = [ ('acn', 'a compelling narrative'), ('ACN', 'a compelling narrative'), ('EAC', 'EA Corner'), ('D', 'Doissetep'), ('bocu', 'Book of Creation Undone') ]
+    acro_mapping = [ ('acn', 'a compelling narrative'), ('ACN', 'a compelling narrative'), ('EAC', 'EA Corner'), ('D', 'Doissetep'), ('bocu', 'Book of Creation Undone'), ('abcal', 'Abandoned Castle') ]
     new_guild = guild
     for k, v in acro_mapping:
         new_guild = new_guild.replace(prefix+k+suffix, prefix+v+suffix)
