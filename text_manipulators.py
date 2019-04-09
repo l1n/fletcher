@@ -260,7 +260,7 @@ async def reaction_request_function(message, client, args):
             target = target[0]
             await target.add_reaction(emoji)
             await asyncio.sleep(60)
-            await target.remove_reaction(emoji, client)
+            await target.remove_reaction(emoji, client.user)
         try:
             if 'snappy' in config['discord'] and config['discord']['snappy']:
                 await message.delete()
