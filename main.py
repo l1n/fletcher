@@ -134,6 +134,8 @@ async def load_webhooks():
                                 }
                         webhook_sync_registry[fromChannelName]['fromChannelObject'] = discord.utils.get(fromGuild.text_channels, name=fromTuple[1])
                         webhook_sync_registry[fromChannelName]['fromWebhook'] = discord.utils.get(await fromGuild.webhooks(), channel__name=fromTuple[1])
+            elif "Guild "+str(guild.id) not in config:
+                print("LWH: Failed to find config for {} ({})".format(guild.name, str(guild.id)))
         except discord.Forbidden as e:
             print('Couldn\'t load webhooks for '+str(guild)+', ask an admin to grant additional permissions (https://novalinium.com/go/4/fletcher)')
         except AttributeError:
