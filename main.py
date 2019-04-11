@@ -421,7 +421,7 @@ async def on_raw_message_delete(message):
                         exc_type, exc_obj, exc_tb = exc_info()
                         print("ORMD[{}]: {}".format(exc_tb.tb_lineno, e))
                         toMessage = None
-                        async.sleep(1)
+                        await asyncio.sleep(1)
                         pass
                 print("Deleting synced message {}:{}:{}".format(metuple[0], metuple[1], metuple[2]))
                 await toMessage.delete()
