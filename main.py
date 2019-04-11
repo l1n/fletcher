@@ -421,10 +421,11 @@ async def on_raw_message_delete(message):
                     except discord.NotFound as e:
                         exc_type, exc_obj, exc_tb = exc_info()
                         print("ORMD[{}]: {}".format(exc_tb.tb_lineno, e))
+                        print("ORMD[{}]: {}:{}:{}".format(exc_tb.tb_lineno, metuple[0], metuple[1], metuple[2]))
                         toMessage = None
                         await asyncio.sleep(1)
                         pass
-                print("Deleting synced message {}:{}:{}".format(metuple[0], metuple[1], metuple[2]))
+                print("ORMD: Deleting synced message {}:{}:{}".format(metuple[0], metuple[1], metuple[2]))
                 await toMessage.delete()
     except discord.Forbidden as e:
         print("Forbidden to delete synced message from "+str(fromGuild.name)+":"+str(fromChannel.name))
