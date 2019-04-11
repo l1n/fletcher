@@ -414,6 +414,7 @@ async def on_raw_message_delete(message):
             if metuple is not None:
                 toGuild = client.get_guild(metuple[0])
                 toChannel = toGuild.get_channel(metuple[1])
+                toMessage = None
                 while not toMessage:
                     try:
                         toMessage = await toChannel.get_message(metuple[2])
