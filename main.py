@@ -414,7 +414,15 @@ async def on_raw_message_delete(message):
             if metuple is not None:
                 toGuild = client.get_guild(metuple[0])
                 toChannel = toGuild.get_channel(metuple[1])
-                toMessage = await toChannel.get_message(metuple[2])
+                while not toMessage:
+                    try:
+                        toMessage = await toChannel.get_message(metuple[2])
+                    except discord.NotFound as e:
+                        exc_type, exc_obj, exc_tb = exc_info()
+                        print("ORMD[{}]: {}".format(exc_tb.tb_lineno, e))
+                        toMessage = None
+                        async.sleep(1)
+                        pass
                 print("Deleting synced message {}:{}:{}".format(metuple[0], metuple[1], metuple[2]))
                 await toMessage.delete()
     except discord.Forbidden as e:
