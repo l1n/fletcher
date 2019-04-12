@@ -89,7 +89,7 @@ async def randomize_role_function(member, client, config):
         print("RRF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
 
 async def printhello_reload_function(guild, client, config):
-    print("PHRF: Hello to guild "+guild.name+" at "+str(datetime.now())+"!")
+    print("PHRF: Hello to guild "+guild.name+" at "+str(datetime.utcnow())+"!")
 
 async def chanban_join_function(member, client, config):
     print('CBJF: '+str(member)+' '+str(config['chanban_younger_than'])+' '+str(member.guild.get_channel(int(config['chanban_channel'])).name))
