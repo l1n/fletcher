@@ -1,7 +1,9 @@
+import asyncio
 import discord
 import io
 import re
 from sys import exc_info
+# global conn set by reload_function
 
 def expand_guild_name(guild, prefix='', suffix=':', global_replace=False):
     # TODO refactor into config file
@@ -176,18 +178,75 @@ async def messagelink_function(message, client, args):
 async def bookmark_function(message, client, args):
     try:
         if len(args) == 2 and type(args[1]) is discord.User:
-            print("bookmarking via reaction")
             if str(args[0].emoji) == "🔖":
                 return await args[1].send("Bookmark to conversation in #{} ({}) https://discordapp.com/channels/{}/{}/{} via reaction to {}".format(message.channel.name, message.channel.guild.name, message.channel.guild.id, message.channel.id, message.id, message.content))
             elif str(args[0].emoji) == "🔗":
                 return await args[1].send("https://discordapp.com/channels/{}/{}/{}".format(message.channel.guild.id, message.channel.id, message.id))
         else:
-            print("bookmarking via command")
             await message.author.send("Bookmark to conversation in #{} ({}) https://discordapp.com/channels/{}/{}/{} {}".format(message.channel.name, message.channel.guild.name, message.channel.guild.id, message.channel.id, message.id, " ".join(args)))
             return await message.add_reaction('✅')
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
         print("BMF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+
+reminder_timerhandle = None
+async def table_exec_function(client):
+    try:
+        global conn
+        cur = conn.cursor()
+        cur.execute("SELECT userid, guild, channel, message, content, created FROM reminders WHERE scheduled > NOW();")
+        tabtuple = cur.fetchone()
+        completed = []
+        while tabtuple:
+            user = await client.get_user_info(tabtuple[0])
+            guild_id = tabtuple[1]
+            channel_id = tabtuple[2]
+            message_id = tabtuple[3]
+            guild = client.get_guild(guild_id)
+            if guild is None:
+                print("PMF: Fletcher is not in guild ID "+str(guild_id))
+                await user.send("You tabled a discussion in a server that Fletcher no longer services. The content of the discussion prompt is reproduced below: {}".format(tabtuple[4]))
+                completed[-1] = tabtuple[:3]
+                tabtuple = cur.fetchone()
+                continue
+            channel = guild.get_channel(channel_id)
+            sent_at = created.strftime("%B %d, %Y %I:%M%p UTC")
+            content = tabtuple[4]
+            try:
+                target_message = await channel.get_message(message_id)
+                # created_at is naîve, but specified as UTC by Discord API docs
+                content = target_message.content
+            except discord.NotFound as e:
+                pass
+            await user.send("You tabled a discussion at {}: want to pick that back up?\nDiscussion link: https://discordapp.com/channels/{}/{}/{}\nContent:".format(created_at, guild_id, channel_id, message_id))
+            await user.send(content)
+            completed[-1] = tabtuple[:3]
+            tabtuple = cur.fetchone()
+        for complete in completed:
+            cur.execute("DELETE FROM reminders WHERE userid = %s AND guild = %s AND channel = %s AND message = %s;", complete)
+        conn.commit()
+        loop = asyncio.get_running_loop()
+        reminder_timerhandle = loop.call_later(61, table_exec_function, client)
+    except Exception as e:
+        if cur is not None:
+            conn.rollback()
+        exc_type, exc_obj, exc_tb = exc_info()
+        print("TXF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+
+async def table_function(message, client, args):
+    try:
+        if len(args) == 2 and type(args[1]) is discord.User:
+            if str(args[0].emoji) == "🏓":
+                global conn
+                cur = conn.cursor()
+                interval = "1 minute"
+                cur.execute("INSERT INTO reminders (userid, guild, channel, message, content, scheduled) VALUES (%s, %s, %s, %s, %s, NOW() + INTERVAL '"+interval+"');", [args[1].id, message.guild.id, message.channel.id, message.id, message.content])
+                return await args[1].send("Tabling conversation in #{} ({}) https://discordapp.com/channels/{}/{}/{} via reaction to {} for {}".format(message.channel.name, message.channel.guild.name, message.channel.guild.id, message.channel.id, message.id, message.content, interval))
+    except Exception as e:
+        if cur is not None:
+            conn.rollback()
+        exc_type, exc_obj, exc_tb = exc_info()
+        print("TF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
 
 def localizeName(user, guild):
     localized = guild.get_member(user.id)
@@ -231,3 +290,16 @@ def autoload(ch):
         'args_name': [],
         'description': 'DM the user a bookmark to the current place in conversation',
         })
+    ch.add_command({
+        'trigger': ['🏓'],
+        'function': table_function,
+        'async': True,
+        'hidden': True,
+        'args_num': 0,
+        'args_name': [],
+        'description': 'Table a discussion for later.',
+        })
+    loop = asyncio.get_running_loop()
+    if reminder_timerhandle:
+        reminder_timerhandle.cancel()
+    reminder_timerhandle = loop.call_later(61, table_exec_function, client)

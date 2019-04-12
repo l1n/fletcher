@@ -69,6 +69,18 @@ fletcher=# \d permaRoles
 Indexes:
     "permaroles_idx" btree (userid, guild)
 
+fletcher=# \d reminders;
+                                   Table "public.reminders"
+  Column   |            Type             | Collation | Nullable |           Default           
+-----------+-----------------------------+-----------+----------+-----------------------------
+ userid    | bigint                      |           | not null | 
+ guild     | bigint                      |           | not null | 
+ channel   | bigint                      |           | not null | 
+ message   | bigint                      |           | not null | 
+ content   | text                        |           |          | 
+ created   | timestamp without time zone |           |          | CURRENT_TIMESTAMP
+ scheduled | timestamp without time zone |           |          | (now() + '1 day'::interval)
+
 """
 
 FLETCHER_CONFIG = os.getenv('FLETCHER_CONFIG', './.fletcherrc')
@@ -268,13 +280,16 @@ async def reload_function(message=None, client=client, args=[]):
 async def on_ready():
     try:
         global doissetep_omega
+        global client
+        global ch
         # print bot information
         await client.change_presence(activity=discord.Game(name='Reloading: The Game'))
         print('Discord.py Version {}, connected as {} ({})'.format(discord.__version__, client.user.name, client.user.id))
         doissetep_omega = await client.get_guild(int(config['audio']['guild'])).get_channel(int(config['audio']['channel'])).connect();
-        loop = asyncio.get_event_loop()
-        loop.add_signal_handler(signal.SIGHUP, lambda: asyncio.ensure_future(reload_function()))
+        loop = asyncio.get_running_loop()
+        loop.remove_signal_handler(signal.SIGHUP)
         await reload_function()
+        loop.add_signal_handler(signal.SIGHUP, lambda: asyncio.ensure_future(reload_function()))
     except Exception as e:
         print(e)
 
