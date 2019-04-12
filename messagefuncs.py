@@ -1,4 +1,5 @@
 import asyncio
+from datetime import datetime
 import discord
 import io
 import re
@@ -189,29 +190,32 @@ async def bookmark_function(message, client, args):
         exc_type, exc_obj, exc_tb = exc_info()
         print("BMF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
 
-reminder_timerhandle = None
-async def table_exec_function(client):
+async def table_exec_function():
     try:
+        print("TXF: audit")
+        global ch
+        client = ch.client
         global conn
         cur = conn.cursor()
-        cur.execute("SELECT userid, guild, channel, message, content, created FROM reminders WHERE scheduled > NOW();")
+        now = datetime.utcnow()
+        cur.execute("SELECT userid, guild, channel, message, content, created FROM reminders WHERE %s > scheduled;", [now])
         tabtuple = cur.fetchone()
-        completed = []
         while tabtuple:
             user = await client.get_user_info(tabtuple[0])
             guild_id = tabtuple[1]
             channel_id = tabtuple[2]
             message_id = tabtuple[3]
+            created = tabtuple[5]
+            created_at = created.strftime("%B %d, %Y %I:%M%p UTC")
+            content = tabtuple[4]
             guild = client.get_guild(guild_id)
             if guild is None:
                 print("PMF: Fletcher is not in guild ID "+str(guild_id))
-                await user.send("You tabled a discussion in a server that Fletcher no longer services. The content of the discussion prompt is reproduced below: {}".format(tabtuple[4]))
-                completed[-1] = tabtuple[:3]
+                await user.send("You tabled a discussion in a server that Fletcher no longer services. The content of the discussion prompt is reproduced below: {}".format(content))
+                completed.append(tabtuple[:3])
                 tabtuple = cur.fetchone()
                 continue
             channel = guild.get_channel(channel_id)
-            sent_at = created.strftime("%B %d, %Y %I:%M%p UTC")
-            content = tabtuple[4]
             try:
                 target_message = await channel.get_message(message_id)
                 # created_at is naîve, but specified as UTC by Discord API docs
@@ -220,13 +224,15 @@ async def table_exec_function(client):
                 pass
             await user.send("You tabled a discussion at {}: want to pick that back up?\nDiscussion link: https://discordapp.com/channels/{}/{}/{}\nContent:".format(created_at, guild_id, channel_id, message_id))
             await user.send(content)
-            completed[-1] = tabtuple[:3]
             tabtuple = cur.fetchone()
-        for complete in completed:
-            cur.execute("DELETE FROM reminders WHERE userid = %s AND guild = %s AND channel = %s AND message = %s;", complete)
+        cur.execute("DELETE FROM reminders WHERE %s > scheduled;", [now])
         conn.commit()
-        loop = asyncio.get_running_loop()
-        reminder_timerhandle = loop.call_later(61, table_exec_function, client)
+        global reminder_timerhandle
+        await asyncio.sleep(61)
+        reminder_timerhandle = asyncio.create_task(table_exec_function())
+    except asyncio.CancelledError:
+        print('TXF: Interrupted, bailing out')
+        raise
     except Exception as e:
         if cur is not None:
             conn.rollback()
@@ -239,7 +245,7 @@ async def table_function(message, client, args):
             if str(args[0].emoji) == "🏓":
                 global conn
                 cur = conn.cursor()
-                interval = "1 minute"
+                interval = "1 day"
                 cur.execute("INSERT INTO reminders (userid, guild, channel, message, content, scheduled) VALUES (%s, %s, %s, %s, %s, NOW() + INTERVAL '"+interval+"');", [args[1].id, message.guild.id, message.channel.id, message.id, message.content])
                 return await args[1].send("Tabling conversation in #{} ({}) https://discordapp.com/channels/{}/{}/{} via reaction to {} for {}".format(message.channel.name, message.channel.guild.name, message.channel.guild.id, message.channel.id, message.id, message.content, interval))
     except Exception as e:
@@ -294,12 +300,11 @@ def autoload(ch):
         'trigger': ['🏓'],
         'function': table_function,
         'async': True,
-        'hidden': True,
         'args_num': 0,
         'args_name': [],
         'description': 'Table a discussion for later.',
         })
-    loop = asyncio.get_running_loop()
-    if reminder_timerhandle:
+    global reminder_timerhandle
+    if reminder_timerhandle is not None:
         reminder_timerhandle.cancel()
-    reminder_timerhandle = loop.call_later(61, table_exec_function, client)
+    reminder_timerhandle = asyncio.create_task(table_exec_function())
