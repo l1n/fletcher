@@ -93,6 +93,8 @@ pick_regex = re.compile(r'[,\s]\s*(?:and|or|but|nor|for|so|yet)?\s*')
 
 async def pick_function(message, client, args):
     try:
+        if args[0] in ["between", "among", "in", "of"]:
+            args = args[1:]
         many = 1
         try:
             if len(args) > 2:
