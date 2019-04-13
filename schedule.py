@@ -2,11 +2,11 @@ import asyncio
 from datetime import datetime
 import discord
 from sys import exc_info
+import textwrap
 # global conn set by reload_function
 
 async def table_exec_function():
     try:
-        print("TXF: audit")
         global ch
         client = ch.client
         global conn
@@ -36,8 +36,9 @@ async def table_exec_function():
                 content = target_message.content
             except discord.NotFound as e:
                 pass
-            await user.send("You tabled a discussion at {}: want to pick that back up?\nDiscussion link: https://discordapp.com/channels/{}/{}/{}\nContent:".format(created_at, guild_id, channel_id, message_id))
-            await user.send(content)
+            msg_chunks = textwrap.wrap("You tabled a discussion at {}: want to pick that back up?\nDiscussion link: https://discordapp.com/channels/{}/{}/{}\nContent: {}".format(created_at, guild_id, channel_id, message_id, content), 2000, replace_whitespace=False)
+            for hunk in msg_chunks:
+                await user.send(hunk)
             tabtuple = cur.fetchone()
         cur.execute("DELETE FROM reminders WHERE %s > scheduled;", [now])
         conn.commit()
