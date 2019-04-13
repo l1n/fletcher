@@ -79,6 +79,8 @@ def autoload(ch):
         'description': 'Table a discussion for later.',
         })
     global reminder_timerhandle
-    if reminder_timerhandle is not None:
+    try:
         reminder_timerhandle.cancel()
+    except NameError:
+        pass
     reminder_timerhandle = asyncio.create_task(table_exec_function())
