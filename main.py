@@ -106,6 +106,7 @@ import janissary
 import mathemagical
 import messagefuncs
 import text_manipulators
+import schedule
 import swag
 import googlephotos
 
@@ -234,6 +235,9 @@ async def reload_function(message=None, client=client, args=[]):
         # Utility text manipulators Module
         autoload(text_manipulators)
         await animate_startup('🔧', message)
+        # Schedule Module
+        autoload(schedule)
+        await animate_startup('📅', message)
         # Greeting module
         autoload(greeting)
         await animate_startup('👋', message)
