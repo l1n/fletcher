@@ -373,6 +373,19 @@ async def lockout_user_function(message, client, args):
         exc_type, exc_obj, exc_tb = exc_info()
         print("LUF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
 
+async def part_channel_function(message, client, args):
+    try:
+        if len(message.channel_mentions) >= 1:
+            channel = message.channel_mentions[0]
+        else:
+            channel = message.guild.get_channel(int(args[0]))
+        await channel.set_permissions(message.author, read_messages=False, read_message_history=False, send_messages=False, reason="User requested part "+message.author.name)
+        await message.add_reaction('✅')
+        await message.author.send("Parted from channel #"+channel.name)
+    except Exception as e:
+        exc_type, exc_obj, exc_tb = exc_info()
+        print("PCF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+
 def autoload(ch):
     ch.add_command({
         'trigger': ['!roleadd', '!addrole'],
@@ -453,4 +466,12 @@ def autoload(ch):
         'args_num': 1,
         'args_name': ['@user', 'reset|hide'],
         'description': 'Lockout or reset user permissions'
+        })
+    ch.add_command({
+        'trigger': ['!part'],
+        'function': part_channel_function,
+        'async': True,
+        'args_num': 1,
+        'args_name': ['#channel'],
+        'description': 'Leave a channel. Cannot be reversed except by admin.'
         })
