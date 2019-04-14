@@ -1,10 +1,12 @@
 import asyncio
 from datetime import datetime
 import discord
+import re
 from sys import exc_info
 import textwrap
 # global conn set by reload_function
 
+schedule_extract_channelmention = re.compile('(?:<#)(\d+)')
 async def table_exec_function():
     try:
         global ch
@@ -31,18 +33,34 @@ async def table_exec_function():
             guild = client.get_guild(guild_id)
             if guild is None:
                 print("PMF: Fletcher is not in guild ID "+str(guild_id))
-                await user.send("You {} in a server that Fletcher no longer services. The content of the discussion prompt is reproduced below: {}".format(mode_desc, content))
+                await user.send("You {} in a server that Fletcher no longer services, so this request cannot be fulfilled. The content of the command is reproduced below: {}".format(mode_desc, content))
                 completed.append(tabtuple[:3])
                 tabtuple = cur.fetchone()
                 continue
-            channel = guild.get_channel(channel_id)
+            from_channel = guild.get_channel(channel_id)
+            target_message = None
             try:
-                target_message = await channel.get_message(message_id)
+                target_message = await from_channel.get_message(message_id)
                 # created_at is naîve, but specified as UTC by Discord API docs
                 content = target_message.content
             except discord.NotFound as e:
                 pass
             if mode == "unban":
+                if target_message:
+                    if len(target_message.channel_mentions) > 0:
+                        channel = target_message.channel_mentions[0]
+                    else:
+                        channel = schedule_extract_channelmention.search(target_message.content).groups()
+                        if len(channel) > 1:
+                            channel = guild.get_channel(channel[1])
+                        else:
+                            channel = target_message.channel
+                else:
+                    channel = schedule_extract_channelmention.search(content).groups()
+                        if len(channel) > 1:
+                            channel = guild.get_channel(channel[1])
+                        else:
+                            channel = from_channel
                 permissions = channel.overwrites_for(user)
                 if permissions.read_messages == False and permissions.send_messages == False and permissions.embed_links == False:
                     await channel.set_permissions(user, overwrite=None, reason="Unban triggered by schedule obo "+user.name)
