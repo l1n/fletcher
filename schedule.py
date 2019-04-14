@@ -44,7 +44,7 @@ async def table_exec_function():
                 target_message = await from_channel.get_message(message_id)
                 # created_at is naîve, but specified as UTC by Discord API docs
                 content = target_message.content
-            except discord.NotFound as e:
+            except (discord.NotFound, AttributeError) as e:
                 pass
             if mode == "unban":
                 if target_message:
