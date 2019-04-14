@@ -16,6 +16,7 @@ def expand_guild_name(guild, prefix='', suffix=':', global_replace=False):
     return new_guild
 
 def xchannel(targetChannel, currentGuild):
+    global ch
     channelLookupBy = "Name"
     toChannel = None
     toGuild = None
@@ -32,7 +33,7 @@ def xchannel(targetChannel, currentGuild):
         else:
             targetChannel = expand_guild_name(targetChannel)
             toTuple = targetChannel.split(":")
-            toGuild = discord.utils.get(client.guilds, name=toTuple[0].replace("_", " "))
+            toGuild = discord.utils.get(ch.client.guilds, name=toTuple[0].replace("_", " "))
             toChannel = discord.utils.get(toGuild.text_channels, name=toTuple[1])
     elif channelLookupBy == "ID":
         toChannel = client.get_channel(int(targetChannel))
