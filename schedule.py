@@ -12,8 +12,11 @@ async def table_exec_function():
         global conn
         cur = conn.cursor()
         now = datetime.utcnow()
-        cur.execute("SELECT userid, guild, channel, message, content, created FROM reminders WHERE %s > scheduled;", [now])
+        cur.execute("SELECT userid, guild, channel, message, content, created, trigger_type FROM reminders WHERE %s > scheduled;", [now])
         tabtuple = cur.fetchone()
+        modes = {
+                "table": "tabled a discussion",
+                }
         while tabtuple:
             user = await client.get_user_info(tabtuple[0])
             guild_id = tabtuple[1]
@@ -22,10 +25,12 @@ async def table_exec_function():
             created = tabtuple[5]
             created_at = created.strftime("%B %d, %Y %I:%M%p UTC")
             content = tabtuple[4]
+            mode = tabtuple[6]
+            mode_desc = modes[mode]
             guild = client.get_guild(guild_id)
             if guild is None:
                 print("PMF: Fletcher is not in guild ID "+str(guild_id))
-                await user.send("You tabled a discussion in a server that Fletcher no longer services. The content of the discussion prompt is reproduced below: {}".format(content))
+                await user.send("You {} in a server that Fletcher no longer services. The content of the discussion prompt is reproduced below: {}".format(mode_desc, content))
                 completed.append(tabtuple[:3])
                 tabtuple = cur.fetchone()
                 continue
@@ -36,9 +41,15 @@ async def table_exec_function():
                 content = target_message.content
             except discord.NotFound as e:
                 pass
-            msg_chunks = textwrap.wrap("You tabled a discussion at {}: want to pick that back up?\nDiscussion link: https://discordapp.com/channels/{}/{}/{}\nContent: {}".format(created_at, guild_id, channel_id, message_id, content), 2000, replace_whitespace=False)
-            for hunk in msg_chunks:
-                await user.send(hunk)
+            if mode == "unban":
+                permissions = channel.overwrites_for(user)
+                if permissions.read_messages == False and permissions.send_messages == False and permissions.embed_links == False:
+                    await channel.set_permissions(user, overwrite=None, reason="Unban triggered by schedule obo "+user.name)
+                    await user.send("Unban triggered by schedule for {}#{} (`!part` to leave channel permanently)".format(guild.name, channel.name))
+            elif mode == "table"
+                msg_chunks = textwrap.wrap("You tabled a discussion at {}: want to pick that back up?\nDiscussion link: https://discordapp.com/channels/{}/{}/{}\nContent: {}".format(created_at, guild_id, channel_id, message_id, content), 2000, replace_whitespace=False)
+                for hunk in msg_chunks:
+                    await user.send(hunk)
             tabtuple = cur.fetchone()
         cur.execute("DELETE FROM reminders WHERE %s > scheduled;", [now])
         conn.commit()

@@ -71,15 +71,16 @@ Indexes:
 
 fletcher=# \d reminders;
                                    Table "public.reminders"
-  Column   |            Type             | Collation | Nullable |           Default           
------------+-----------------------------+-----------+----------+-----------------------------
- userid    | bigint                      |           | not null | 
- guild     | bigint                      |           | not null | 
- channel   | bigint                      |           | not null | 
- message   | bigint                      |           | not null | 
- content   | text                        |           |          | 
- created   | timestamp without time zone |           |          | CURRENT_TIMESTAMP
- scheduled | timestamp without time zone |           |          | (now() + '1 day'::interval)
+  Column      |            Type             | Collation | Nullable |           Default           
+--------------+-----------------------------+-----------+----------+-----------------------------
+ userid       | bigint                      |           | not null | 
+ guild        | bigint                      |           | not null | 
+ channel      | bigint                      |           | not null | 
+ message      | bigint                      |           | not null | 
+ content      | text                        |           |          | 
+ created      | timestamp without time zone |           |          | CURRENT_TIMESTAMP
+ scheduled    | timestamp without time zone |           |          | (now() + '1 day'::interval)
+ trigger_type | text                        |           |          | 'table'::text
 
 """
 
