@@ -51,11 +51,11 @@ async def table_exec_function():
                     if len(target_message.channel_mentions) > 0:
                         channel = target_message.channel_mentions[0]
                     else:
-                        channel = messagefuncs.xchannel(" ".split(message.content)[1].strip(), guild)
+                        channel = messagefuncs.xchannel(message.content.split()[1].strip(), guild)
                         if channel is None:
                             channel = target_message.channel
                 else:
-                    channel = messagefuncs.xchannel(" ".split(content)[1].strip(), guild)
+                    channel = messagefuncs.xchannel(content.split()[1].strip(), guild)
                     if channel is None:
                         channel = from_channel
                 permissions = channel.overwrites_for(user)
