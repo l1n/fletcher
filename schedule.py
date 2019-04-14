@@ -16,6 +16,7 @@ async def table_exec_function():
         tabtuple = cur.fetchone()
         modes = {
                 "table": "tabled a discussion",
+                "unban": "snoozed a channel",
                 }
         while tabtuple:
             user = await client.get_user_info(tabtuple[0])
