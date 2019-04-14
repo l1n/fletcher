@@ -4,6 +4,7 @@ import discord
 from sys import exc_info
 import textwrap
 import text_manipulators
+# global conn set by reload_function
 
 async def addrole_function(message, client, args):
     global config
@@ -386,6 +387,28 @@ async def part_channel_function(message, client, args):
         exc_type, exc_obj, exc_tb = exc_info()
         print("PCF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
 
+# Requires schedule.py
+async def snooze_channel_function(message, client, args):
+    try:
+        if len(message.channel_mentions) >= 1:
+            channel = message.channel_mentions[0]
+        else:
+            channel = message.channel
+        global conn
+        cur = conn.cursor()
+        interval = "1 minute"
+        cur.execute("INSERT INTO reminders (userid, guild, channel, message, content, scheduled, trigger_type) VALUES (%s, %s, %s, %s, %s, NOW() + INTERVAL '"+interval+"', 'unban');", [args[1].id, message.guild.id, message.channel.id, message.id, message.content])
+        await channel.set_permissions(message.author, read_messages=False, read_message_history=False, send_messages=False, embed_links=False, reason="User requested snooze "+message.author.name)
+        conn.commit()
+        await message.add_reaction('✅')
+        await message.author.send("Snoozed for 24 hours {}#{} (`!part` to leave channel permanently)".format(channel.guild.name, channel.name))
+    except Exception as e:
+        if cur is not None:
+            conn.rollback()
+        exc_type, exc_obj, exc_tb = exc_info()
+        print("PCF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+
+
 def autoload(ch):
     ch.add_command({
         'trigger': ['!roleadd', '!addrole'],
@@ -474,4 +497,12 @@ def autoload(ch):
         'args_num': 1,
         'args_name': ['#channel'],
         'description': 'Leave a channel. Cannot be reversed except by admin.'
+        })
+    ch.add_command({
+        'trigger': ['!snooze'],
+        'function': snooze_channel_function,
+        'async': True,
+        'args_num': 0,
+        'args_name': ['#channel'],
+        'description': 'Leave a channel. Reversed in 24 hours.'
         })
