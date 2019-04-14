@@ -406,14 +406,14 @@ async def snooze_channel_function(message, client, args):
         global conn
         cur = conn.cursor()
         if len(args) > 1:
-            interval = str(int(args[1]))+" hours"
+            interval = int(args[1])
         else:
-            interval = "24 hours"
-        cur.execute("INSERT INTO reminders (userid, guild, channel, message, content, scheduled, trigger_type) VALUES (%s, %s, %s, %s, %s, NOW() + INTERVAL '"+interval+"', 'unban');", [message.author.id, guild.id, message.channel.id, message.id, message.content])
+            interval = 24
+        cur.execute("INSERT INTO reminders (userid, guild, channel, message, content, scheduled, trigger_type) VALUES (%s, %s, %s, %s, %s, NOW() + INTERVAL '"+interval+" hours', 'unban');", [message.author.id, guild.id, message.channel.id, message.id, message.content])
         await channel.set_permissions(message.author, read_messages=False, read_message_history=False, send_messages=False, embed_links=False, reason="User requested snooze "+message.author.name)
         conn.commit()
         await message.add_reaction('✅')
-        await message.author.send("Snoozed for 24 hours {}#{} (`!part` to leave channel permanently)".format(channel.guild.name, channel.name))
+        await message.author.send("Snoozed for {} hours {}#{} (`!part` to leave channel permanently)".format(interval, channel.guild.name, channel.name))
     except Exception as e:
         if cur is not None:
             conn.rollback()
