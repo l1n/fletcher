@@ -1,6 +1,7 @@
 import asyncio
 from datetime import datetime
 import discord
+import messagefuncs
 import re
 from sys import exc_info
 import textwrap
@@ -50,17 +51,13 @@ async def table_exec_function():
                     if len(target_message.channel_mentions) > 0:
                         channel = target_message.channel_mentions[0]
                     else:
-                        channel = schedule_extract_channelmention.search(target_message.content).groups()
-                        if len(channel) > 1:
-                            channel = guild.get_channel(channel[1])
-                        else:
+                        channel = messagefuncs.xchannel(" ".split(message.content)[1].strip(), guild)
+                        if channel is None:
                             channel = target_message.channel
                 else:
-                    channel = schedule_extract_channelmention.search(content).groups()
-                        if len(channel) > 1:
-                            channel = guild.get_channel(channel[1])
-                        else:
-                            channel = from_channel
+                    channel = messagefuncs.xchannel(" ".split(message.content)[1].strip(), guild)
+                    if channel is None:
+                        channel = from_channel
                 permissions = channel.overwrites_for(user)
                 if permissions.read_messages == False and permissions.send_messages == False and permissions.embed_links == False:
                     await channel.set_permissions(user, overwrite=None, reason="Unban triggered by schedule obo "+user.name)

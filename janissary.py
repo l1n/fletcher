@@ -377,7 +377,7 @@ async def lockout_user_function(message, client, args):
 
 async def part_channel_function(message, client, args):
     try:
-        if len(message.channel_mentions) >= 1:
+        if len(message.channel_mentions) > 0:
             channel = message.channel_mentions[0]
         else:
             channel = messagefuncs.xchannel(args[0].strip(), message.guild)
@@ -393,7 +393,7 @@ async def part_channel_function(message, client, args):
 # Requires schedule.py
 async def snooze_channel_function(message, client, args):
     try:
-        if len(message.channel_mentions) >= 1:
+        if len(message.channel_mentions) > 0:
             channel = message.channel_mentions[0]
         else:
             channel = messagefuncs.xchannel(args[0].strip(), message.guild)
