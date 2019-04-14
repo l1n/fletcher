@@ -405,7 +405,10 @@ async def snooze_channel_function(message, client, args):
             guild = channel.guild
         global conn
         cur = conn.cursor()
-        interval = "1 day"
+        if len(args) > 1:
+            interval = str(int(args[1]))+" hours"
+        else:
+            interval = "24 hours"
         cur.execute("INSERT INTO reminders (userid, guild, channel, message, content, scheduled, trigger_type) VALUES (%s, %s, %s, %s, %s, NOW() + INTERVAL '"+interval+"', 'unban');", [message.author.id, guild.id, message.channel.id, message.id, message.content])
         await channel.set_permissions(message.author, read_messages=False, read_message_history=False, send_messages=False, embed_links=False, reason="User requested snooze "+message.author.name)
         conn.commit()
