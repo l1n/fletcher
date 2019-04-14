@@ -55,7 +55,7 @@ async def table_exec_function():
                         if channel is None:
                             channel = target_message.channel
                 else:
-                    channel = messagefuncs.xchannel(" ".split(message.content)[1].strip(), guild)
+                    channel = messagefuncs.xchannel(" ".split(content)[1].strip(), guild)
                     if channel is None:
                         channel = from_channel
                 permissions = channel.overwrites_for(user)
