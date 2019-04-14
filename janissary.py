@@ -1,6 +1,7 @@
 import asyncio
 from datetime import datetime, timedelta
 import discord
+import messagefuncs
 from sys import exc_info
 import textwrap
 import text_manipulators
@@ -379,7 +380,9 @@ async def part_channel_function(message, client, args):
         if len(message.channel_mentions) >= 1:
             channel = message.channel_mentions[0]
         else:
-            channel = message.guild.get_channel(int(args[0]))
+            channel = messagefuncs.xchannel(args[0].strip(), message.guild)
+            if channel is None:
+                channel = message.channel
         await channel.set_permissions(message.author, read_messages=False, read_message_history=False, send_messages=False, reason="User requested part "+message.author.name)
         await message.add_reaction('✅')
         await message.author.send("Parted from channel #"+channel.name)
@@ -393,7 +396,9 @@ async def snooze_channel_function(message, client, args):
         if len(message.channel_mentions) >= 1:
             channel = message.channel_mentions[0]
         else:
-            channel = message.channel
+            channel = messagefuncs.xchannel(args[0].strip(), message.guild)
+            if channel is None:
+                channel = message.channel
         global conn
         cur = conn.cursor()
         interval = "1 day"

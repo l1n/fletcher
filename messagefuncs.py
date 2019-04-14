@@ -15,6 +15,30 @@ def expand_guild_name(guild, prefix='', suffix=':', global_replace=False):
             return v
     return new_guild
 
+def xchannel(targetChannel, currentGuild):
+    channelLookupBy = "Name"
+    toChannel = None
+    toGuild = None
+    if targetChannel.startswith('<#'):
+        targetChannel = targetChannel[2:-1].strip()
+        channelLookupBy = "ID"
+    elif targetChannel.startswith('#'):
+        targetChannel = targetChannel[1:].strip()
+    print('XC: Channel Identifier '+channelLookupBy+':'+targetChannel)
+    if channelLookupBy == "Name":
+        if ":" not in targetChannel:
+            toChannel = discord.utils.get(currentGuild.text_channels, name=targetChannel)
+            toGuild = currentGuild
+        else:
+            targetChannel = expand_guild_name(targetChannel)
+            toTuple = targetChannel.split(":")
+            toGuild = discord.utils.get(client.guilds, name=toTuple[0].replace("_", " "))
+            toChannel = discord.utils.get(toGuild.text_channels, name=toTuple[1])
+    elif channelLookupBy == "ID":
+        toChannel = client.get_channel(int(targetChannel))
+        toGuild = toChannel.guild
+    return toChannel
+
 extract_identifiers_messagelink = re.compile('(?<!<)https://(?:ptb\.)?discordapp.com/channels/(\d+)/(\d+)/(\d+)', re.IGNORECASE)
 async def teleport_function(message, client, args):
     global config
@@ -26,28 +50,8 @@ async def teleport_function(message, client, args):
         if str(fromChannel.id) in config['teleport']['fromchannel-ban'].split(',') and not message.author.guild_permissions.manage_webhooks:
             await fromChannel.send('Portals out of this channel have been disabled.', delete_after=60)
             raise Exception('Forbidden teleport')
-        targetChannel = args[0].strip()
-        channelLookupBy = "Name"
-        toChannel = None
-        toGuild = None
-        if targetChannel.startswith('<#'):
-            targetChannel = targetChannel[2:-1].strip()
-            channelLookupBy = "ID"
-        elif targetChannel.startswith('#'):
-            targetChannel = targetChannel[1:].strip()
-        print('Target Channel '+channelLookupBy+': '+targetChannel)
-        if channelLookupBy == "Name":
-            if ":" not in targetChannel:
-                toChannel = discord.utils.get(fromGuild.text_channels, name=targetChannel)
-                toGuild = fromGuild
-            else:
-                targetChannel = expand_guild_name(targetChannel)
-                toTuple = targetChannel.split(":")
-                toGuild = discord.utils.get(client.guilds, name=toTuple[0].replace("_", " "))
-                toChannel = discord.utils.get(toGuild.text_channels, name=toTuple[1])
-        elif channelLookupBy == "ID":
-            toChannel = client.get_channel(int(targetChannel))
-            toGuild = toChannel.guild
+        toChannel = xchannel(args[0].strip(), fromGuild)
+        toGuild = toChannel.guild
         if fromChannel.id == toChannel.id:
             await fromChannel.send('You cannot open an overlapping portal! Access denied.')
             raise Exception('Attempt to open overlapping portal')
