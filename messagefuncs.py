@@ -2,6 +2,7 @@ import discord
 import io
 import re
 from sys import exc_info
+import textwrap
 
 def expand_guild_name(guild, prefix='', suffix=':', global_replace=False):
     # TODO refactor into config file
@@ -39,6 +40,14 @@ def xchannel(targetChannel, currentGuild):
         toChannel = ch.client.get_channel(int(targetChannel))
         toGuild = toChannel.guild
     return toChannel
+
+async def sendWrappedMessage(msg, target, files=[]):
+    msg_chunks = textwrap.wrap(msg, 2000, replace_whitespace=False)
+    last_chunk = msg_chunks.pop()
+    for chunk in msg_chunks:
+        await target.send(chunk)
+    await target.send(last_chunk, files=files)
+
 
 extract_identifiers_messagelink = re.compile('(?<!<)https://(?:ptb\.)?discordapp.com/channels/(\d+)/(\d+)/(\d+)', re.IGNORECASE)
 async def teleport_function(message, client, args):
@@ -147,7 +156,7 @@ async def preview_messagelink_function(message, client, args):
             if args is not None and args[0].isdigit():
                 content = content + f'\nSource: https://discordapp.com/channels/{guild_id}/{channel_id}/{message_id}'
             # TODO 🔭 to preview?
-            return await message.channel.send(content, files=attachments)
+            return await sendWrappedMessage(content, message.channel, files=attachments)
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
         print("PMF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
@@ -182,7 +191,7 @@ async def bookmark_function(message, client, args):
     try:
         if len(args) == 2 and type(args[1]) is discord.User:
             if str(args[0].emoji) == "🔖":
-                return await args[1].send("Bookmark to conversation in #{} ({}) https://discordapp.com/channels/{}/{}/{} via reaction to {}".format(message.channel.name, message.channel.guild.name, message.channel.guild.id, message.channel.id, message.id, message.content))
+                return await sendWrappedMessage("Bookmark to conversation in #{} ({}) https://discordapp.com/channels/{}/{}/{} via reaction to {}".format(message.channel.name, message.channel.guild.name, message.channel.guild.id, message.channel.id, message.id, message.content), args[1])
             elif str(args[0].emoji) == "🔗":
                 return await args[1].send("https://discordapp.com/channels/{}/{}/{}".format(message.channel.guild.id, message.channel.id, message.id))
         else:
