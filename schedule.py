@@ -1,5 +1,4 @@
 import asyncio
-from datetime import datetime
 import discord
 import messagefuncs
 import re
@@ -14,7 +13,8 @@ async def table_exec_function():
         client = ch.client
         global conn
         cur = conn.cursor()
-        now = datetime.now()
+        cur.execute("SELECT NOW();");
+        now = cur.fetchone()[0]
         cur.execute("SELECT userid, guild, channel, message, content, created, trigger_type FROM reminders WHERE %s > scheduled;", [now])
         tabtuple = cur.fetchone()
         modes = {
