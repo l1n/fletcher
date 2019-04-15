@@ -14,7 +14,7 @@ async def table_exec_function():
         client = ch.client
         global conn
         cur = conn.cursor()
-        now = datetime.utcnow()
+        now = datetime.now()
         cur.execute("SELECT userid, guild, channel, message, content, created, trigger_type FROM reminders WHERE %s > scheduled;", [now])
         tabtuple = cur.fetchone()
         modes = {
