@@ -387,6 +387,7 @@ async def part_channel_function(message, client, args):
 
 async def optin_channel_function(message, client, args):
     try:
+        pass
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
         print("OICF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
