@@ -236,7 +236,7 @@ async def modreport_function(message, client, args):
             else:
                 users = scoped_config['manual-mod-users'].split(',')
             for user_id in users:
-                modmail = await client.get_user(int(user_id)).send(report_content)
+                modmail = await messagefuncs.sendWrappedMessage(report_content, client.get_user(int(user_id))
                 if message.channel.is_nsfw():
                     await modmail.add_reaction('🕜')
         else:
@@ -286,9 +286,7 @@ async def lastactive_channel_function(message, client, args):
                 msg = "{}\n<#{}>{}: Forbidden".format(msg, channel.id, category_pretty)
                 pass
         msg = '**Channel Activity:**{}'.format(msg)
-        msg_chunks = textwrap.wrap(msg, 2000, replace_whitespace=False)
-        for chunk in msg_chunks:
-            await message.channel.send(chunk)
+        await messagefuncs.sendWrappedMessage(msg, message.channel)
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
         print("LACF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
@@ -313,8 +311,9 @@ async def lastactive_user_function(message, client, args):
         if message.guild.large:
             client.request_offline_members(message.guild)
         users = {}
+        tomorrow = datetime.today() + timedelta(days=1)
         for m in message.guild.members:
-            users[m.id] = datetime.today() + timedelta(days=1)
+            users[m.id] = tomorrow
         for channel in message.channel.guild.text_channels:
             async for message in channel.history(limit=None):
                 try:
@@ -332,9 +331,7 @@ async def lastactive_user_function(message, client, args):
             else:
                 last_active = text_manipulators.pretty_date(last_active)
             msg = "{}\n<@{}>{}: {}".format(msg, user_id, last_active)
-        msg_chunks = textwrap.wrap(msg, 2000, replace_whitespace=False)
-        for chunk in msg_chunks:
-            await message.channel.send(chunk)
+        await messagefuncs.sendWrappedMessage(msg, message.channel)
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
         print("LSU[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
@@ -368,9 +365,7 @@ async def lockout_user_function(message, client, args):
                         await channel.set_permissions(member, overwrite=None, reason="Admin reset lockout obo "+message.author.name)
                     else:
                         await channel.set_permissions(member, read_messages=False, read_message_history=False, send_messages=False, reason="Admin requested lockout obo "+message.author.name)
-        msg_chunks = textwrap.wrap(log, 2000, replace_whitespace=False)
-        for chunk in msg_chunks:
-            await message.author.send(chunk)
+        await messagefuncs.sendWrappedMessage(log, message.author)
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
         print("LUF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
@@ -390,7 +385,13 @@ async def part_channel_function(message, client, args):
         exc_type, exc_obj, exc_tb = exc_info()
         print("PCF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
 
-# Requires schedule.py
+async def optin_channel_function(message, client, args):
+    try:
+    except Exception as e:
+        exc_type, exc_obj, exc_tb = exc_info()
+        print("OICF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+
+# Requires schedule.py to clear reminders
 async def snooze_channel_function(message, client, args):
     try:
         if len(message.channel_mentions) > 0:
@@ -503,7 +504,17 @@ def autoload(ch):
         'description': 'Lockout or reset user permissions'
         })
     ch.add_command({
-        'trigger': ['!part'],
+        'trigger': ['!optin'],
+        'function': optin_channel_function,
+        'async': True,
+        'hidden': True,
+        'admin': True,
+        'args_num': 0,
+        'args_name': ['#channel'],
+        'description': 'Join a channel, no arguments to list available channels.'
+        })
+    ch.add_command({
+        'trigger': ['!part', '!optout'],
         'function': part_channel_function,
         'async': True,
         'args_num': 1,
