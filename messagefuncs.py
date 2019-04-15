@@ -36,7 +36,7 @@ def xchannel(targetChannel, currentGuild):
             toGuild = discord.utils.get(ch.client.guilds, name=toTuple[0].replace("_", " "))
             toChannel = discord.utils.get(toGuild.text_channels, name=toTuple[1])
     elif channelLookupBy == "ID":
-        toChannel = client.get_channel(int(targetChannel))
+        toChannel = ch.client.get_channel(int(targetChannel))
         toGuild = toChannel.guild
     return toChannel
 
