@@ -171,13 +171,18 @@ async def help_function(message, client, args):
             def command_filter(c):
                 return ('admin' not in c.keys() or c['admin'] == False) and ('hidden' not in c.keys() or c['hidden'] == False)
         accessible_commands = filter(command_filter, ch.commands)
+        if len(args) > 0 and args[0] != "verbose":
+            def trigger_filter(c):
+                for trigger in c['trigger']:
+                    if args[0] in trigger:
+                        return true
+                return false
+            accessible_commands = filter(trigger_filter, accessible_commands)
         if len(args) > 0 and args[0] == "verbose":
             helpMessageBody = "\n".join(["`{}`: {}\nArguments ({}): {}".format("` or `".join(command['trigger']), command['description'], command['args_num'], " ".join(command['args_name'])) for command in accessible_commands])
         else:
             helpMessageBody = "\n".join(["`{}`: {}".format("` or `".join(command['trigger'][:2]), command['description']) for command in accessible_commands])
-        msg_chunks = textwrap.wrap(helpMessageBody, 2000, replace_whitespace=False)
-        for chunk in msg_chunks:
-            await message.channel.send(chunk)
+        await messagefuncs.sendWrappedMessage(helpMessageBody, message.channel)
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
         print("HF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
@@ -200,7 +205,7 @@ def autoload(ch):
         'description': 'Output current config'
         })
     ch.add_command({
-        'trigger': ['!help'],
+        'trigger': ['!help', '!man'],
         'function': help_function,
         'async': True,
         'args_num': 0,
