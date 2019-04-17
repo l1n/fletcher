@@ -186,7 +186,7 @@ async def help_function(message, client, args):
                     if args[0] in c['description']:
                         return True
                     return False
-            accessible_commands = filter(query_filter, accessible_commands)
+            accessible_commands = list(filter(query_filter, accessible_commands))
             # Set verbose if filtered list
             if len(accessible_commands) < 3:
                 args[0] = "verbose"
