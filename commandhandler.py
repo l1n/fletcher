@@ -177,7 +177,7 @@ async def help_function(message, client, args):
                     for trigger in c['trigger']:
                         if args[0] in trigger:
                             return True
-                return False
+                    return False
             else:
                 def query_filter(c):
                     for trigger in c['trigger']:
@@ -185,7 +185,7 @@ async def help_function(message, client, args):
                             return True
                     if args[0] in c['description']:
                         return True
-                return False
+                    return False
             accessible_commands = filter(query_filter, accessible_commands)
             # Set verbose if filtered list
             if len(accessible_commands) < 3:
