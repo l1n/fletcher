@@ -351,7 +351,7 @@ async def lockout_user_function(message, client, args):
         else:
             thorough = False
         if len(args) >= 4:
-            filter_id = args[3]
+            filter_id = int(args[3])
         else:
             filter_id = None
         log = "Lockout "+mode+" completed for "+member.name
