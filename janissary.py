@@ -342,10 +342,14 @@ async def lockout_user_function(message, client, args):
             member = message.mentions[0]
         else:
             member = message.guild.get_member(int(args[0]))
-        if len(args) == 2 and args[1] == "reset":
+        if len(args) >= 2 and args[1] == "reset":
             mode = "reset"
         else:
             mode = "hide"
+        if len(args) == 3 and args[2] == "thorough":
+            thorough = True
+        else:
+            thorough = False
         log = "Lockout "+mode+" completed for "+member.name
         for category, channels in member.guild.by_category():
             if category is not None:
@@ -356,7 +360,7 @@ async def lockout_user_function(message, client, args):
                     await category.set_permissions(member, overwrite=None, reason="Admin reset lockout obo "+message.author.name)
                 else:
                     await category.set_permissions(member, read_messages=False, read_message_history=False, send_messages=False, reason="Admin requested lockout obo "+message.author.name)
-            else:
+            if (category is None) or thorough:
                 for channel in channels:
                     logMessage = str(member)+" from non-category channel "+str(channel)+" in "+str(member.guild)
                     print("LUF: "+logMessage)
