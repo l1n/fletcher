@@ -178,6 +178,9 @@ async def help_function(message, client, args):
                         return True
                 return False
             accessible_commands = filter(trigger_filter, accessible_commands)
+            # Set verbose if filtered list
+            if len(accessible_commands) < 3:
+                args[0] = "verbose"
         if len(args) > 0 and args[0] == "verbose":
             helpMessageBody = "\n".join(["`{}`: {}\nArguments ({}): {}".format("` or `".join(command['trigger']), command['description'], command['args_num'], " ".join(command['args_name'])) for command in accessible_commands])
         else:
