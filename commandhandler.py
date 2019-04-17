@@ -183,7 +183,7 @@ async def help_function(message, client, args):
                     for trigger in c['trigger']:
                         if args[0] in trigger:
                             return True
-                    if args[0] in description:
+                    if args[0] in c['description']:
                         return True
                 return False
             accessible_commands = filter(query_filter, accessible_commands)
