@@ -172,23 +172,24 @@ async def help_function(message, client, args):
                 return ('admin' not in c.keys() or c['admin'] == False) and ('hidden' not in c.keys() or c['hidden'] == False)
         accessible_commands = filter(command_filter, ch.commands)
         if len(args) > 0 and args[0] != "verbose":
-            if args[0].startswith('!'):
+            keyword = " ".join(args).trim().lower()
+            if keyword.startswith('!'):
                 def query_filter(c):
                     for trigger in c['trigger']:
-                        if args[0] in trigger:
+                        if keyword in trigger:
                             return True
                     return False
             else:
                 def query_filter(c):
                     for trigger in c['trigger']:
-                        if args[0] in trigger:
+                        if keyword in trigger:
                             return True
-                    if args[0] in c['description']:
+                    if keyword in c['description'].lower():
                         return True
                     return False
             accessible_commands = list(filter(query_filter, accessible_commands))
             # Set verbose if filtered list
-            if len(accessible_commands) < 3:
+            if len(accessible_commands) < 5:
                 args[0] = "verbose"
         if len(args) > 0 and args[0] == "verbose":
             helpMessageBody = "\n".join(["`{}`: {}\nArguments ({}): {}".format("` or `".join(command['trigger']), command['description'], command['args_num'], " ".join(command['args_name'])) for command in accessible_commands])
