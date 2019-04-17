@@ -175,8 +175,8 @@ async def help_function(message, client, args):
             def trigger_filter(c):
                 for trigger in c['trigger']:
                     if args[0] in trigger:
-                        return true
-                return false
+                        return True
+                return False
             accessible_commands = filter(trigger_filter, accessible_commands)
         if len(args) > 0 and args[0] == "verbose":
             helpMessageBody = "\n".join(["`{}`: {}\nArguments ({}): {}".format("` or `".join(command['trigger']), command['description'], command['args_num'], " ".join(command['args_name'])) for command in accessible_commands])
