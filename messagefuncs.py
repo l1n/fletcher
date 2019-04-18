@@ -139,7 +139,7 @@ async def preview_messagelink_function(message, client, args):
                 content = "Message from {} sent in #{} ({}) at {}:\n{}".format(target_message.author.name, channel.name, guild.name, sent_at, content)
             attachments = []
             if target_message.channel.is_nsfw() and not message.channel.is_nsfw():
-                content = extract_links.sub(content, r'<\g<0>>')
+                content = extract_links.sub(r'<\g<0>>', content)
             if len(target_message.attachments) > 0:
                 plural = ""
                 if len(target_message.attachments) > 1:
