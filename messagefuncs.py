@@ -106,6 +106,7 @@ async def teleport_function(message, client, args):
         exc_type, exc_obj, exc_tb = exc_info()
         print("TPF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
 
+extract_links = re.compile('(?<!<)((https?|ftp):\/\/|www\.)(\w.+\w\W?)', re.IGNORECASE)
 async def preview_messagelink_function(message, client, args):
     try:
         in_content = None
@@ -137,6 +138,8 @@ async def preview_messagelink_function(message, client, args):
             else:
                 content = "Message from {} sent in #{} ({}) at {}:\n{}".format(target_message.author.name, channel.name, guild.name, sent_at, content)
             attachments = []
+            if target_message.channel.is_nsfw() and not message.channel.is_nsfw():
+                content = extract_links.sub(content, r'<\0>')
             if len(target_message.attachments) > 0:
                 plural = ""
                 if len(target_message.attachments) > 1:
