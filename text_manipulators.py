@@ -259,6 +259,7 @@ async def reaction_request_function(message, client, args):
             target = await message.channel.history(before=message, limit=1).flatten()
             target = target[0]
             await target.add_reaction(emoji)
+            await asyncio.sleep(1)
             try:
                 reaction, user = await client.wait_for('reaction_add', timeout=6000.0, check=lambda reaction, user: reaction.emoji == emoji)
             except asyncio.TimeoutError:
