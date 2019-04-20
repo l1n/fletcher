@@ -60,7 +60,11 @@ async def teleport_function(message, client, args):
         if str(fromChannel.id) in config['teleport']['fromchannel-ban'].split(',') and not message.author.guild_permissions.manage_webhooks:
             await fromChannel.send('Portals out of this channel have been disabled.', delete_after=60)
             raise Exception('Forbidden teleport')
-        toChannel = xchannel(args[0].strip(), fromGuild)
+        toChannelName = args[0].strip()
+        toChannel = xchannel(toChannelName, fromGuild)
+        if toChannel is None:
+            await fromChannel.send('Could not find channel {}, please check for typos.'.format(toChannelName))
+            raise Exception('Attempt to open portal to nowhere')
         toGuild = toChannel.guild
         if fromChannel.id == toChannel.id:
             await fromChannel.send('You cannot open an overlapping portal! Access denied.')
