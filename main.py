@@ -363,12 +363,16 @@ async def on_raw_message_edit(payload):
         fromGuild = client.get_guild(int(message['guild_id']))
         fromChannel = fromGuild.get_channel(int(message['channel_id']))
         fromMessage = await fromChannel.get_message(message_id)
-        if type(fromChannel) is discord.TextChannel:
-            print(str(message_id)+" #"+fromGuild.name+":"+fromChannel.name+" <"+fromMessage.author.name+"> [Edit] "+fromMessage.content)
-        elif type(fromChannel) is discord.DMChannel:
-            print(str(message_id)+" @"+fromChannel.recipient.name+" <"+fromMessage.author.name+"> [Edit] "+fromMessage.content)
+        if len(fromMessage.content) > 0:
+            if type(fromChannel) is discord.TextChannel:
+                print(str(message_id)+" #"+fromGuild.name+":"+fromChannel.name+" <"+fromMessage.author.name+"> [Edit] "+fromMessage.content)
+            elif type(fromChannel) is discord.DMChannel:
+                print(str(message_id)+" @"+fromChannel.recipient.name+" <"+fromMessage.author.name+"> [Edit] "+fromMessage.content)
+            else:
+                # Group Channels don't support bots so neither will we
+                pass
         else:
-            # Group Channels don't support bots so neither will we
+            # Currently, we don't log empty or image-only messages
             pass
         if fromGuild.name+':'+fromChannel.name in webhook_sync_registry:
             cur = conn.cursor()
@@ -509,5 +513,7 @@ async def on_member_join(member):
 async def on_member_remove(member):
     await ch.remove_handler(member)
 
+loop = asyncio.get_event_loop()
+
 # start bot
-client.run(token)
+loop.run_until_complete(client.start(token))
