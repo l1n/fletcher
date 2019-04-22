@@ -424,6 +424,12 @@ async def snooze_channel_function(message, client, args):
         conn.commit()
         await message.add_reaction('✅')
         await message.author.send("Snoozed for {} hours {}#{} (`!part` to leave channel permanently)".format(interval, channel.guild.name, channel.name))
+    except discord.Forbidden as e:
+        if cur is not None:
+            conn.rollback()
+        exc_type, exc_obj, exc_tb = exc_info()
+        print("PCF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+        await message.channel.send("Snooze forbidden! I don't have the authority to do that.")
     except Exception as e:
         if cur is not None:
             conn.rollback()
