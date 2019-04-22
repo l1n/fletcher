@@ -303,6 +303,9 @@ async def on_ready():
 async def on_message(message):
     global webhook_sync_registry
     global conn
+    # if the message is from the bot itself or sent via webhook, which is usually done by a bot, ignore it other than sync processing
+    if message.webhook_id:
+        return
     try:
         if message.guild.name+':'+message.channel.name in webhook_sync_registry:
             content = message.clean_content
@@ -335,10 +338,6 @@ async def on_message(message):
         pass
     if message.author == client.user:
         print(config['discord']['botNavel']+": "+message.clean_content)
-        return
-
-    # if the message is from the bot itself or sent via webhook, which is usually done by a bot, ignore it other than sync processing
-    if message.webhook_id:
         return
 
     # try to evaluate with the command handler
