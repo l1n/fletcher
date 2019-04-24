@@ -354,7 +354,7 @@ async def kick_user_function(message, client, args):
             print("KUF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
             # Ignore blocks etc
             pass
-        await member.kick(reason="{} obo {}".(logMessage, message.author.name))
+        await member.kick(reason="{} obo {}".format(logMessage, message.author.name))
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
         print("KUF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
