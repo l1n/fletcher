@@ -69,6 +69,9 @@ async def teleport_function(message, client, args):
         if fromChannel.id == toChannel.id:
             await fromChannel.send('You cannot open an overlapping portal! Access denied.')
             raise Exception('Attempt to open overlapping portal')
+        if not toChannel.permissions_for(toGuild.get_member(message.author.id)).send_messages:
+            await fromChannel.send('You do not have permission to post in that channel! Access denied.')
+            raise Exception('Attempt to open portal to forbidden channel')
         print('Entering in '+str(fromChannel))
         fromMessage = await fromChannel.send('Opening Portal To <#{}> ({})'.format(toChannel.id, toGuild.name))
         try:
