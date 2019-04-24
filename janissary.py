@@ -336,6 +336,29 @@ async def lastactive_user_function(message, client, args):
         exc_type, exc_obj, exc_tb = exc_info()
         print("LSU[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
 
+async def kick_user_function(message, client, args):
+    try:
+        if len(message.mentions) >= 1:
+            member = message.mentions[0]
+        else:
+            member = message.guild.get_member(int(args[0]))
+        logMessage = " ".join(args[1:]).strip()
+        if not len(logMessage):
+            logMessage = "A message was not provided."
+        logMessage = "You have been kicked from {}. If you have questions, please contact a moderator for that guild.\nReason: {}".format(guild.name, logMessage)
+        print("KUF: <@{}> kicked <@{}> from {} for {}".format(message.author.id, member.id, message.guild.id, logMessage))
+        try:
+            await messagefuncs.sendWrappedMessage(logMessage, member)
+        except Exception as e:
+            exc_type, exc_obj, exc_tb = exc_info()
+            print("KUF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+            # Ignore blocks etc
+            pass
+        await member.kick(logMessage)
+    except Exception as e:
+        exc_type, exc_obj, exc_tb = exc_info()
+        print("KUF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+
 async def lockout_user_function(message, client, args):
     try:
         if len(message.mentions) >= 1:
@@ -508,6 +531,15 @@ def autoload(ch):
         'args_num': 0,
         'args_name': [],
         'description': 'List all available users and time of last message (Admin)'
+        })
+    ch.add_command({
+        'trigger': ['!kick'],
+        'function': kick_user_function,
+        'async': True,
+        'admin': True,
+        'args_num': 1,
+        'args_name': ['@user', 'reason'],
+        'description': 'Kick user from server, and send them a message with the reason.'
         })
     ch.add_command({
         'trigger': ['!lockout'],
