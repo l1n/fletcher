@@ -345,7 +345,7 @@ async def kick_user_function(message, client, args):
         logMessage = " ".join(args[1:]).strip()
         if not len(logMessage):
             logMessage = "A message was not provided."
-        logMessage = "You have been kicked from {}. If you have questions, please contact a moderator for that guild.\nReason: {}".format(guild.name, logMessage)
+        logMessage = "You have been kicked from {}. If you have questions, please contact a moderator for that guild.\nReason: {}".format(message.guild.name, logMessage)
         print("KUF: <@{}> kicked <@{}> from {} for {}".format(message.author.id, member.id, message.guild.id, logMessage))
         try:
             await messagefuncs.sendWrappedMessage(logMessage, member)
