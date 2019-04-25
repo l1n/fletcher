@@ -181,7 +181,7 @@ async def help_function(message, client, args):
             else:
                 arg = args[0]
                 break
-        if message.startswith('!man'):
+        if message.content.startswith('!man'):
             public = True
         target = message.channel
         if (not hasattr(message.author, 'guild_permissions')) or (not message.author.guild_permissions.manage_webhooks) or (message.author.guild_permissions.manage_webhooks and not public):
