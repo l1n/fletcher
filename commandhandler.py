@@ -212,7 +212,7 @@ async def help_function(message, client, args):
             helpMessageBody = "\n".join(["`{}`: {}\nArguments ({}): {}".format("` or `".join(command['trigger']), command['description'], command['args_num'], " ".join(command['args_name'])) for command in accessible_commands])
         else:
             helpMessageBody = "\n".join(["`{}`: {}".format("` or `".join(command['trigger'][:2]), command['description']) for command in accessible_commands])
-        if message.author.guild_permissions.manage_webhooks and not public:
+        if not hasattr(message.author, 'guild_permissions') or (message.author.guild_permissions.manage_webhooks and not public):
             target = message.author
             await message.add_reaction('✅')
         else:
