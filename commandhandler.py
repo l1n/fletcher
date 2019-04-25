@@ -181,6 +181,8 @@ async def help_function(message, client, args):
             else:
                 arg = args[0]
                 break
+        if len(args) == 0:
+            arg = None
         if hasattr(message.author, 'guild_permissions') and message.author.guild_permissions.manage_webhooks and len(args) > 0 and verbose:
             def command_filter(c):
                 return ('hidden' not in c.keys() or c['hidden'] == False)
