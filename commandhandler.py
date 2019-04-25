@@ -37,9 +37,9 @@ class CommandHandler:
         channel = self.client.get_channel(reaction.channel_id)
         message = await channel.get_message(reaction.message_id)
         if type(channel) is discord.TextChannel:
-            print("#"+channel.guild.name+":"+channel.name+" <"+user.name+":"+str(user.name.id)+"> reacting with "+messageContent+" to "+str(message.id))
+            print("#"+channel.guild.name+":"+channel.name+" <"+user.name+":"+str(user.id)+"> reacting with "+messageContent+" to "+str(message.id))
         elif type(message.channel) is discord.DMChannel:
-            print("@"+channel.recipient.name+" <"+user.name+":"+str(user.name.id)+"> reacting with "+messageContent+" to "+str(message.id))
+            print("@"+channel.recipient.name+" <"+user.name+":"+str(user.id)+"> reacting with "+messageContent+" to "+str(message.id))
         else:
             # Group Channels don't support bots so neither will we
             pass
