@@ -164,13 +164,6 @@ class CommandHandler:
 async def help_function(message, client, args):
     global ch
     try:
-        if hasattr(message.author, 'guild_permissions') and message.author.guild_permissions.manage_webhooks and len(args) > 0 and args[0] == "verbose":
-            def command_filter(c):
-                return ('hidden' not in c.keys() or c['hidden'] == False)
-        else:
-            def command_filter(c):
-                return ('admin' not in c.keys() or c['admin'] == False) and ('hidden' not in c.keys() or c['hidden'] == False)
-        accessible_commands = filter(command_filter, ch.commands)
         arg = None
         verbose = False
         public = False
@@ -188,6 +181,13 @@ async def help_function(message, client, args):
             else:
                 arg = args[0]
                 break
+        if hasattr(message.author, 'guild_permissions') and message.author.guild_permissions.manage_webhooks and len(args) > 0 and verbose:
+            def command_filter(c):
+                return ('hidden' not in c.keys() or c['hidden'] == False)
+        else:
+            def command_filter(c):
+                return ('admin' not in c.keys() or c['admin'] == False) and ('hidden' not in c.keys() or c['hidden'] == False)
+        accessible_commands = filter(command_filter, ch.commands)
         if arg:
             keyword = " ".join(args).strip().lower()
             if keyword.startswith('!'):
@@ -207,8 +207,8 @@ async def help_function(message, client, args):
             accessible_commands = list(filter(query_filter, accessible_commands))
             # Set verbose if filtered list
             if len(accessible_commands) < 5:
-                args[0] = "verbose"
-        if len(args) > 0 and args[0] == "verbose":
+                verbose = True
+        if len(args) > 0 and verbose:
             helpMessageBody = "\n".join(["`{}`: {}\nArguments ({}): {}".format("` or `".join(command['trigger']), command['description'], command['args_num'], " ".join(command['args_name'])) for command in accessible_commands])
         else:
             helpMessageBody = "\n".join(["`{}`: {}".format("` or `".join(command['trigger'][:2]), command['description']) for command in accessible_commands])
