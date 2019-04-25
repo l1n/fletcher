@@ -37,9 +37,9 @@ class CommandHandler:
         channel = self.client.get_channel(reaction.channel_id)
         message = await channel.get_message(reaction.message_id)
         if type(channel) is discord.TextChannel:
-            print("#"+channel.guild.name+":"+channel.name+" <"+user.name+"> reacting with "+messageContent+" to "+str(message.id))
+            print("#"+channel.guild.name+":"+channel.name+" <"+user.name+":"+str(user.name.id)+"> reacting with "+messageContent+" to "+str(message.id))
         elif type(message.channel) is discord.DMChannel:
-            print("@"+channel.recipient.name+" <"+user.name+"> reacting with "+messageContent+" to "+str(message.id))
+            print("@"+channel.recipient.name+" <"+user.name+":"+str(user.name.id)+"> reacting with "+messageContent+" to "+str(message.id))
         else:
             # Group Channels don't support bots so neither will we
             pass
@@ -102,22 +102,22 @@ class CommandHandler:
                     sent_com_score = 1
                 elif message.content == "VADER BAD":
                     sent_com_score = -1
-                print(str(message.id)+" #"+message.guild.name+":"+message.channel.name+" <"+message.author.name+"> ["+str(sent_com_score)+"] "+message.content)
+                print(str(message.id)+" #"+message.guild.name+":"+message.channel.name+" <"+message.author.name+":"+str(message.author.id)+"> ["+str(sent_com_score)+"] "+message.content)
                 if 'Guild '+str(message.guild.id) in config and 'sent-com-score-threshold' in config['Guild '+str(message.guild.id)] and sent_com_score <= float(config['Guild '+str(message.guild.id)]['sent-com-score-threshold']) and message.webhook_id is None and message.guild.name in config['moderation']['guilds'].split(','):
                     await janissary.modreport_function(message, self.client, ("\n[Sentiment Analysis Combined Score "+str(sent_com_score)+'] '+message.content).split(' '))
             else:
                 if type(message.channel) is discord.TextChannel:
-                    print(str(message.id)+" #"+message.guild.name+":"+message.channel.name+" <"+message.author.name+"> [Nil] "+message.content)
+                    print(str(message.id)+" #"+message.guild.name+":"+message.channel.name+" <"+message.author.nam+":"+str(message.author.id)+"> [Nil] "+message.content)
                 elif type(message.channel) is discord.DMChannel:
-                    print(str(message.id)+" @"+message.channel.recipient.name+" <"+message.author.name+"> [Nil] "+message.content)
+                    print(str(message.id)+" @"+message.channel.recipient.name+" <"+message.author.nam+":"+str(message.author.id)+"> [Nil] "+message.content)
                 else:
                     # Group Channels don't support bots so neither will we
                     pass
         except AttributeError as e:
             if type(message.channel) is discord.TextChannel:
-                print("#"+message.channel.name+" <"+message.author.name+"> [Nil] "+message.content)
+                print("#"+message.channel.name+" <"+message.author.name+":"+str(message.author.id)+"> [Nil] "+message.content)
             elif type(message.channel) is discord.DMChannel:
-                print("@"+message.channel.recipient.name+" <"+message.author.name+"> [Nil] "+message.content)
+                        print("@"+message.channel.recipient.name+" <"+message.author.name+":"+str(message.author.id)+"> [Nil] "+message.content)
             else:
                 # Group Channels don't support bots so neither will we
                 pass

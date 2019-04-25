@@ -365,9 +365,9 @@ async def on_raw_message_edit(payload):
         fromMessage = await fromChannel.get_message(message_id)
         if len(fromMessage.content) > 0:
             if type(fromChannel) is discord.TextChannel:
-                print(str(message_id)+" #"+fromGuild.name+":"+fromChannel.name+" <"+fromMessage.author.name+"> [Edit] "+fromMessage.content)
+                print(str(message_id)+" #"+fromGuild.name+":"+fromChannel.name+" <"+fromMessage.author.name+":"+str(fromMessage.author.id)+"> [Edit] "+fromMessage.content)
             elif type(fromChannel) is discord.DMChannel:
-                print(str(message_id)+" @"+fromChannel.recipient.name+" <"+fromMessage.author.name+"> [Edit] "+fromMessage.content)
+                print(str(message_id)+" @"+fromChannel.recipient.name+" <"+fromMessage.author.name+":"+str(fromMessage.author.id)+"> [Edit] "+fromMessage.content)
             else:
                 # Group Channels don't support bots so neither will we
                 pass
