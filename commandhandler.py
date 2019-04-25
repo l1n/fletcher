@@ -181,6 +181,8 @@ async def help_function(message, client, args):
             else:
                 arg = args[0]
                 break
+        if message.startswith('!man'):
+            public = True
         target = message.channel
         if (not hasattr(message.author, 'guild_permissions')) or (not message.author.guild_permissions.manage_webhooks) or (message.author.guild_permissions.manage_webhooks and not public):
             target = message.author
@@ -214,6 +216,7 @@ async def help_function(message, client, args):
             # Set verbose if filtered list
             if len(accessible_commands) < 5:
                 verbose = True
+                public = True
         if len(args) > 0 and verbose:
             helpMessageBody = "\n".join(["`{}`: {}\nArguments ({}): {}".format("` or `".join(command['trigger']), command['description'], command['args_num'], " ".join(command['args_name'])) for command in accessible_commands])
         else:
