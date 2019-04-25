@@ -181,6 +181,11 @@ async def help_function(message, client, args):
             else:
                 arg = args[0]
                 break
+        target = message.channel
+        if (not hasattr(message.author, 'guild_permissions')) or (not message.author.guild_permissions.manage_webhooks) or (message.author.guild_permissions.manage_webhooks and not public):
+            target = message.author
+            await message.add_reaction('✅')
+        await target.send("Public "+public)
         if len(args) == 0:
             arg = None
         if hasattr(message.author, 'guild_permissions') and message.author.guild_permissions.manage_webhooks and len(args) > 0 and verbose:
@@ -214,11 +219,6 @@ async def help_function(message, client, args):
             helpMessageBody = "\n".join(["`{}`: {}\nArguments ({}): {}".format("` or `".join(command['trigger']), command['description'], command['args_num'], " ".join(command['args_name'])) for command in accessible_commands])
         else:
             helpMessageBody = "\n".join(["`{}`: {}".format("` or `".join(command['trigger'][:2]), command['description']) for command in accessible_commands])
-        if (not hasattr(message.author, 'guild_permissions')) or (message.author.guild_permissions.manage_webhooks and public == False):
-            target = message.author
-            await message.add_reaction('✅')
-        else:
-            target = message.channel
         await messagefuncs.sendWrappedMessage(helpMessageBody, target)
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
