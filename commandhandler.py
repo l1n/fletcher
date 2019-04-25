@@ -176,7 +176,7 @@ async def help_function(message, client, args):
         public = False
         while len(args) > 0:
             arg = args[0]
-            arg = arg.trim().lower()
+            arg = arg.strip().lower()
             if   arg == "verbose":
                 verbose = True
                 arg = None
@@ -189,7 +189,7 @@ async def help_function(message, client, args):
                 arg = args[0]
                 break
         if arg:
-            keyword = " ".join(args).trim().lower()
+            keyword = " ".join(args).strip().lower()
             if keyword.startswith('!'):
                 def query_filter(c):
                     for trigger in c['trigger']:
