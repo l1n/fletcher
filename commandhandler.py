@@ -185,7 +185,6 @@ async def help_function(message, client, args):
         if (not hasattr(message.author, 'guild_permissions')) or (not message.author.guild_permissions.manage_webhooks) or (message.author.guild_permissions.manage_webhooks and not public):
             target = message.author
             await message.add_reaction('✅')
-        await target.send("Public "+public)
         if len(args) == 0:
             arg = None
         if hasattr(message.author, 'guild_permissions') and message.author.guild_permissions.manage_webhooks and len(args) > 0 and verbose:
