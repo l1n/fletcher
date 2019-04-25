@@ -171,7 +171,24 @@ async def help_function(message, client, args):
             def command_filter(c):
                 return ('admin' not in c.keys() or c['admin'] == False) and ('hidden' not in c.keys() or c['hidden'] == False)
         accessible_commands = filter(command_filter, ch.commands)
-        if len(args) > 0 and args[0] != "verbose":
+        arg = None
+        verbose = False
+        public = False
+        while len(args) > 0:
+            arg = args[0]
+            arg = arg.trim().lower()
+            if   arg == "verbose":
+                verbose = True
+                arg = None
+                args = args[1:]
+            elif arg == "public":
+                public = True
+                arg = None
+                args = args[1:]
+            else:
+                arg = args[0]
+                break
+        if arg:
             keyword = " ".join(args).trim().lower()
             if keyword.startswith('!'):
                 def query_filter(c):
@@ -195,7 +212,12 @@ async def help_function(message, client, args):
             helpMessageBody = "\n".join(["`{}`: {}\nArguments ({}): {}".format("` or `".join(command['trigger']), command['description'], command['args_num'], " ".join(command['args_name'])) for command in accessible_commands])
         else:
             helpMessageBody = "\n".join(["`{}`: {}".format("` or `".join(command['trigger'][:2]), command['description']) for command in accessible_commands])
-        await messagefuncs.sendWrappedMessage(helpMessageBody, message.channel)
+        if message.author.guild_permissions.manage_webhooks and not public:
+            target = message.author
+            await message.add_reaction('✅')
+        else:
+            target = message.channel
+        await messagefuncs.sendWrappedMessage(helpMessageBody, target)
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
         print("HF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
