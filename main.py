@@ -130,7 +130,7 @@ async def load_webhooks():
         try:
             if "Guild "+str(guild.id) in config and "synchronize" in config["Guild "+str(guild.id)] and config["Guild "+str(guild.id)]["synchronize"] == "on":
                 print("LWH: Querying "+guild.name)
-                async for webhook in guild.webhooks():
+                for webhook in await guild.webhooks():
                     print("LWH: * "+webhook.name)
                     if webhook.name.startswith(config['discord']['botNavel']+' ('):
                         toChannelName = guild.name+':'+str(guild.get_channel(webhook.channel_id))
