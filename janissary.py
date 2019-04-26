@@ -434,8 +434,11 @@ async def snooze_channel_function(message, client, args):
                 channel = message.channel
         if message.guild is not None:
             guild = message.guild
-        else:
+        elif hasattr(channel, 'guild'):
             guild = channel.guild
+        else:
+            await message.add_reaction('🚫')
+            return await message.channel.send('Failed to locate channel, please check spelling.')
         global conn
         cur = conn.cursor()
         if len(args) > 1:
