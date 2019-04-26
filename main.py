@@ -125,13 +125,12 @@ webhook_sync_registry = {
 
 async def load_webhooks():
     global config
-    global webhook_sync_registry
     webhook_sync_registry = {}
     for guild in client.guilds:
         try:
             if "Guild "+str(guild.id) in config and "synchronize" in config["Guild "+str(guild.id)] and config["Guild "+str(guild.id)]["synchronize"] == "on":
                 print("LWH: Querying "+guild.name)
-                for webhook in await guild.webhooks():
+                async for webhook in guild.webhooks():
                     print("LWH: * "+webhook.name)
                     if webhook.name.startswith(config['discord']['botNavel']+' ('):
                         toChannelName = guild.name+':'+str(guild.get_channel(webhook.channel_id))
@@ -155,12 +154,16 @@ async def load_webhooks():
         except AttributeError:
             pass
     print("Webhooks loaded:")
+    globals()['webhook_sync_registry'] = webhook_sync_registry
     print("\n".join([key+" to "+webhook_sync_registry[key]['toChannelName']+' (Guild '+str(webhook_sync_registry[key]['toChannelObject'].guild.id)+')' for key in list(webhook_sync_registry)]))
 canticum_message = None
 doissetep_omega =  None
 
-def autoload(module):
-    global ch
+def autoload(module, choverride):
+    if choverride:
+        ch = choverride
+    else:
+        ch = globals()['ch']
     global config
     global conn
     global sid
@@ -188,7 +191,6 @@ async def animate_startup(emote, message=None):
         print(emote)
 
 async def reload_function(message=None, client=client, args=[]):
-    global ch
     global config
     global conn
     global sid
@@ -212,17 +214,14 @@ async def reload_function(message=None, client=client, args=[]):
                     for k, v in guild_config.items('DEFAULT'):
                         config.set("Guild "+f, k, v)
         await animate_startup('📝', message)
-        await load_webhooks()
-        if message:
-            await message.add_reaction('↔')
         conn = psycopg2.connect(host=config['database']['host'],database=config['database']['tablespace'], user=config['database']['user'], password=config['database']['password'])
         await animate_startup('💾', message)
         # Command Handler (loaded twice to bootstrap)
         importlib.reload(commandhandler)
         await animate_startup('⌨', message)
         ch = commandhandler.CommandHandler(client)
-        autoload(commandhandler)
-        autoload(versionutils)
+        autoload(commandhandler, ch)
+        autoload(versionutils, ch)
         versioninfo = versionutils.VersionInfo()
         ch.add_command({
             'trigger': ['!reload <@'+str(ch.client.user.id)+'>'],
@@ -234,29 +233,29 @@ async def reload_function(message=None, client=client, args=[]):
             'description': 'Reload config (admin only)'
             })
         # Utility text manipulators Module
-        autoload(text_manipulators)
+        autoload(text_manipulators, ch)
         await animate_startup('🔧', message)
         # Schedule Module
-        autoload(schedule)
+        autoload(schedule, ch)
         await animate_startup('📅', message)
         # Greeting module
-        autoload(greeting)
+        autoload(greeting, ch)
         await animate_startup('👋', message)
         # Sentinel Module
-        autoload(sentinel)
+        autoload(sentinel, ch)
         await animate_startup('🎏', message)
         # Messages Module
-        autoload(messagefuncs)
+        autoload(messagefuncs, ch)
         await animate_startup('🔭', message)
         # Math modules
-        autoload(mathemagical)
+        autoload(mathemagical, ch)
         await animate_startup('➕', message)
-        autoload(janissary)
+        autoload(janissary, ch)
         # Super Waifu Animated Girlfriend (SWAG)
-        autoload(swag)
+        autoload(swag, ch)
         await animate_startup('🙉', message)
         # Google Photos Connector (for !twilestia et al)
-        autoload(googlephotos)
+        autoload(googlephotos, ch)
         await animate_startup('📷', message)
         # Play it again, Sam
         if not doissetep_omega.is_playing():
@@ -266,6 +265,10 @@ async def reload_function(message=None, client=client, args=[]):
         # Trigger reload handlers
         await ch.reload_handler()
         await animate_startup('🔁', message)
+        globals()['ch'] = ch
+        await load_webhooks()
+        if message:
+            await message.add_reaction('↔')
         await animate_startup('✅', message)
         await client.change_presence(activity=discord.Game(
             name='fletcher.fun | !help',
@@ -293,6 +296,7 @@ async def on_ready():
         doissetep_omega = await client.get_guild(int(config['audio']['guild'])).get_channel(int(config['audio']['channel'])).connect();
         loop = asyncio.get_running_loop()
         loop.remove_signal_handler(signal.SIGHUP)
+        await load_webhooks()
         await reload_function()
         loop.add_signal_handler(signal.SIGHUP, lambda: asyncio.ensure_future(reload_function()))
     except Exception as e:
