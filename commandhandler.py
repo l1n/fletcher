@@ -115,7 +115,7 @@ class CommandHandler:
                     pass
         except AttributeError as e:
             if type(message.channel) is discord.TextChannel:
-                print("#"+message.channel.name+" <"+message.author.name+":"+str(message.author.id)+"> [Nil] "+message.content)
+                print(str(message.id)+" #"+message.guild.name+":"+message.channel.name+" <"+message.author.name+":"+str(message.author.id)+"> [Nil] "+message.content)
             elif type(message.channel) is discord.DMChannel:
                         print("@"+message.channel.recipient.name+" <"+message.author.name+":"+str(message.author.id)+"> [Nil] "+message.content)
             else:
