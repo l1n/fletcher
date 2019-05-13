@@ -497,7 +497,8 @@ async def sudo_function(message, client, args):
         while tries < 30:
             await asyncio.sleep(1)
             entries = await message.guild.audit_logs(limit=1, user=message.author, after=now).flatten()
-            if len(entries) > 0:
+            if len(entries) > 1:
+                print(",".join(entries))
                 await message.author.remove_roles(role, reason="Sudo deescalation", atomic=False)
                 return
             tries = tries + 1
