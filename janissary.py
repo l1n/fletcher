@@ -240,7 +240,7 @@ async def modreport_function(message, client, args):
                 users = scoped_config['mod-users'].split(',')
             else:
                 users = scoped_config['manual-mod-users'].split(',')
-            users = list(expand_target_list(users))
+            users = list(expand_target_list(users, message.guild))
             for user_id in users:
                 modmail = await messagefuncs.sendWrappedMessage(report_content, client.get_user(int(user_id)))
                 if message.channel.is_nsfw():
@@ -251,19 +251,19 @@ async def modreport_function(message, client, args):
         exc_type, exc_obj, exc_tb = exc_info()
         print("MRF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
 
-def expand_target_list(targets):
+def expand_target_list(targets, guild):
     inputs = list(targets)
     targets = set()
     for target in inputs:
         if target.startswith('r:'):
-            members = message.guild.get_role(target[2:]).members
+            members = guild.get_role(target[2:]).members
             targets.update(set(members))
         elif target.startswith('c:'):
-            channel = message.guild.get_channel(target[2:])
+            channel = guild.get_channel(target[2:])
             targets.update(channel)
         else:
             # ID asssumed to be targets
-            targets.add(message.guild.get_user(int(user)))
+            targets.add(guild.get_user(int(user)))
     return targets
 
 async def lastactive_channel_function(message, client, args):
