@@ -199,6 +199,7 @@ async def modping_function(message, client, args):
                 await role.edit(mentionable=False)
             if 'snappy' in config['discord'] and config['discord']['snappy']:
                 mentionPing.delete()
+            print("MPF: pinged {} for guild {}".format(mentionPing.id, message.guild.name))
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
         print("MPF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
