@@ -496,9 +496,14 @@ async def sudo_function(message, client, args):
         tries = 0
         while tries < 600:
             await asyncio.sleep(1)
-            entries = await message.guild.audit_logs(limit=None, user=message.author, after=now).flatten()
-            if len(entries) > 0:
-                print("SUDOF"+(",".join(entries)))
+            try:
+                # Discord audit log has an after parameter which hasn't worked in ages :(
+                entry = await message.guild.audit_logs(limit=None, user=message.author, oldest_first=False).next()
+            except discord.NoMoreItems:
+                entry = None
+                pass
+            if entry.created_at > now:
+                print("SUDOF: "+str(entry))
                 await message.author.remove_roles(role, reason="Sudo deescalation (commanded)", atomic=False)
                 return
             tries = tries + 1
