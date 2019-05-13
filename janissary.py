@@ -496,12 +496,13 @@ async def sudo_function(message, client, args):
         tries = 0
         while tries < 600:
             await asyncio.sleep(1)
-            entries = await message.guild.audit_logs(limit=1, user=message.author, after=now).flatten()
-            if len(entries) > 1:
-                print(",".join(entries))
+            entries = await message.guild.audit_logs(limit=None, user=message.author, after=now).flatten()
+            if len(entries) > 0:
+                print("SUDOF"+(",".join(entries)))
                 await message.author.remove_roles(role, reason="Sudo deescalation (commanded)", atomic=False)
                 return
             tries = tries + 1
+        print("SUDOF: timeout")
         await message.author.remove_roles(role, reason="Sudo deescalation (timeout)", atomic=False)
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
