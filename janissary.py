@@ -241,8 +241,8 @@ async def modreport_function(message, client, args):
             else:
                 users = scoped_config['manual-mod-users'].split(',')
             users = list(expand_target_list(users, message.guild))
-            for user_id in users:
-                modmail = await messagefuncs.sendWrappedMessage(report_content, client.get_user(int(user_id)))
+            for target in users:
+                modmail = await messagefuncs.sendWrappedMessage(report_content, target)
                 if message.channel.is_nsfw():
                     await modmail.add_reaction('🕜')
         else:
