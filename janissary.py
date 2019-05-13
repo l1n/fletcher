@@ -488,16 +488,17 @@ async def sudo_function(message, client, args):
         if "Guild "+str(message.guild.id) in config:
             scoped_config = config["Guild "+str(message.guild.id)]
         else:
-            raise Exception("No guild-specific configuration for moderation on guild "+str(message.guild))
+            raise Exception("No guild-specific configuration for wheel on guild "+str(message.guild))
         now = datetime.utcnow()
-        await message.author.add_roles(message.guild.get_role(int(scoped_config['wheel-role'])), reason="Sudo elevation")
+        role = message.guild.get_role(int(scoped_config['wheel-role']))
+        await message.author.add_roles(role, reason="Sudo elevation", atomic=False)
         await message.add_reaction('✅')
         tries = 0
         while tries < 30:
             await asyncio.sleep(1)
             entries = await message.guild.audit_logs(limit=1, user=message.author, after=now).flatten()
             if len(entries):
-                await message.author.remove_roles(message.guild.get_role(scoped_config['wheel-role']), reason="Sudo deescalation")
+                await message.author.remove_roles(role, reason="Sudo deescalation", atomic=False)
                 return
             tries = tries + 1
     except Exception as e:
