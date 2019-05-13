@@ -263,7 +263,7 @@ def expand_target_list(targets, guild):
             targets.update(channel)
         else:
             # ID asssumed to be targets
-            targets.add(guild.get_user(int(user)))
+            targets.add(guild.get_member(int(user)))
     return targets
 
 async def lastactive_channel_function(message, client, args):
