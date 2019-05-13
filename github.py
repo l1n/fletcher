@@ -15,13 +15,19 @@ async def github_report_function(message, client, args):
         async with aiohttp.ClientSession(headers={'Authorization': 'token '+config['github']['personalAccessToken']}) as session:
             url = base_url + post_url
             content = "\n".join(message.content.splitlines(True)[1:])
+            content = content + "\n reported on behalf of "+message.author.display_name+" via [Fletcher](fletcher.fun) on Discord ("+message.guild.name+":"+message.channel.name+")"
             title = " ".join(message.content.splitlines()[0].split(" ")[1:])
             async with session.post(url, json={'title': title, 'body': content}) as response:
                 response_body = await response.json()
-            await message.channel.send(embed=discord.Embed(title="#"+str(response_body['number'])+": "+response_body['title'], url=response_body['html_url']).add_field(
-                name="Status", value=response_body['state'].capitalize(), inline=True).add_field(
-                name="Content", value=response_body['body']).set_footer(
-                icon_url="https://download.nova.anticlack.com/fletcher/github.favicon.png",text="On behalf of {}".format(message.author.display_name)))
+                if not response_body['body']:
+                    response_body['body'] = "*Empty*"
+                    body_inline = True
+                else:
+                    body_inline = False
+                await message.channel.send(embed=discord.Embed(title="#"+str(response_body['number'])+": "+response_body['title'], url=response_body['html_url']).add_field(
+                    name="Status", value=response_body['state'].capitalize(), inline=True).add_field(
+                    name="Content", value=response_body['body'], inline=body_inline).set_footer(
+                    icon_url="https://download.nova.anticlack.com/fletcher/github.favicon.png",text="On behalf of {}".format(message.author.display_name)))
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
         print("GRF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
