@@ -103,7 +103,7 @@ async def chanban_reload_function(guild, client, config):
         age_of_consent = timedelta(seconds=int(config['chanban_younger_than']))
         age_of_consent_expiry = timedelta(seconds=int(config['chanban_younger_than']), hours=2)
         younglings = [member for member in guild.members if now - member.joined_at < age_of_consent]
-        member_overrides = [member for (member, permissions) in channel.overwrites if isinstance(member, discord.Member)]
+        member_overrides = [member for member, permissions in channel.overwrites.items() if isinstance(member, discord.Member)]
         for member in younglings:
             if member not in member_overrides:
                 print('CBRF: Banning '+str(member))
