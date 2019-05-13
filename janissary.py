@@ -256,10 +256,10 @@ def expand_target_list(targets, guild):
     targets = set()
     for target in inputs:
         if target.startswith('r:'):
-            members = guild.get_role(target[2:]).members
+            members = guild.get_role(int(target[2:])).members
             targets.update(set(members))
         elif target.startswith('c:'):
-            channel = guild.get_channel(target[2:])
+            channel = guild.get_channel(int(target[2:]))
             targets.update(channel)
         else:
             # ID asssumed to be targets
