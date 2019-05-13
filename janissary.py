@@ -482,6 +482,27 @@ async def snooze_channel_function(message, client, args):
         exc_type, exc_obj, exc_tb = exc_info()
         print("PCF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
 
+async def sudo_function(message, client, args):
+    try:
+        if "Guild "+str(message.guild.id) in config:
+            scoped_config = config["Guild "+str(message.guild.id)]
+        else:
+            raise Exception("No guild-specific configuration for moderation on guild "+str(message.guild))
+        now = datetime.utcnow()
+        await message.author.add_roles(message.guild.get_role(scoped_config['wheel-role']), reason="Sudo elevation")
+        await message.add_reaction('✅')
+        tries = 0
+        while tries < 30:
+            await asyncio.sleep(1)
+            entries = await message.guild.audit_logs(limit=1, user=message.author, after=now).flatten()
+            if len(entries):
+                await message.author.remove_roles(message.guild.get_role(scoped_config['wheel-role']), reason="Sudo deescalation")
+                return
+            tries = tries + 1
+    except Exception as e:
+        exc_type, exc_obj, exc_tb = exc_info()
+        print("SUDOF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+
 
 def autoload(ch):
     ch.add_command({
@@ -598,4 +619,13 @@ def autoload(ch):
         'args_num': 0,
         'args_name': ['#channel'],
         'description': 'Leave a channel. Reversed in 24 hours.'
+        })
+    ch.add_command({
+        'trigger': ['!sudo'],
+        'function': sudo_function,
+        'async': True,
+        'admin': True,
+        'args_num': 0,
+        'args_name': [],
+        'description': 'Elevate permissions for one command', # by assigning a temporary admin-grant role
         })
