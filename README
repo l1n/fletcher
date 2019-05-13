@@ -45,7 +45,7 @@ If you would like to self-host Fletcher, email the author: we'll work something
 out. This is a source code release of only the main modules, without optional
 modules or other ancillaries provided. Alternatively, simply add the hosted
 Fletcher to your own Discord server using the OAuth grant link at
-https://novalinium.com/go/4/fletcher.
+http://fletcher.fun/add.
 
 Documentation:
 Documentation for this code is in progress at https://man.sr.ht/~nova/fletcher,
