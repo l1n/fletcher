@@ -110,6 +110,7 @@ import text_manipulators
 import schedule
 import swag
 import googlephotos
+import github
 
 versioninfo = versionutils.VersionInfo()
 sid = SentimentIntensityAnalyzer()
@@ -257,6 +258,9 @@ async def reload_function(message=None, client=client, args=[]):
         # Google Photos Connector (for !twilestia et al)
         autoload(googlephotos, ch)
         await animate_startup('📷', message)
+        # GitHub Connector
+        autoload(github, ch)
+        await animate_startup('🐙', message)
         # Play it again, Sam
         if not doissetep_omega.is_playing():
             doissetep_omega.play(discord.FFmpegPCMAudio(config['audio']['instreamurl']))
