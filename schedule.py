@@ -22,7 +22,7 @@ async def table_exec_function():
                 "unban": "snoozed a channel",
                 }
         while tabtuple:
-            user = await client.get_user_info(tabtuple[0])
+            user = await client.get_user(tabtuple[0])
             guild_id = tabtuple[1]
             channel_id = tabtuple[2]
             message_id = tabtuple[3]
@@ -41,7 +41,7 @@ async def table_exec_function():
             from_channel = guild.get_channel(channel_id)
             target_message = None
             try:
-                target_message = await from_channel.get_message(message_id)
+                target_message = await from_channel.fetch_message(message_id)
                 # created_at is naîve, but specified as UTC by Discord API docs
                 content = target_message.content
             except (discord.NotFound, AttributeError) as e:

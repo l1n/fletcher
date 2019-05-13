@@ -366,7 +366,7 @@ async def on_raw_message_edit(payload):
             return # No DM processing pls
         fromGuild = client.get_guild(int(message['guild_id']))
         fromChannel = fromGuild.get_channel(int(message['channel_id']))
-        fromMessage = await fromChannel.get_message(message_id)
+        fromMessage = await fromChannel.fetch_message(message_id)
         if len(fromMessage.content) > 0:
             if type(fromChannel) is discord.TextChannel:
                 print(str(message_id)+" #"+fromGuild.name+":"+fromChannel.name+" <"+fromMessage.author.name+":"+str(fromMessage.author.id)+"> [Edit] "+fromMessage.content)
@@ -386,7 +386,7 @@ async def on_raw_message_edit(payload):
             if metuple is not None:
                 toGuild = client.get_guild(metuple[0])
                 toChannel = toGuild.get_channel(metuple[1])
-                toMessage = await toChannel.get_message(metuple[2])
+                toMessage = await toChannel.fetch_message(metuple[2])
                 await toMessage.delete()
                 content = fromMessage.clean_content
                 attachments = []
@@ -445,7 +445,7 @@ async def on_raw_message_delete(message):
                 toMessage = None
                 while not toMessage:
                     try:
-                        toMessage = await toChannel.get_message(metuple[2])
+                        toMessage = await toChannel.fetch_message(metuple[2])
                     except discord.NotFound as e:
                         exc_type, exc_obj, exc_tb = exc_info()
                         print("ORMD[{}]: {}".format(exc_tb.tb_lineno, e))

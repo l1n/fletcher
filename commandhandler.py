@@ -33,9 +33,9 @@ class CommandHandler:
     async def reaction_handler(self, reaction):
         global config
         messageContent = str(reaction.emoji)
-        user = await self.client.get_user_info(reaction.user_id)
+        user = await self.client.get_user(reaction.user_id)
         channel = self.client.get_channel(reaction.channel_id)
-        message = await channel.get_message(reaction.message_id)
+        message = await channel.fetch_message(reaction.message_id)
         if type(channel) is discord.TextChannel:
             print("#"+channel.guild.name+":"+channel.name+" <"+user.name+":"+str(user.id)+"> reacting with "+messageContent+" to "+str(message.id))
         elif type(message.channel) is discord.DMChannel:
