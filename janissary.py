@@ -490,7 +490,7 @@ async def sudo_function(message, client, args):
         else:
             raise Exception("No guild-specific configuration for moderation on guild "+str(message.guild))
         now = datetime.utcnow()
-        await message.author.add_roles(message.guild.get_role(scoped_config['wheel-role']), reason="Sudo elevation")
+        await message.author.add_roles(message.guild.get_role(int(scoped_config['wheel-role'])), reason="Sudo elevation")
         await message.add_reaction('✅')
         tries = 0
         while tries < 30:
