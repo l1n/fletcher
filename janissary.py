@@ -260,7 +260,7 @@ def expand_target_list(targets, guild):
             targets.update(set(members))
         elif target.startswith('c:'):
             channel = guild.get_channel(int(target[2:]))
-            targets.update(channel)
+            targets.add(channel)
         else:
             # ID asssumed to be targets
             targets.add(guild.get_member(int(target)))
