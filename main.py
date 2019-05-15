@@ -1,17 +1,18 @@
 # bot.py
+from datetime import datetime
+from nltk.sentiment.vader import SentimentIntensityAnalyzer
+from sys import exc_info
 import asyncio
 import configparser
-from datetime import datetime
+import cProfile
 import discord
 import importlib
 import io
 import math
-from nltk.sentiment.vader import SentimentIntensityAnalyzer
 import os
 import psycopg2
 import re
 import signal
-from sys import exc_info
 import traceback
 
 """fletcher=# \d parlay
@@ -200,8 +201,16 @@ async def reload_function(message=None, client=client, args=[]):
     now = datetime.utcnow()
     try:
         await client.change_presence(activity=discord.Game(name='Reloading: The Game'))
+        if 'profile' in config['discord'] and config['discord']['profile']:
+            global pr
+            if pr:
+                pr.disable()
+                pr.print_stats()
         config = configparser.ConfigParser()
         config.read(FLETCHER_CONFIG)
+        if 'profile' in config['discord'] and config['discord']['profile']:
+            pr = cProfile.Profile()
+            pr.enable()
         if 'extra' in config and 'rc-path' in config['extra'] and os.path.isdir(config['extra']['rc-path']):
             for f in os.listdir(config['extra']['rc-path']):
                 if f.isdigit():
@@ -228,7 +237,7 @@ async def reload_function(message=None, client=client, args=[]):
             'trigger': ['!reload <@'+str(ch.client.user.id)+'>'],
             'function': reload_function,
             'async': True,
-            'admin': True,
+            'admin': 'global',
             'args_num': 0,
             'args_name': [],
             'description': 'Reload config (admin only)'
