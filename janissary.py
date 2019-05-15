@@ -519,7 +519,7 @@ def autoload(ch):
         'trigger': ['!roleadd', '!addrole'],
         'function': addrole_function,
         'async': True,
-        'admin': True,
+        'admin': 'server',
         'args_num': 1,
         'args_name': [],
         'description': 'Add role (self-assignable by default)'
@@ -528,7 +528,7 @@ def autoload(ch):
         'trigger': ['!roledel', '!delrole'],
         'function': delrole_function,
         'async': True,
-        'admin': True,
+        'admin': 'server',
         'args_num': 1,
         'args_name': [],
         'description': 'Delete role'
@@ -537,7 +537,7 @@ def autoload(ch):
         'trigger': ['!revoke'],
         'function': revokerole_function,
         'async': True,
-        'admin': True,
+        'admin': 'server',
         'args_num': 1,
         'args_name': [],
         'description': 'Revoke role `!revoke rolename from me`'
@@ -546,7 +546,7 @@ def autoload(ch):
         'trigger': ['!assign'],
         'function': assignrole_function,
         'async': True,
-        'admin': True,
+        'admin': 'server',
         'args_num': 1,
         'args_name': [],
         'description': 'Assign role `!assign rolename to me`'
@@ -555,7 +555,7 @@ def autoload(ch):
         'trigger': ['!modping'],
         'function': modping_function,
         'async': True,
-        'admin': True,
+        'admin': 'server',
         'args_num': 1,
         'args_name': [],
         'description': 'Ping unpingable roles (Admin)'
@@ -572,7 +572,7 @@ def autoload(ch):
         'trigger': ['!lastactive_channel', '!lastactivity_channel', '!lsc'],
         'function': lastactive_channel_function,
         'async': True,
-        'admin': True,
+        'admin': 'server',
         'args_num': 0,
         'args_name': [],
         'description': 'List all available channels and time of last message (Admin)'
@@ -581,7 +581,7 @@ def autoload(ch):
         'trigger': ['!lastactive_user', '!lastactivity_user', '!lsu'],
         'function': lastactive_user_function,
         'async': True,
-        'admin': True,
+        'admin': 'server',
         'args_num': 0,
         'args_name': [],
         'description': 'List all available users and time of last message (Admin)'
@@ -590,7 +590,7 @@ def autoload(ch):
         'trigger': ['!kick'],
         'function': kick_user_function,
         'async': True,
-        'admin': True,
+        'admin': 'server',
         'args_num': 1,
         'args_name': ['@user', 'reason'],
         'description': 'Kick user from server, and send them a message with the reason.'
@@ -599,7 +599,7 @@ def autoload(ch):
         'trigger': ['!lockout'],
         'function': lockout_user_function,
         'async': True,
-        'admin': True,
+        'admin': 'server',
         'args_num': 1,
         'args_name': ['@user', 'reset|hide'],
         'description': 'Lockout or reset user permissions'
@@ -609,7 +609,7 @@ def autoload(ch):
         'function': optin_channel_function,
         'async': True,
         'hidden': True,
-        'admin': True,
+        'admin': 'global',
         'args_num': 0,
         'args_name': ['#channel'],
         'description': 'Join a channel, no arguments to list available channels.'
@@ -634,7 +634,7 @@ def autoload(ch):
         'trigger': ['!sudo'],
         'function': sudo_function,
         'async': True,
-        'admin': True,
+        'admin': 'server',
         'args_num': 0,
         'args_name': [],
         'description': 'Elevate permissions for one command', # by assigning a temporary admin-grant role

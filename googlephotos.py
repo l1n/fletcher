@@ -109,7 +109,7 @@ def autoload(ch):
         'trigger': ['!photos_list_albums', '!pla'],
         'function': listalbums_function,
         'async': False,
-        'admin': True,
+        'admin': 'global',
         'hidden': True,
         'args_num': 0,
         'args_name': [],
@@ -119,7 +119,7 @@ def autoload(ch):
         'trigger': ['!photos_login'],
         'function': login_googlephotos_function,
         'async': False,
-        'admin': True,
+        'admin': 'global',
         'args_num': 1,
         'args_name': [],
         'description': 'Log onto Google Photos (Admin)'

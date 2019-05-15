@@ -6,6 +6,36 @@ import re
 from sys import exc_info
 import textwrap
 
+def allowCommand(command, message):
+    global config
+    if 'admin' in command:
+        # Global admin commands use builtin global admin list
+        if command['admin'] == 'global' and message.author.id in [int(admin.strip()) for admin in config['discord']['globalAdmin'].split(',')]:
+            return True
+        # Guild admin commands
+        if type(message.channel) == discord.GuildChannel:
+            # Server-specific
+            if command['admin'].startswith('server:')    and message.guild.id   in [int(guild.strip())   for guild   in command['admin'].split(':')[1].split(',')] and message.author.guild_permissions.manage_webhooks:
+                return True                                                                                
+            # Channel-specific
+            elif command['admin'].startswith('channel:') and message.channel.id in [int(channel.strip()) for channel in command['admin'].split(':')[1].split(',')] and message.author.permissions_in(message.channel).manage_webhooks:
+                return True
+            # Any server
+            elif command['admin'] in ['server', True] and message.author.guild_permissions.manage_webhooks:
+                return True
+            # Any channel
+            elif command['admin'] == 'channel' and message.author.permissions_in(message.channel).manage_webhooks:
+                return True
+        # Unprivileged
+        if command['admin'] == False:
+            return True
+        else:
+            # Invalid config
+            return False
+    else:
+        # No admin set == Unprivileged
+        return True
+
 class CommandHandler:
 
     # constructor
@@ -44,7 +74,7 @@ class CommandHandler:
             # Group Channels don't support bots so neither will we
             pass
         for command in self.commands:
-            if messageContent.startswith(tuple(command['trigger'])) and (('admin' in command and command['admin'] and hasattr(user, 'guild_permissions') and user.guild_permissions.manage_webhooks) or 'admin' not in command or not command['admin']):
+            if messageContent.startswith(tuple(command['trigger'])) and allowCommand(command, message):
                 print(command)
                 if command['args_num'] == 0:
                     if str(user.id) in config['moderation']['blacklist-user-usage'].split(','):
@@ -139,7 +169,7 @@ class CommandHandler:
         if not searchString.startswith("!"):
             return
         for command in self.commands:
-            if searchString.lower().startswith(tuple(command['trigger'])) and (('admin' in command and command['admin'] and hasattr(message.author, 'guild_permissions') and message.author.guild_permissions.manage_webhooks) or 'admin' not in command or not command['admin']):
+            if searchString.lower().startswith(tuple(command['trigger'])) and allowCommand(command, message):
                 with message.channel.typing():
                     print("[CH] Triggered "+str(command))
                     args = searchString.split(' ')
