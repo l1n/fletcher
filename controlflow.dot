@@ -7,6 +7,7 @@ digraph fletcher {
     Initialize -> OnReady [ label = "Connect to Discord WebSocket Gateway" ];
     OnReady -> Reload [ label = "Reload config files,\nhotpatch modules,\nand rebuild CommandHandler" ];
     Reload -> Config [ label = "INI file at FLETCHER_CONFIG" ];
+    Reload -> Profiler [ label = "Optional, toggle in config file" ];
     Config -> Webhooks [ label = "Message bridge configuration\nfrom Discord" ];
     Webhooks -> Sync;
     Config -> Database [ label = "Connect to Postgres" ];
@@ -48,12 +49,14 @@ digraph fletcher {
     Admin -> ModPing [ label = "Unlock, ping, and relock a role" ];
     Config -> ModPing [ label = "User list" ];
     Admin -> ModReport [ label = "Report message to mods\nremoved immediately after (if reaction)" ];
-    Config -> ModReport [ label = "User list" ];
+    Config -> ModReport [ label = "User, channel and/or role list" ];
     Admin -> LastActiveChannel [ label = "List all available channels\nand time of last message" ];
     Admin -> LastActiveUser [ label = "List all available users\nand time of last message" ];
+    Admin -> Sudo [ label = "Allow admin to temporarily elevate permissions" ];
     CommandHandler -> SWAG [ label = "Sugar snacks for the chatter" ];
     SWAG -> uwu [ label = "Say cute stuff" ];
     SWAG -> ShindanMaker [ label = "Allow interacting with shindanmaker.com without hitting the site" ];
+    SWAG -> RetrowWave [ label = "Turn arguments into a retro-looking image" ];
     SWAG -> Pony;
     Pony -> CanIUploadMyself;
     Pony -> FriendshipIsOptimal;
@@ -62,6 +65,9 @@ digraph fletcher {
     GooglePhotos -> AuthorizeFlow;
     GooglePhotos -> ListAlbums;
     GooglePhotos -> Twilestia [ label = "For flirting with Celestia mostly\ngets random image from album" ];
+    CommandHandler -> GitHub;
+    GitHub -> GitHubReport [ label = "Report issue on a per server basis" ];
+    Config -> GitHubReport [ label = "Repo to report issues to" ];
     CommandHandler -> PlayRadio [ label = "Reset canticum trigger so voice updates go to a new message" ];
     OnReady -> SignalHandlerHUP;
     OnReady -> OnVoiceUpdate;
