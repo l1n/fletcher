@@ -1,6 +1,7 @@
 import aiohttp
 import discord
 import io
+import messagefuncs
 import random
 import re
 from lxml import html
@@ -42,6 +43,51 @@ async def uwu_function(message, client, args, responses=uwu_responses):
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
         print("UWU[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+
+async def retrowave_function(message, client, args):
+    try:
+        async with aiohttp.ClientSession() as session:
+            params = aiohttp.FormData()
+            params.add_field('bcg',random.randint(1, 5))
+            params.add_field('txt',random.randint(1, 4))
+            text_parts = message.content
+            text_parts = messagefuncs.sanitize_font.sub('', text_parts)
+            if '/' in text_parts:
+                if len(args) == 2 and type(args[1]) is discord.User:
+                    pass
+                else:
+                    text_parts = text_parts[10:].strip()
+                text_parts = [part.strip() for part in text_parts.split('/')]
+                if len(text_parts) == 0:
+                    text_parts = ['', '', '']
+                elif len(text_parts) == 1:
+                    text_parts = ['', text_parts[0], '']
+                elif len(text_parts) == 2:
+                    text_parts += ['']
+            else:
+                text_parts = text_parts.split()
+                if len(args) == 2 and type(args[1]) is discord.User:
+                    pass
+                else:
+                    text_parts = text_parts[1:]
+                part_len = int(len(text_parts)/3)
+                if part_len > 1:
+                    text_parts = [" ".join(text_parts[:part_len]), " ".join(text_parts[part_len:2*part_len]), " ".join(text_parts[2*part_len:])]
+                else:
+                    text_parts = [" ".join(text_parts[0:1]), " ".join(text_parts[1:2]), " ".join(text_parts[2:])]
+            params.add_field('text1',text_parts[0])
+            params.add_field('text2',text_parts[1])
+            params.add_field('text3',text_parts[2])
+            print("RWF: "+str(text_parts))
+            async with session.post('https://m.photofunia.com/categories/all_effects/retro-wave?server=2', data=params) as resp:
+                request_body = (await resp.read()).decode('UTF-8')
+                root = html.document_fromstring(request_body)
+                async with session.get(root.xpath('//a[@class="download-button"]')[0].attrib['href']) as resp:
+                    buffer = io.BytesIO(await resp.read())
+                return await message.channel.send(files=[discord.File(buffer, 'retrowave.jpg')])
+    except Exception as e:
+        exc_type, exc_obj, exc_tb = exc_info()
+        print("RWF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
 
 async def shindan_function(message, client, args):
     try:
@@ -143,4 +189,12 @@ def autoload(ch):
         'args_num': 0,
         'args_name': [],
         'description': 'Embed shindan'
+        })
+    ch.add_command({
+        'trigger': ['!retrowave'],
+        'function': retrowave_function,
+        'async': True,
+        'args_num': 0,
+        'args_name': [],
+        'description': 'Retrowave Text Generator'
         })

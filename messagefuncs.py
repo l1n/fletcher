@@ -219,6 +219,8 @@ def localizeName(user, guild):
         localized = localized.display_name
     return localized
 
+sanitize_font = re.compile(r'[^❤A-Za-z0-9 /]')
+
 # Register this module's commands
 def autoload(ch):
     ch.add_command({
