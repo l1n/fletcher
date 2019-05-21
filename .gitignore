@@ -1,2 +1,8 @@
 .fletcherrc
+bin
+include
+lib
+share
 __pycache__
+controlflow.png
+controlflow.ps

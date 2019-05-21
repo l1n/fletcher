@@ -90,7 +90,7 @@ class CommandHandler:
                                 return await message.channel.send(str(command['function'](message, self.client, [reaction, user])))
         except Exception as e:
             exc_type, exc_obj, exc_tb = exc_info()
-            print("RXH[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+            print(f'RXH[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
 
     async def remove_handler(self, member):
         if "Guild "+str(member.guild.id) in config and 'on_member_remove' in config["Guild "+str(member.guild.id)]:
@@ -117,7 +117,7 @@ class CommandHandler:
                             await self.reload_handlers[reload_action](guild, self.client, config["Guild "+str(guild.id)])
         except Exception as e:
             exc_type, exc_obj, exc_tb = exc_info()
-            print("RLH[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+            print(f'RLH[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
 
     async def command_handler(self, message):
         global config
@@ -197,7 +197,7 @@ class CommandHandler:
                             else:
                                 return await message.channel.send(str(command['function'](message, self.client, args)))
                         else:
-                            return await message.channel.send('command "{}" requires {} argument(s) "{}"'.format(command['trigger'][0], command['args_num'], ', '.join(command['args_name'])))
+                            return await message.channel.send(f'command "{command["trigger"][0]}" requires {command["args_num"]} argument(s) "{", ".join(command["args_name"])}"')
 
 async def help_function(message, client, args):
     global ch
@@ -256,13 +256,13 @@ async def help_function(message, client, args):
                 verbose = True
                 public = True
         if len(args) > 0 and verbose:
-            helpMessageBody = "\n".join(["`{}`: {}\nArguments ({}): {}".format("` or `".join(command['trigger']), command['description'], command['args_num'], " ".join(command['args_name'])) for command in accessible_commands])
+            helpMessageBody = "\n".join([f'`{"` or `".join(command["trigger"])}`: {command["description"]}\nArguments ({command["args_num"]}): {" ".join(command["args_name"])}' for command in accessible_commands])
         else:
-            helpMessageBody = "\n".join(["`{}`: {}".format("` or `".join(command['trigger'][:2]), command['description']) for command in accessible_commands])
+            helpMessageBody = "\n".join([f'`{"` or `".join(command["trigger"][:2])}`: {command["description"]}' for command in accessible_commands])
         await messagefuncs.sendWrappedMessage(helpMessageBody, target)
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
-        print("HF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+        print(f'HF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
 
 def dumpconfig_function(message, client, args):
     print("Channels Loaded:")

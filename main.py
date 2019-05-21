@@ -132,9 +132,9 @@ async def load_webhooks():
     for guild in client.guilds:
         try:
             if "Guild "+str(guild.id) in config and "synchronize" in config["Guild "+str(guild.id)] and config["Guild "+str(guild.id)]["synchronize"] == "on":
-                print("LWH: Querying "+guild.name)
+                print(f'LWH: Querying {guild.name}')
                 for webhook in await guild.webhooks():
-                    print("LWH: * "+webhook.name)
+                    print(f'LWH: * {webhook.name}')
                     if webhook.name.startswith(config['discord']['botNavel']+' ('):
                         toChannelName = guild.name+':'+str(guild.get_channel(webhook.channel_id))
                         fromTuple = webhook.name.split("(")[1].split(")")[0].split(":")
@@ -151,14 +151,14 @@ async def load_webhooks():
                         webhook_sync_registry[fromChannelName]['fromChannelObject'] = discord.utils.get(fromGuild.text_channels, name=fromTuple[1])
                         webhook_sync_registry[fromChannelName]['fromWebhook'] = discord.utils.get(await fromGuild.webhooks(), channel__name=fromTuple[1])
             elif "Guild "+str(guild.id) not in config:
-                print("LWH: Failed to find config for {} ({})".format(guild.name, str(guild.id)))
+                print(f'LWH: Failed to find config for {guild.name} ({guild.id})')
         except discord.Forbidden as e:
-            print('Couldn\'t load webhooks for '+str(guild)+', ask an admin to grant additional permissions (https://novalinium.com/go/4/fletcher)')
+            print(f'Couldn\'t load webhooks for {guild.name} ({guild.id}), ask an admin to grant additional permissions (https://novalinium.com/go/4/fletcher)')
         except AttributeError:
             pass
     print("Webhooks loaded:")
-    globals()['webhook_sync_registry'] = webhook_sync_registry
     print("\n".join([key+" to "+webhook_sync_registry[key]['toChannelName']+' (Guild '+str(webhook_sync_registry[key]['toChannelObject'].guild.id)+')' for key in list(webhook_sync_registry)]))
+    return webhook_sync_registry
 canticum_message = None
 doissetep_omega =  None
 
@@ -171,6 +171,7 @@ def autoload(module, choverride):
     global conn
     global sid
     global versioninfo
+    global webhook_sync_registry
     importlib.reload(module)
     module.ch = ch
     module.config = config
@@ -183,7 +184,7 @@ def autoload(module, choverride):
         # Ignore missing autoload
         print('[Info] '+module.__name__+' missing autoload(ch), continuing.')
         exc_type, exc_obj, exc_tb = exc_info()
-        print("AL[{}]: {}".format(exc_tb.tb_lineno, e))
+        print(f'AL[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
         print(traceback.format_exc())
         pass
 
@@ -280,7 +281,7 @@ async def reload_function(message=None, client=client, args=[]):
         await ch.reload_handler()
         await animate_startup('🔁', message)
         globals()['ch'] = ch
-        await load_webhooks()
+        webhook_sync_registry = await load_webhooks()
         if message:
             await message.add_reaction('↔')
         await animate_startup('✅', message)
@@ -290,10 +291,10 @@ async def reload_function(message=None, client=client, args=[]):
             ))
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
-        print("RM[{}]: {}".format(exc_tb.tb_lineno, e))
+        print(f'RM[{exc_tb.tb_lineno}]: {e}')
         await animate_startup('🚫', message)
         await client.change_presence(activity=discord.Game(
-            name='Error Reloading: RM[{}]: {}'.format(exc_tb.tb_lineno, e),
+            name=f'Error Reloading: RM[{exc_tb.tb_lineno}]: {e}',
             start=now
             ))
 
@@ -306,7 +307,7 @@ async def on_ready():
         global ch
         # print bot information
         await client.change_presence(activity=discord.Game(name='Reloading: The Game'))
-        print('Discord.py Version {}, connected as {} ({})'.format(discord.__version__, client.user.name, client.user.id))
+        print(f'Discord.py Version {discord.__version__}, connected as {client.user.name} ({client.user.id})')
         doissetep_omega = await client.get_guild(int(config['audio']['guild'])).get_channel(int(config['audio']['channel'])).connect();
         loop = asyncio.get_running_loop()
         loop.remove_signal_handler(signal.SIGHUP)
@@ -437,7 +438,7 @@ async def on_raw_message_edit(payload):
     # generic python error
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
-        print("ORMU[{}]: {}".format(exc_tb.tb_lineno, e))
+        print(f'ORMU[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
 
 # on message deletion (for webhooks only for now)
 @client.event
@@ -462,15 +463,15 @@ async def on_raw_message_delete(message):
                         toMessage = await toChannel.fetch_message(metuple[2])
                     except discord.NotFound as e:
                         exc_type, exc_obj, exc_tb = exc_info()
-                        print("ORMD[{}]: {}".format(exc_tb.tb_lineno, e))
-                        print("ORMD[{}]: {}:{}:{}".format(exc_tb.tb_lineno, metuple[0], metuple[1], metuple[2]))
+                        print(f'ORMD[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
+                        print(f'ORMD[{exc_tb.tb_lineno}]: {metuple[0]}:{metuple[1]}:{metuple[2]}')
                         toMessage = None
                         await asyncio.sleep(1)
                         pass
-                print("ORMD: Deleting synced message {}:{}:{}".format(metuple[0], metuple[1], metuple[2]))
+                print(f'ORMD: Deleting synced message {metuple[0]}:{metuple[1]}:{metuple[2]}')
                 await toMessage.delete()
     except discord.Forbidden as e:
-        print("Forbidden to delete synced message from "+str(fromGuild.name)+":"+str(fromChannel.name))
+        print(f'Forbidden to delete synced message from {fromGuild.name}:{fromChannel.name}')
     except KeyError as e:
         # Eat keyerrors from non-synced channels
         pass
@@ -480,7 +481,7 @@ async def on_raw_message_delete(message):
     # generic python error
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
-        print("ORMD[{}]: {}".format(exc_tb.tb_lineno, e))
+        print(f'ORMD[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
 
 # on new rxn
 @client.event
@@ -502,7 +503,7 @@ async def on_raw_reaction_add(reaction):
         # generic python error
         except Exception as e:
             exc_type, exc_obj, exc_tb = exc_info()
-            print("ORRA[{}]: {}".format(exc_tb.tb_lineno, e))
+            print(f'ORRA[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
 
 # on vox change
 @client.event

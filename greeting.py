@@ -21,20 +21,20 @@ async def restorerole_function(member, client, config):
             return
         # Silently drop deleted roles
         roles = list(filter(None, [member.guild.get_role(role) for role in roles]))
-        print("RPR: Restoring roles {} for {} in {}".format(",".join([str(role) for role in roles]), member.id, member.guild.id))
+        print(f'RPR: Restoring roles {",".join([str(role) for role in roles])} for {member.id} in {member.guild.id}')
         await member.edit(nick=name, roles=roles, reason='Restoring Previous Roles')
     except Exception as e:
         if cur is not None:
             conn.rollback()
         exc_type, exc_obj, exc_tb = exc_info()
-        print("RPR[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+        print(f'RPR[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
 
 async def saverole_function(member, client, config):
     try:
         global conn
         if len(member.roles):
             roles = [role.id for role in member.roles]
-            print("SRF: Storing roles {} for {} in {}".format(",".join([str(role) for role in roles]), member.id, member.guild.id))
+            print(f'SRF: Storing roles {",".join([str(role) for role in roles])} for {member.id} in {member.guild.id}')
             cur = conn.cursor()
             cur.execute("INSERT INTO permaRoles (userid, guild, roles, updated, nickname) VALUES (%s, %s, %s, %s, %s);", [member.id, member.guild.id, [role.id for role in member.roles], datetime.now(), member.display_name])
             conn.commit()
@@ -42,7 +42,7 @@ async def saverole_function(member, client, config):
         if cur is not None:
             conn.rollback()
         exc_type, exc_obj, exc_tb = exc_info()
-        print("SRF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+        print(f'SRF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
 
 async def lockout_function(member, client, config):
     try:
@@ -76,7 +76,7 @@ async def lockout_function(member, client, config):
                             await channel.set_permissions(member, None, reason="Lockout policy for new members (agreed to rules)")
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
-        print("LOF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+        print(f'LOF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
 
 async def randomize_role_function(member, client, config):
     try:
@@ -86,7 +86,7 @@ async def randomize_role_function(member, client, config):
             await member.add_roles(role, reason='Per Randomize Role Guild setting (see randomize_role_list)', atomic=False)
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
-        print("RRF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+        print(f'RRF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
 
 async def printhello_reload_function(guild, client, config):
     print("PHRF: Hello to guild "+guild.name+" at "+str(datetime.utcnow())+"!")
@@ -115,7 +115,7 @@ async def chanban_reload_function(guild, client, config):
                 await channel.set_permissions(member, overwrite=None)
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
-        print("CBRF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+        print(f'CBRF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
 
 # Register functions in client
 def autoload(ch):

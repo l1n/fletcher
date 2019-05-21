@@ -41,15 +41,15 @@ def login_googlephotos_function(message=None, client=None, args=None):
     flow.redirect_uri = 'https://novalinium.com/breksta-oauth'
     flow.fetch_token(authorization_response=args[0])
     credentials = flow.credentials
-    freeze = """```
+    freeze = f"""```
 [google-photos]
-token = {}
-refresh_token = {}
-token_uri = {}
-client_id = {}
-client_secret = {}
-scopes = {}
-```""".format(credentials.token,credentials.refresh_token,credentials.token_uri,credentials.client_id,credentials.client_secret,credentials.scopes)
+token = {credentials.token}
+refresh_token = {credentials.refresh_token}
+token_uri = {credentials.token_uri}
+client_id = {credentials.cleint_id}
+client_secret = {credentials.client_secret}
+scopes = {credentials.scopes}
+```"""
     print(freeze)
     gphotos = build('photoslibrary', 'v1', credentials=credentials)
     return freeze
@@ -61,7 +61,7 @@ def listalbums_function(message, client, args):
         return "; ".join([album.get("title")+" ("+album.get("id")+")" for album in gphotos.albums().list().execute()['albums']])
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
-        print("LAF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+        print(f'LAF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
 
 async def twilestia_function(message, client, args):
     global config
@@ -71,7 +71,7 @@ async def twilestia_function(message, client, args):
         for counter in range(5):
             try:
                 image = twilestia_list.pop()
-                fullSizeImage = "{}=w{}-h{}".format(image.get("baseUrl"), image.get("mediaMetadata").get("width"), image.get("mediaMetadata").get("height"))
+                fullSizeImage = f'{image.get("baseUrl")}=w{image.get("mediaMetadata").get("width")}-h{image.get("mediaMetadata").get("height")}'
                 async with aiohttp.ClientSession() as session:
                     async with session.get(fullSizeImage) as resp:
                         buffer = io.BytesIO(await resp.read())
@@ -82,14 +82,14 @@ async def twilestia_function(message, client, args):
             except (ValueError, BrokenPipeError, IndexError, AttributeError, Exception) as e:
                 # Retry!
                 exc_type, exc_obj, exc_tb = exc_info()
-                print("TCF[{}]: {} {}, counter is at {}".format(exc_tb.tb_lineno, type(e).__name__, e, counter))
-                print("TCF: Refreshing twilestia_list")
+                print(f'TCF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
+                print(f'TCF: Refreshing twilestia_list, counter is at {counter}')
                 twilestia_list = list(gphotos.mediaItems().search(body={"albumId":config['google-photos']['twilestia']}).execute().get("mediaItems"))
                 random.shuffle(twilestia_list)
                 continue
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
-        print("TCF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+        print(f'TCF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
 
 def autoload(ch):
     global config 

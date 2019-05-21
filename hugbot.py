@@ -18,7 +18,7 @@ async def remind_function(message, client, args):
         if cur is not None:
             conn.rollback()
         exc_type, exc_obj, exc_tb = exc_info()
-        print("DBF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+        print(f'DBF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
 
 
 def autoload(ch):

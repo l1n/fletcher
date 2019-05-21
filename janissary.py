@@ -58,7 +58,7 @@ async def addrole_function(message, client, args):
                     await message.delete()
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
-        print("ARF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+        print(f'ARF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
 
 async def assignrole_function(message, client, args):
     global config
@@ -99,7 +99,7 @@ async def assignrole_function(message, client, args):
                     await message.delete()
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
-        print("ASRF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+        print(f'ASRF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
 
 async def revokerole_function(message, client, args):
     global config
@@ -140,7 +140,7 @@ async def revokerole_function(message, client, args):
                     await message.delete()
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
-        print("RSRF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+        print(f'RSRF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
 
 async def delrole_function(message, client, args):
     global config
@@ -173,7 +173,7 @@ async def delrole_function(message, client, args):
                     await message.delete()
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
-        print("DRF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+        print(f'DRF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
 
 async def modping_function(message, client, args):
     global config
@@ -199,10 +199,10 @@ async def modping_function(message, client, args):
                 await role.edit(mentionable=False)
             if 'snappy' in config['discord'] and config['discord']['snappy']:
                 mentionPing.delete()
-            print("MPF: pinged {} for guild {}".format(mentionPing.id, message.guild.name))
+            print(f'MPF: pinged {mentionPing.id} for guild {message.guild.name}')
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
-        print("MPF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+        print(f'MPF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
 
 async def modreport_function(message, client, args):
     global config
@@ -217,11 +217,11 @@ async def modreport_function(message, client, args):
                 print("MRF: Forbidden from removing modreport reaction")
                 pass
             plaintext = message.content
-            report_content = "Mod Report: #{} ({}) https://discordapp.com/channels/{}/{}/{} via reaction to ".format(message.channel.name, message.channel.guild.name, message.channel.guild.id, message.channel.id, message.id)
+            report_content = f'Mod Report: #{message.channel.name} ({message.channel.guild.name}) {message.jump_link} via reaction to '
             automod = False
         else:
             plaintext = " ".join(args)
-            report_content = "Mod Report: #{} ({}) https://discordapp.com/channels/{}/{}/{} ".format(message.channel.name, message.channel.guild.name, message.channel.guild.id, message.channel.id, message.id)
+            report_content = f'Mod Report: #{message.channel.name} ({message.channel.guild.name}) {message.jump_link} '
             automod = True
         if message.channel.is_nsfw():
             report_content = report_content + await text_manipulators.rot13_function(message, client, [plaintext, 'INTPROC'])
@@ -249,7 +249,7 @@ async def modreport_function(message, client, args):
             raise Exception("Moderation disabled on guild "+str(message.guild))
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
-        print("MRF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+        print(f'MRF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
 
 def expand_target_list(targets, guild):
     inputs = list(targets)
@@ -288,29 +288,32 @@ async def lastactive_channel_function(message, client, args):
             try:
                 category_pretty = ""
                 if channel.category_id:
-                    category_pretty = " [{}]".format(client.get_channel(channel.category_id).name)
+                    category_pretty = f' [{client.get_channel(channel.category_id).name}]'
                 created_at = (await channel.history(limit=1).flatten())[0].created_at
                 created_pretty = text_manipulators.pretty_date(created_at)
                 if created_pretty:
-                    created_pretty = " ({})".format(created_pretty)
+                    created_pretty = f' ({created_pretty})'
                 if lastMonth:
                     if (before and lastMonth < created_at.date()) or (not before and lastMonth > created_at.date()):
-                        msg = "{}\n<#{}>{}: {}{}".format(msg, channel.id, category_pretty, created_at.isoformat(timespec='minutes'), created_pretty)
+                        msg = f'{msg}\n<#{channel.id}>{category_pretty}: {created_at.isoformat(timespec="minutes")}{created_pretty}'
+                    else:
+                        # filtered out
+                        pass
                 else:
-                        msg = "{}\n<#{}>{}: {}{}".format(msg, channel.id, category_pretty, created_at.isoformat(timespec='minutes'), created_pretty)
+                    msg = f'{msg}\n<#{channel.id}>{category_pretty}: {created_at.isoformat(timespec="minutes")}{created_pretty}'
             except discord.NotFound as e:
                 pass
             except IndexError as e:
-                msg = "{}\n<#{}>{}: Bad History".format(msg, channel.id, category_pretty)
+                msg = f'{msg}\n<#{channel.id}>{category_pretty}: Bad History'
                 pass
             except discord.Forbidden as e:
-                msg = "{}\n<#{}>{}: Forbidden".format(msg, channel.id, category_pretty)
+                msg = f'{msg}\n<#{channel.id}>{category_pretty}: Forbidden'
                 pass
-        msg = '**Channel Activity:**{}'.format(msg)
+        msg = f'**Channel Activity:**{msg}'
         await messagefuncs.sendWrappedMessage(msg, message.channel)
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
-        print("LACF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+        print(f'LACF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
 
 async def lastactive_user_function(message, client, args):
     try:
@@ -338,24 +341,24 @@ async def lastactive_user_function(message, client, args):
         for channel in message.channel.guild.text_channels:
             async for message in channel.history(limit=None):
                 try:
-                    print("[{} <#{}>] <@{}>: {}".format(message.created_at, channel.id, message.author.id, message.content))
+                    print(f'[{message.created_at} <#{channel.id}>] <@{message.author.id}>: {message.content}')
                     if message.created_at < users[message.author.id]:
                         users[message.author.id] = message.created_at
                 except discord.NotFound as e:
                     pass
                 except discord.Forbidden as e:
                     pass
-        msg = '**User Activity:**{}'.format(msg)
+        msg = f'**User Activity:**{msg}'
         for user_id, last_active in users:
             if last_active == datetime.today() + timedelta(days=1):
                 last_active = "None"
             else:
                 last_active = text_manipulators.pretty_date(last_active)
-            msg = "{}\n<@{}>{}: {}".format(msg, user_id, last_active)
+            msg = f'{msg}\n<@{user_id}>: {last_active}'
         await messagefuncs.sendWrappedMessage(msg, message.channel)
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
-        print("LSU[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+        print(f'LSU[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
 
 async def kick_user_function(message, client, args):
     try:
@@ -366,19 +369,19 @@ async def kick_user_function(message, client, args):
         logMessage = " ".join(args[1:]).strip()
         if not len(logMessage):
             logMessage = "A message was not provided."
-        logMessage = "You have been kicked from {}. If you have questions, please contact a moderator for that guild.\nReason: {}".format(message.guild.name, logMessage)
-        print("KUF: <@{}> kicked <@{}> from {} for {}".format(message.author.id, member.id, message.guild.id, logMessage))
+        logMessage = f'You have been kicked from {message.guild.name}. If you have questions, please contact a moderator for that guild.\nReason: {logMessage}'
+        print(f'KUF: <@{message.author.id}> kicked <@{member.id}> from {message.guild.id} for {logMessage}')
         try:
             await messagefuncs.sendWrappedMessage(logMessage, member)
         except Exception as e:
             exc_type, exc_obj, exc_tb = exc_info()
-            print("KUF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+            print(f'KUF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
             # Ignore blocks etc
             pass
-        await member.kick(reason="{} obo {}".format(logMessage, message.author.name))
+        await member.kick(reason=f'{logMessage} obo {message.author.name}')
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
-        print("KUF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+        print(f'KUF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
 
 async def lockout_user_function(message, client, args):
     try:
@@ -420,7 +423,7 @@ async def lockout_user_function(message, client, args):
         await messagefuncs.sendWrappedMessage(log, message.author)
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
-        print("LUF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+        print(f'LUF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
 
 async def part_channel_function(message, client, args):
     try:
@@ -435,14 +438,14 @@ async def part_channel_function(message, client, args):
         await message.author.send("Parted from channel #"+channel.name)
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
-        print("PCF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+        print(f'PCF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
 
 async def optin_channel_function(message, client, args):
     try:
         pass
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
-        print("OICF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+        print(f'OICF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
 
 # Requires schedule.py to clear reminders
 async def snooze_channel_function(message, client, args):
@@ -470,18 +473,18 @@ async def snooze_channel_function(message, client, args):
         await channel.set_permissions(message.author, read_messages=False, read_message_history=False, send_messages=False, embed_links=False, reason="User requested snooze "+message.author.name)
         conn.commit()
         await message.add_reaction('✅')
-        await message.author.send("Snoozed for {} hours {}#{} (`!part` to leave channel permanently)".format(interval, channel.guild.name, channel.name))
+        await message.author.send(f'Snoozed {channel.guild.name}#{channel.name} for {interval} hours (`!part` to leave channel permanently)')
     except discord.Forbidden as e:
         if cur is not None:
             conn.rollback()
         exc_type, exc_obj, exc_tb = exc_info()
-        print("PCF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+        print(f'SNCF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
         await message.channel.send("Snooze forbidden! I don't have the authority to do that.")
     except Exception as e:
         if cur is not None:
             conn.rollback()
         exc_type, exc_obj, exc_tb = exc_info()
-        print("PCF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+        print(f'SNCF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
 
 async def sudo_function(message, client, args):
     try:
@@ -511,7 +514,7 @@ async def sudo_function(message, client, args):
         await message.author.remove_roles(role, reason="Sudo deescalation (timeout)", atomic=False)
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
-        print("SUDOF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+        print(f'SUDOF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
 
 
 def autoload(ch):

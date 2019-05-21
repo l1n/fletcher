@@ -27,7 +27,7 @@ async def github_search_function(message, client, args):
                     await message.channel.send(f"Results truncated, {response_body['total_count']} total responses")
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
-        print("GSF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+        print(f'GSF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
 
 async def github_report_function(message, client, args):
     try:
@@ -46,7 +46,7 @@ async def github_report_function(message, client, args):
                 await message.channel.send(embed=issue_to_embed(response_body, message.author.display_name))
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
-        print("GRF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+        print(f'GRF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
 
 def issue_to_embed(issue, author_name):
     if not issue['body']:
@@ -59,7 +59,7 @@ def issue_to_embed(issue, author_name):
     return discord.Embed(title="#"+str(issue['number'])+": "+issue['title'], url=issue['html_url']).add_field(
             name="Status", value=issue['state'].capitalize(), inline=True).add_field(
             name="Content", value=issue['body'], inline=body_inline).set_footer(
-            icon_url="https://download.nova.anticlack.com/fletcher/github.favicon.png",text="On behalf of {}".format(author_name))
+            icon_url="https://download.nova.anticlack.com/fletcher/github.favicon.png",text=f'On behalf of {author_name}')
 
 def autoload(ch):
     ch.add_command({
