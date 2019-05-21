@@ -22,7 +22,7 @@ async def table_exec_function():
                 "unban": "snoozed a channel",
                 }
         while tabtuple:
-            user = await client.get_user(tabtuple[0])
+            user = client.get_user(tabtuple[0])
             guild_id = tabtuple[1]
             channel_id = tabtuple[2]
             message_id = tabtuple[3]

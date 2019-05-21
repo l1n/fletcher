@@ -98,6 +98,7 @@ token = config['discord']['botToken']
 # globals for database handle and CommandHandler
 conn = None
 ch = None
+pr = None
 
 # Submodules, loaded in reload_function so no initialization is done here
 import commandhandler

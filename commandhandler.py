@@ -1,6 +1,7 @@
 from datetime import datetime
 import discord
 import messagefuncs
+import inspect
 import janissary
 import re
 from sys import exc_info
@@ -13,12 +14,12 @@ def allowCommand(command, message):
         if command['admin'] == 'global' and message.author.id in [int(admin.strip()) for admin in config['discord']['globalAdmin'].split(',')]:
             return True
         # Guild admin commands
-        if type(message.channel) == discord.GuildChannel:
+        if type(message.channel) == discord.TextChannel:
             # Server-specific
-            if command['admin'].startswith('server:')    and message.guild.id   in [int(guild.strip())   for guild   in command['admin'].split(':')[1].split(',')] and message.author.guild_permissions.manage_webhooks:
+            if str(command['admin']).startswith('server:')    and message.guild.id   in [int(guild.strip())   for guild   in command['admin'].split(':')[1].split(',')] and message.author.guild_permissions.manage_webhooks:
                 return True                                                                                
             # Channel-specific
-            elif command['admin'].startswith('channel:') and message.channel.id in [int(channel.strip()) for channel in command['admin'].split(':')[1].split(',')] and message.author.permissions_in(message.channel).manage_webhooks:
+            elif str(command['admin']).startswith('channel:') and message.channel.id in [int(channel.strip()) for channel in command['admin'].split(':')[1].split(',')] and message.author.permissions_in(message.channel).manage_webhooks:
                 return True
             # Any server
             elif command['admin'] in ['server', True] and message.author.guild_permissions.manage_webhooks:
@@ -49,6 +50,7 @@ class CommandHandler:
         self.bang_remover = re.compile('^!+')
 
     def add_command(self, command):
+        command['module'] = inspect.stack()[1][1]
         self.commands.append(command)
 
     def add_remove_handler(self, func_name, func):
@@ -61,30 +63,34 @@ class CommandHandler:
         self.reload_handlers[func_name] = func
 
     async def reaction_handler(self, reaction):
-        global config
-        messageContent = str(reaction.emoji)
-        user = await self.client.get_user(reaction.user_id)
-        channel = self.client.get_channel(reaction.channel_id)
-        message = await channel.fetch_message(reaction.message_id)
-        if type(channel) is discord.TextChannel:
-            print("#"+channel.guild.name+":"+channel.name+" <"+user.name+":"+str(user.id)+"> reacting with "+messageContent+" to "+str(message.id))
-        elif type(message.channel) is discord.DMChannel:
-            print("@"+channel.recipient.name+" <"+user.name+":"+str(user.id)+"> reacting with "+messageContent+" to "+str(message.id))
-        else:
-            # Group Channels don't support bots so neither will we
-            pass
-        for command in self.commands:
-            if messageContent.startswith(tuple(command['trigger'])) and allowCommand(command, message):
-                print(command)
-                if command['args_num'] == 0:
-                    if str(user.id) in config['moderation']['blacklist-user-usage'].split(','):
-                        raise Exception('Blacklisted command attempt by user')
-                    print(command['function'])
-                    with message.channel.typing():
-                        if command['async']:
-                            return await command['function'](message, self.client, [reaction, user])
-                        else:
-                            return await message.channel.send(str(command['function'](message, self.client, [reaction, user])))
+        try:
+            global config
+            messageContent = str(reaction.emoji)
+            user = self.client.get_user(reaction.user_id)
+            channel = self.client.get_channel(reaction.channel_id)
+            message = await channel.fetch_message(reaction.message_id)
+            if type(channel) is discord.TextChannel:
+                print("#"+channel.guild.name+":"+channel.name+" <"+user.name+":"+str(user.id)+"> reacting with "+messageContent+" to "+str(message.id))
+            elif type(message.channel) is discord.DMChannel:
+                print("@"+channel.recipient.name+" <"+user.name+":"+str(user.id)+"> reacting with "+messageContent+" to "+str(message.id))
+            else:
+                # Group Channels don't support bots so neither will we
+                pass
+            for command in self.commands:
+                if messageContent.startswith(tuple(command['trigger'])) and allowCommand(command, message):
+                    print(command)
+                    if command['args_num'] == 0:
+                        if str(user.id) in config['moderation']['blacklist-user-usage'].split(','):
+                            raise Exception('Blacklisted command attempt by user')
+                        print(command['function'])
+                        with message.channel.typing():
+                            if command['async']:
+                                return await command['function'](message, self.client, [reaction, user])
+                            else:
+                                return await message.channel.send(str(command['function'](message, self.client, [reaction, user])))
+        except Exception as e:
+            exc_type, exc_obj, exc_tb = exc_info()
+            print("RXH[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
 
     async def remove_handler(self, member):
         if "Guild "+str(member.guild.id) in config and 'on_member_remove' in config["Guild "+str(member.guild.id)]:
@@ -111,7 +117,7 @@ class CommandHandler:
                             await self.reload_handlers[reload_action](guild, self.client, config["Guild "+str(guild.id)])
         except Exception as e:
             exc_type, exc_obj, exc_tb = exc_info()
-            print("RH[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+            print("RLH[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
 
     async def command_handler(self, message):
         global config
