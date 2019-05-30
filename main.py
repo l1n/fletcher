@@ -158,7 +158,7 @@ async def load_webhooks():
             pass
     print("Webhooks loaded:")
     print("\n".join([key+" to "+webhook_sync_registry[key]['toChannelName']+' (Guild '+str(webhook_sync_registry[key]['toChannelObject'].guild.id)+')' for key in list(webhook_sync_registry)]))
-    return webhook_sync_registry
+    globals()['webhook_sync_registry'] = webhook_sync_registry
 canticum_message = None
 doissetep_omega =  None
 
@@ -171,7 +171,6 @@ def autoload(module, choverride):
     global conn
     global sid
     global versioninfo
-    global webhook_sync_registry
     importlib.reload(module)
     module.ch = ch
     module.config = config
@@ -281,7 +280,7 @@ async def reload_function(message=None, client=client, args=[]):
         await ch.reload_handler()
         await animate_startup('🔁', message)
         globals()['ch'] = ch
-        webhook_sync_registry = await load_webhooks()
+        await load_webhooks()
         if message:
             await message.add_reaction('↔')
         await animate_startup('✅', message)
@@ -322,11 +321,11 @@ async def on_ready():
 async def on_message(message):
     global webhook_sync_registry
     global conn
-    # if the message is from the bot itself or sent via webhook, which is usually done by a bot, ignore it other than sync processing
-    if message.webhook_id:
-        return
     try:
-        if message.guild.name+':'+message.channel.name in webhook_sync_registry:
+        # if the message is from the bot itself or sent via webhook, which is usually done by a bot, ignore it other than sync processing
+        if message.webhook_id:
+            return
+        if message.guild is not None and (message.guild.name+':'+message.channel.name in webhook_sync_registry.keys()):
             content = message.clean_content
             attachments = []
             if len(message.attachments) > 0:
@@ -352,22 +351,18 @@ async def on_message(message):
             cur = conn.cursor()
             cur.execute("INSERT INTO messagemap (fromguild, fromchannel, frommessage, toguild, tochannel, tomessage) VALUES (%s, %s, %s, %s, %s, %s);", [message.guild.id, message.channel.id, message.id, syncMessage.guild.id, syncMessage.channel.id, syncMessage.id])
             conn.commit()
-    except AttributeError as e:
-        # Eat from PMs
-        pass
-    if message.author == client.user:
-        print(config['discord']['botNavel']+": "+message.clean_content)
-        return
-
-    # try to evaluate with the command handler
-    try:
+        if message.author == client.user:
+            print(config['discord']['botNavel']+": "+message.clean_content)
+            return
+ 
+        # try to evaluate with the command handler
         while ch is None:
             await asyncio.sleep(1)
         await ch.command_handler(message)
 
-    # message doesn't contain a command trigger
-    except TypeError as e:
-        pass
+    except Exception as e:
+        exc_type, exc_obj, exc_tb = exc_info()
+        print(f'ORMR[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
 
 # on message update (for webhooks only for now)
 @client.event
@@ -393,7 +388,7 @@ async def on_raw_message_edit(payload):
         else:
             # Currently, we don't log empty or image-only messages
             pass
-        if fromGuild.name+':'+fromChannel.name in webhook_sync_registry:
+        if fromGuild.name+':'+fromChannel.name in webhook_sync_registry.keys():
             cur = conn.cursor()
             cur.execute("SELECT toguild, tochannel, tomessage FROM messagemap WHERE fromguild = %s AND fromchannel = %s AND frommessage = %s LIMIT 1;", [int(message['guild_id']), int(message['channel_id']), message_id])
             metuple = cur.fetchone()
@@ -447,7 +442,7 @@ async def on_raw_message_delete(message):
     try:
         fromGuild = client.get_guild(message.guild_id)
         fromChannel = fromGuild.get_channel(message.channel_id)
-        if fromGuild.name+':'+fromChannel.name in webhook_sync_registry:
+        if fromGuild.name+':'+fromChannel.name in webhook_sync_registry.keys():
             cur = conn.cursor()
             cur.execute("SELECT toguild, tochannel, tomessage FROM messagemap WHERE fromguild = %s AND fromchannel = %s AND frommessage = %s LIMIT 1;", [message.guild_id, message.channel_id, message.message_id])
             metuple = cur.fetchone()
