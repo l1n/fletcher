@@ -461,6 +461,10 @@ async def snooze_channel_function(message, client, args):
             if channel is None:
                 channel = message.channel
             channels = [channel]
+        if len(channels) > 0:
+            channel = channels[0]
+        else:
+            channel = None
         if message.guild is not None:
             guild = message.guild
         elif hasattr(channel, 'guild'):
