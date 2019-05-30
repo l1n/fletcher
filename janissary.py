@@ -217,11 +217,11 @@ async def modreport_function(message, client, args):
                 print("MRF: Forbidden from removing modreport reaction")
                 pass
             plaintext = message.content
-            report_content = f'Mod Report: #{message.channel.name} ({message.channel.guild.name}) {message.jump_link} via reaction to '
+            report_content = f'Mod Report: #{message.channel.name} ({message.channel.guild.name}) {message.jump_url} via reaction to '
             automod = False
         else:
             plaintext = " ".join(args)
-            report_content = f'Mod Report: #{message.channel.name} ({message.channel.guild.name}) {message.jump_link} '
+            report_content = f'Mod Report: #{message.channel.name} ({message.channel.guild.name}) {message.jump_url} '
             automod = True
         if message.channel.is_nsfw():
             report_content = report_content + await text_manipulators.rot13_function(message, client, [plaintext, 'INTPROC'])
