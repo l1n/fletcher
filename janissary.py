@@ -450,12 +450,17 @@ async def optin_channel_function(message, client, args):
 # Requires schedule.py to clear reminders
 async def snooze_channel_function(message, client, args):
     try:
+        global conn
         if len(message.channel_mentions) > 0:
-            channel = message.channel_mentions[0]
+            channels = message.channel_mentions
+        elif args[0].strip()[-2:] == ':*':
+            guild = discord.utils.get(client.guilds, name=messagefuncs.expand_guild_name(args[0]).strip()[:-2].replace("_", " "))
+            channels = guild.text_channels
         else:
             channel = messagefuncs.xchannel(args[0].strip(), message.guild)
             if channel is None:
                 channel = message.channel
+            channels = [channel]
         if message.guild is not None:
             guild = message.guild
         elif hasattr(channel, 'guild'):
@@ -463,14 +468,14 @@ async def snooze_channel_function(message, client, args):
         else:
             await message.add_reaction('🚫')
             return await message.channel.send('Failed to locate channel, please check spelling.')
-        global conn
         cur = conn.cursor()
         if len(args) > 1:
             interval = float(args[1])
         else:
             interval = 24
         cur.execute("INSERT INTO reminders (userid, guild, channel, message, content, scheduled, trigger_type) VALUES (%s, %s, %s, %s, %s, NOW() + INTERVAL '"+str(interval)+" hours', 'unban');", [message.author.id, guild.id, message.channel.id, message.id, message.content])
-        await channel.set_permissions(message.author, read_messages=False, read_message_history=False, send_messages=False, embed_links=False, reason="User requested snooze "+message.author.name)
+        for channel in channels:
+            await channel.set_permissions(message.author, read_messages=False, read_message_history=False, send_messages=False, embed_links=False, reason="User requested snooze "+message.author.name)
         conn.commit()
         await message.add_reaction('✅')
         await message.author.send(f'Snoozed {channel.guild.name}#{channel.name} for {interval} hours (`!part` to leave channel permanently)')

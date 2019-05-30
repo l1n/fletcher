@@ -48,20 +48,26 @@ async def table_exec_function():
                 pass
             if mode == "unban":
                 if target_message:
-                    if len(target_message.channel_mentions) > 0:
-                        channel = target_message.channel_mentions[0]
-                    else:
-                        channel = messagefuncs.xchannel(message.content.split()[1].strip(), guild)
-                        if channel is None:
-                            channel = target_message.channel
+                    args = message.content.split()[1:]
                 else:
-                    channel = messagefuncs.xchannel(content.split()[1].strip(), guild)
-                    if channel is None:
+                    args = content.split()[1:]
+                if target_message and len(target_message.channel_mentions) > 0:
+                    channels = [target_message.channel_mentions]
+                elif args[0].strip()[-2:] == ':*':
+                    guild = discord.utils.get(client.guilds, name=messagefuncs.expand_guild_name(args[0]).strip()[:-2].replace("_", " "))
+                    channels = guild.text_channels
+                else:
+                    channel = messagefuncs.xchannel(args[0].strip(), guild)
+                    if channel is None and target_message:
+                        channel = target_message.channel
+                    elif channel is None:
                         channel = from_channel
-                permissions = channel.overwrites_for(user)
-                if permissions.read_messages == False and permissions.send_messages == False and permissions.embed_links == False:
-                    await channel.set_permissions(user, overwrite=None, reason="Unban triggered by schedule obo "+user.name)
-                    await user.send("Unban triggered by schedule for {}#{} (`!part` to leave channel permanently)".format(guild.name, channel.name))
+                    channels = [channel]
+                for channel in channels:
+                    permissions = channel.overwrites_for(user)
+                    if permissions.read_messages == False and permissions.send_messages == False and permissions.embed_links == False:
+                        await channel.set_permissions(user, overwrite=None, reason="Unban triggered by schedule obo "+user.name)
+                        await user.send("Unban triggered by schedule for {}#{} (`!part` to leave channel permanently)".format(guild.name, channel.name))
             elif mode == "table":
                 msg_chunks = textwrap.wrap("You tabled a discussion at {}: want to pick that back up?\nDiscussion link: https://discordapp.com/channels/{}/{}/{}\nContent: {}".format(created_at, guild_id, channel_id, message_id, content), 2000, replace_whitespace=False)
                 for hunk in msg_chunks:
