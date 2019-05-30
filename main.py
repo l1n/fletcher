@@ -361,6 +361,8 @@ async def on_message(message):
         await ch.command_handler(message)
 
     except Exception as e:
+        if cur is not None:
+            conn.rollback()
         exc_type, exc_obj, exc_tb = exc_info()
         print(f'ORMR[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
 
@@ -432,6 +434,8 @@ async def on_raw_message_edit(payload):
     #     pass
     # generic python error
     except Exception as e:
+        if cur is not None:
+            conn.rollback()
         exc_type, exc_obj, exc_tb = exc_info()
         print(f'ORMU[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
 
@@ -475,6 +479,8 @@ async def on_raw_message_delete(message):
         pass
     # generic python error
     except Exception as e:
+        if cur is not None:
+            conn.rollback()
         exc_type, exc_obj, exc_tb = exc_info()
         print(f'ORMD[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
 
