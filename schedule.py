@@ -63,11 +63,16 @@ async def table_exec_function():
                     elif channel is None:
                         channel = from_channel
                     channels = [channel]
+                channel_names = ""
                 for channel in channels:
                     permissions = channel.overwrites_for(user)
                     if permissions.read_messages == False and permissions.send_messages == False and permissions.embed_links == False:
                         await channel.set_permissions(user, overwrite=None, reason="Unban triggered by schedule obo "+user.name)
-                        await user.send("Unban triggered by schedule for {}#{} (`!part` to leave channel permanently)".format(guild.name, channel.name))
+                        channel_names += f'{guild.name}:{channel.name}, '
+                channel_names = channel_names[:-2]
+                if args[0].strip()[-2:] == ':*':
+                    channel_names = channels[0].guild.name
+                await user.send(f'Unban triggered by schedule for {channel_names} (`!part` to leave channel permanently)')
             elif mode == "table":
                 msg_chunks = textwrap.wrap("You tabled a discussion at {}: want to pick that back up?\nDiscussion link: https://discordapp.com/channels/{}/{}/{}\nContent: {}".format(created_at, guild_id, channel_id, message_id, content), 2000, replace_whitespace=False)
                 for hunk in msg_chunks:

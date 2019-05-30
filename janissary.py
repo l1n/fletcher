@@ -478,11 +478,16 @@ async def snooze_channel_function(message, client, args):
         else:
             interval = 24
         cur.execute("INSERT INTO reminders (userid, guild, channel, message, content, scheduled, trigger_type) VALUES (%s, %s, %s, %s, %s, NOW() + INTERVAL '"+str(interval)+" hours', 'unban');", [message.author.id, guild.id, message.channel.id, message.id, message.content])
+        channel_names = ""
         for channel in channels:
             await channel.set_permissions(message.author, read_messages=False, read_message_history=False, send_messages=False, embed_links=False, reason="User requested snooze "+message.author.name)
+            channel_names += f'{guild.name}:{channel.name}, '
+        channel_names = channel_names[:-2]
+        if args[0].strip()[-2:] == ':*':
+            channel_names = channels[0].guild.name
         conn.commit()
         await message.add_reaction('✅')
-        await message.author.send(f'Snoozed {channel.guild.name}#{channel.name} for {interval} hours (`!part` to leave channel permanently)')
+        await message.author.send(f'Snoozed {channel_names} for {interval} hours (`!part` to leave channel permanently)')
     except discord.Forbidden as e:
         if cur is not None:
             conn.rollback()
