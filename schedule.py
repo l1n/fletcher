@@ -48,7 +48,7 @@ async def table_exec_function():
                 pass
             if mode == "unban":
                 if target_message:
-                    args = message.content.split()[1:]
+                    args = target_message.content.split()[1:]
                 else:
                     args = content.split()[1:]
                 if target_message and len(target_message.channel_mentions) > 0:
