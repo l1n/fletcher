@@ -83,11 +83,10 @@ class CommandHandler:
                         if str(user.id) in config['moderation']['blacklist-user-usage'].split(','):
                             raise Exception('Blacklisted command attempt by user')
                         print(command['function'])
-                        with message.channel.typing():
-                            if command['async']:
-                                return await command['function'](message, self.client, [reaction, user])
-                            else:
-                                return await message.channel.send(str(command['function'](message, self.client, [reaction, user])))
+                        if command['async']:
+                            return await command['function'](message, self.client, [reaction, user])
+                        else:
+                            return await message.channel.send(str(command['function'](message, self.client, [reaction, user])))
         except Exception as e:
             exc_type, exc_obj, exc_tb = exc_info()
             print(f'RXH[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
