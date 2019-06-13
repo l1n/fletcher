@@ -3,6 +3,7 @@ import io
 import sympy
 from sys import exc_info
 import tempfile
+import messagefuncs
 
 import matplotlib.pyplot as plt
 
@@ -30,6 +31,11 @@ async def latex_render_function(message, client, args):
     try:
         renderstring = "$"+" ".join(args)+"$"
         await message.channel.send("`"+renderstring+"`", file=discord.File(renderLatex(renderstring, format='png'), filename="fletcher-render.png"))
+    except RuntimeError as e:
+        exc_type, exc_obj, exc_tb = exc_info()
+        print("LRF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+        await message.add_reaction('🚫')
+        await messagefuncs.sendWrappedMessage(f'Error rendering LaTeX: {e}', message.author)
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
         print("LRF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
