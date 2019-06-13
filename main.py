@@ -313,8 +313,19 @@ async def on_ready():
         await load_webhooks()
         await reload_function()
         loop.add_signal_handler(signal.SIGHUP, lambda: asyncio.ensure_future(reload_function()))
+        loop.add_signal_handler(signal.SIGINT, lambda: asyncio.ensure_future(shutdown_function()))
     except Exception as e:
         print(e)
+
+async def shutdown_function():
+    global client
+    await client.change_presence(activity=discord.Game(
+        name='Shutting Down',
+        start=now
+        ),
+        status=discord.Status.do_not_disturb
+        )
+    sys.exit(0)
 
 # on new message
 @client.event
