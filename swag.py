@@ -166,13 +166,13 @@ async def scp_function(message, client, args):
             if '-' in message.content:
                 args[0] = message.content.split('-')[1].trim()
             else:
-                args[0] = 'https://www.scp-wiki.net/random:random-scp'
+                args[0] = 'http://www.scp-wiki.net/random:random-scp'
         if args[0].isdigit():
-             url = "https://www.scp-wiki.net/scp-"+args[0]
-        elif args[0].startswith("https://www.scp-wiki.net/"):
+             url = "http://www.scp-wiki.net/scp-"+args[0]
+        elif args[0].startswith("http://www.scp-wiki.net/"):
             url = args[0]
         else:
-            await message.channel.send('Please specify a SCP number from https://www.scp-wiki.net/')
+            await message.channel.send('Please specify a SCP number from http://www.scp-wiki.net/')
             return
         async with aiohttp.ClientSession() as session:
             async with session.get(url) as resp:
