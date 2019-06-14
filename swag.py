@@ -159,6 +159,45 @@ async def pick_function(message, client, args):
         exc_type, exc_obj, exc_tb = exc_info()
         print("PF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
 
+async def scp_function(message, client, args):
+    try:
+        url = None
+        if len(args) == 0:
+            if '-' in message.content:
+                args[0] = message.content.split('-')[1].trim()
+            else:
+                args[0] = 'https://www.scp-wiki.net/random:random-scp'
+        if args[0].isdigit():
+             url = "https://www.scp-wiki.net/scp-"+args[0]
+        elif args[0].startswith("https://www.scp-wiki.net/"):
+            url = args[0]
+        else:
+            await message.channel.send('Please specify a SCP number from https://www.scp-wiki.net/')
+            return
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url) as resp:
+                request_body = (await resp.read()).decode('UTF-8')
+                root = html.document_fromstring(request_body)
+                author = ""
+                title = root.xpath('//div[@id="page-title"]')[0].text_content().strip()
+                content = root.xpath('//div[@id="page-content"]/p')
+                embedPreview = discord.Embed(
+                        title=title,
+                        description=content[3].text_content().strip()[30:2031],
+                        url=url
+                        ).set_footer(
+                                icon_url=message.author.avatar_url,
+                                text=f'SCP-{args[0]} on behalf of {message.author.display_name}'
+                                    )
+                embedPreview.add_field(name='Object Class', value=content[1].text_content().strip()[31:2032], inline=False)
+                embedPreview.add_field(name='Special Containment Procedures', value=content[2].text_content().strip()[49:2050], inline=False)
+                embedPreview.add_field(name='Tags', value=[node.text_content().strip() for node in root.xpath('//div[@class="page-tags"]/span/a')].join(', '), inline=True)
+                resp = await message.channel.send(embed=embedPreview)
+    except Exception as e:
+        exc_type, exc_obj, exc_tb = exc_info()
+        print("SCP[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+
+
 def autoload(ch):
     ch.add_command({
         'trigger': ['!uwu', '<:uwu:445116031204196352>', '<:uwu:269988618909515777>', '<a:rainbowo:493599733571649536>', '<:owo:487739798241542183>', '<:owo:495014441457549312>', '<a:OwO:508311820411338782>', '!good', '!aww'],
@@ -189,6 +228,14 @@ def autoload(ch):
         'args_num': 0,
         'args_name': [],
         'description': 'Embed shindan'
+        })
+    ch.add_command({
+        'trigger': ['!scp'],
+        'function': scp_function,
+        'async': True,
+        'args_num': 0,
+        'args_name': [],
+        'description': 'SCP Function'
         })
     ch.add_command({
         'trigger': ['!retrowave'],
