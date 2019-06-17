@@ -279,6 +279,56 @@ async def reaction_request_function(message, client, args):
         exc_type, exc_obj, exc_tb = exc_info()
         print("XRF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
 
+async def blockquote_embed_function(message, client, args):
+    try:
+        if len(args) == 1 and args[0][0:2] == '<<':
+            limit = int(args[0][2:])
+        else:
+            limit = None
+        if len(args) == 0 or limit <= 0:
+            limit = 1
+        if limit:
+            historical_messages = []
+            async for historical_message in message.channel.history(before=message, limit=None):
+                if historical_message.author == message.author:
+                    historical_messages.append(historical_message)
+                    limit -= 1
+                if limit == 0:
+                    break
+            rollup = ''
+            for message in historical_messages:
+                rollup += message.clean_content
+                rollup += '\n'
+        else:
+            rollup = " ".join(args)
+        embed = discord.Embed().set_footer(icon_url=message.author.avatar_url,text="Quoted by {}".format(message.author))
+        if len(rollup) < 2048:
+            embed.description = rollup
+            rollup = None
+        # 25 fields * 1024 characters
+        # https://discordapp.com/developers/docs/resources/channel#embed-object-embed-field-structure
+        elif len(rollup) <= 25 * 1024:
+            msg_chunks = textwrap.wrap(rollup, 1024, replace_whitespace=False)
+            for hunk in msg_chunks:
+                embed.add_field(None, hunk, inline=True)
+            rollup = None
+        else:
+            # TODO send multiple embeds instead
+            await message.author.send('Message too long, maximum quotable character count is 25 * 1024')
+        if not rollup:
+            await message.channel.send(embed=embed)
+            try:
+                if 'snappy' in config['discord'] and config['discord']['snappy']:
+                    for message in historical_messages:
+                        await message.delete()
+                    await message.delete()
+            except discord.Forbidden:
+                print("BEF: Couldn't delete messages but snappy mode is on")
+                pass
+    except Exception as e:
+        exc_type, exc_obj, exc_tb = exc_info()
+        print("BEF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+
 def autoload(ch):
     ch.add_command({
         'trigger': ['!rot13', '🕜', '<:rot13:539568301861371905>', '<:rot13:527988322879012894>'],
@@ -305,6 +355,15 @@ def autoload(ch):
         'args_num': 0,
         'args_name': [],
         'description': 'Send contents of image deep fried'
+        })
+
+    ch.add_command({
+        'trigger': ['!blockquote'],
+        'function': blockquote_embed_function,
+        'async': True,
+        'args_num': 0,
+        'args_name': [],
+        'description': 'Blockquote last message as embed'
         })
 
     ch.add_command({
