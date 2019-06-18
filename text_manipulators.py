@@ -285,7 +285,7 @@ async def blockquote_embed_function(message, client, args):
             limit = int(args[0][2:])
         else:
             limit = None
-        if len(args) == 0 or limit <= 0:
+        if len(args) == 0 or limit and limit <= 0:
             limit = 1
         if limit:
             historical_messages = []
