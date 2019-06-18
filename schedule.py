@@ -74,9 +74,7 @@ async def table_exec_function():
                     channel_names = channels[0].guild.name
                 await user.send(f'Unban triggered by schedule for {channel_names} (`!part` to leave channel permanently)')
             elif mode == "table":
-                msg_chunks = textwrap.wrap("You tabled a discussion at {}: want to pick that back up?\nDiscussion link: https://discordapp.com/channels/{}/{}/{}\nContent: {}".format(created_at, guild_id, channel_id, message_id, content), 2000, replace_whitespace=False)
-                for hunk in msg_chunks:
-                    await user.send(hunk)
+                await messagefuncs.sendWrappedMessage(f"You tabled a discussion at {created_at}: want to pick that back up?\nDiscussion link: https://discordapp.com/channels/{guild_id}/{channel_id}/{message_id}\nContent: {content}", user)
             tabtuple = cur.fetchone()
         cur.execute("DELETE FROM reminders WHERE %s > scheduled;", [now])
         conn.commit()

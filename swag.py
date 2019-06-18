@@ -250,6 +250,7 @@ def autoload(ch):
         'function': shindan_function,
         'async': True,
         'args_num': 0,
+        'long_run': 'author',
         'args_name': [],
         'description': 'Embed shindan'
         })
@@ -258,6 +259,7 @@ def autoload(ch):
         'function': scp_function,
         'async': True,
         'args_num': 0,
+        'long_run': True,
         'args_name': [],
         'description': 'SCP Function'
         })
@@ -266,6 +268,7 @@ def autoload(ch):
         'function': retrowave_function,
         'async': True,
         'args_num': 0,
+        'long_run': True,
         'args_name': [],
         'description': 'Retrowave Text Generator'
         })

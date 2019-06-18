@@ -47,6 +47,7 @@ def autoload(ch):
         'function': latex_render_function,
         'async': True,
         'args_num': 0,
+        'long_run': True,
         'args_name': [],
         'description': 'Render arguments as LaTeX formula (does not require `$$`)'
         })

@@ -65,10 +65,10 @@ def autoload(ch):
     ch.add_command({
         'trigger': ['!ghreport'],
         'function': github_report_function,
-        'async': True, 'args_num': 1, 'args_name': [], 'description': 'GitHub Issue Reporter'
+        'async': True, 'args_num': 1, 'args_name': [], 'description': 'GitHub Issue Reporter', 'long_run': True
         })
     ch.add_command({
         'trigger': ['!ghsearch'],
         'function': github_search_function,
-        'async': True, 'args_num': 1, 'args_name': [], 'description': 'GitHub Issue Search'
+        'async': True, 'args_num': 1, 'args_name': [], 'description': 'GitHub Issue Search', 'long_run': True
         })

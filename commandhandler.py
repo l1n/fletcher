@@ -175,28 +175,32 @@ class CommandHandler:
             return
         for command in self.commands:
             if searchString.lower().startswith(tuple(command['trigger'])) and allowCommand(command, message):
-                with message.channel.typing():
-                    print("[CH] Triggered "+str(command))
-                    args = searchString.split(' ')
-                    args = [item for item in args if item]
-                    args.pop(0)
-                    if str(message.author.id) in config['moderation']['blacklist-user-usage'].split(','):
-                        await message.add_reaction('💔')
-                        await message.channel.send("I'll only talk to you when you stop being mean to me, "+message.author.display_name+"!")
-                        raise Exception('Blacklisted command attempt by user')
-                    if command['args_num'] == 0:
+                if 'long_run' in command:
+                    if command['long_run'] == 'author':
+                        message.author.trigger_typing()
+                    elif command['long_run']:
+                        message.channel.trigger_typing()
+                print("[CH] Triggered "+str(command))
+                args = searchString.split(' ')
+                args = [item for item in args if item]
+                args.pop(0)
+                if str(message.author.id) in config['moderation']['blacklist-user-usage'].split(','):
+                    await message.add_reaction('💔')
+                    await message.channel.send("I'll only talk to you when you stop being mean to me, "+message.author.display_name+"!")
+                    raise Exception('Blacklisted command attempt by user')
+                if command['args_num'] == 0:
+                    if command['async']:
+                        return await command['function'](message, self.client, args)
+                    else:
+                        return await message.channel.send(str(command['function'](message, self.client, args)))
+                else:
+                    if len(args) >= command['args_num']:
                         if command['async']:
                             return await command['function'](message, self.client, args)
                         else:
                             return await message.channel.send(str(command['function'](message, self.client, args)))
                     else:
-                        if len(args) >= command['args_num']:
-                            if command['async']:
-                                return await command['function'](message, self.client, args)
-                            else:
-                                return await message.channel.send(str(command['function'](message, self.client, args)))
-                        else:
-                            return await message.channel.send(f'command "{command["trigger"][0]}" requires {command["args_num"]} argument(s) "{", ".join(command["args_name"])}"')
+                        return await message.channel.send(f'command "{command["trigger"][0]}" requires {command["args_num"]} argument(s) "{", ".join(command["args_name"])}"')
 
 async def help_function(message, client, args):
     global ch

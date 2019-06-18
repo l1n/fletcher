@@ -591,6 +591,7 @@ def autoload(ch):
         'async': True,
         'admin': 'server',
         'args_num': 0,
+        'long_run': 'author',
         'args_name': [],
         'description': 'List all available channels and time of last message (Admin)'
         })
@@ -618,6 +619,7 @@ def autoload(ch):
         'async': True,
         'admin': 'server',
         'args_num': 1,
+        'long_run': 'author',
         'args_name': ['@user', 'reset|hide'],
         'description': 'Lockout or reset user permissions'
         })

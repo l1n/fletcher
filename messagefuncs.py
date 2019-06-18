@@ -244,6 +244,7 @@ def autoload(ch):
         'function': preview_messagelink_function,
         'async': True,
         'args_num': 1,
+        'long_run': True,
         'args_name': ['string'],
         'description': 'Retrieve message body by link (used internally to unwrap message links in chat)'
         })
