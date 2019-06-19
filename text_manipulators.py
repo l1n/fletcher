@@ -309,6 +309,7 @@ async def blockquote_embed_function(message, client, args):
                     title = "Message from {} sent in <#{}> at {}".format(target_message.author.name, channel_id, sent_at)
                 else:
                     title = "Message from {} sent in #{} ({}) at {}".format(target_message.author.name, channel.name, guild.name, sent_at)
+            limit = None
         else:
             limit = None
         if len(args) == 0 or limit and limit <= 0:
