@@ -281,8 +281,10 @@ async def reaction_request_function(message, client, args):
 
 async def blockquote_embed_function(message, client, args):
     try:
-        if len(args) == 1 and args[0][0:2] == '<<':
+        title = None
+        if len(args) >= 1 and args[0][0:2] == '<<':
             limit = int(args[0][2:])
+            title = " ".join(args[1:])
         else:
             limit = None
         if len(args) == 0 or limit and limit <= 0:
@@ -301,7 +303,12 @@ async def blockquote_embed_function(message, client, args):
                 rollup += '\n'
         else:
             rollup = " ".join(args)
-        embed = discord.Embed().set_footer(icon_url=message.author.avatar_url,text="Quoted by {}".format(message.author))
+        quoted_by = f'{message.author.name}#{message.author.discriminator}'
+        if message.author.nick:
+            quoted_by = f'{message.author.nick} ({quoted_by})'
+        embed = discord.Embed().set_footer(icon_url=message.author.avatar_url,text=quoted_by)
+        if title:
+            embed.title = title
         if len(rollup) < 2048:
             embed.description = rollup
             rollup = None
