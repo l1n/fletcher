@@ -302,7 +302,11 @@ async def blockquote_embed_function(message, client, args):
                 rollup += message.clean_content
                 rollup += '\n'
         else:
-            rollup = " ".join(args)
+            if "\n" in message.content:
+                title = message.content.split("\n", 1)[0].split(" ", 1)[1]
+                rollup = message.content.split("\n", 1)[1]
+            else:
+                rollup = message.content.split(" ", 1)[1]
         quoted_by = f'{message.author.name}#{message.author.discriminator}'
         if message.author.nick:
             quoted_by = f'{message.author.nick} ({quoted_by})'
