@@ -158,7 +158,7 @@ class CommandHandler:
                 # Group Channels don't support bots so neither will we
                 pass
             pass
-        if messagefuncs.extract_identifiers_messagelink.search(message.content) and "!preview" not in message.content:
+        if messagefuncs.extract_identifiers_messagelink.search(message.content) and not (message.content.startswith("!preview") or message.content.startswith("!blockquote")):
             if str(message.author.id) not in config['moderation']['blacklist-user-usage'].split(','):
                 await messagefuncs.preview_messagelink_function(message, self.client, None)
         if 'rot13' in message.content:
