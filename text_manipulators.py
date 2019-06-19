@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 import discord
 import io
 import math
+import messagefuncs
 import random
 from PIL import Image
 from sys import exc_info
@@ -285,6 +286,29 @@ async def blockquote_embed_function(message, client, args):
         if len(args) >= 1 and args[0][0:2] == '<<':
             limit = int(args[0][2:])
             title = " ".join(args[1:])
+        elif len(args) >=1:
+            urlParts = messagefuncs.extract_identifiers_messagelink.search(message.content).groups()
+            if len(urlParts) == 3:
+                guild_id = int(urlParts[0])
+                channel_id = int(urlParts[1])
+                message_id = int(urlParts[2])
+                guild = client.get_guild(guild_id)
+                if guild is None:
+                    print("PMF: Fletcher is not in guild ID "+str(guild_id))
+                    return
+                channel = guild.get_channel(channel_id)
+                target_message = await channel.fetch_message(message_id)
+                # created_at is naîve, but specified as UTC by Discord API docs
+                sent_at = target_message.created_at.strftime("%B %d, %Y %I:%M%p UTC")
+                rollup = target_message.content
+                if rollup == "":
+                    rollup = "*No Text*"
+                if message.guild and message.guild.id == guild_id and message.channel.id == channel_id:
+                    title = "Message from {} sent at {}".format(target_message.author.name, sent_at)
+                elif message.guild and message.guild.id == guild_id:
+                    title = "Message from {} sent in <#{}> at {}".format(target_message.author.name, channel_id, sent_at)
+                else:
+                    title = "Message from {} sent in #{} ({}) at {}".format(target_message.author.name, channel.name, guild.name, sent_at)
         else:
             limit = None
         if len(args) == 0 or limit and limit <= 0:
@@ -302,11 +326,12 @@ async def blockquote_embed_function(message, client, args):
                 rollup += message.clean_content
                 rollup += '\n'
         else:
-            if "\n" in message.content:
-                title = message.content.split("\n", 1)[0].split(" ", 1)[1]
-                rollup = message.content.split("\n", 1)[1]
-            else:
-                rollup = message.content.split(" ", 1)[1]
+            if not rollup:
+                if "\n" in message.content:
+                    title = message.content.split("\n", 1)[0].split(" ", 1)[1]
+                    rollup = message.content.split("\n", 1)[1]
+                else:
+                    rollup = message.content.split(" ", 1)[1]
         quoted_by = f'{message.author.name}#{message.author.discriminator}'
         if message.author.nick:
             quoted_by = f'{message.author.nick} ({quoted_by})'
