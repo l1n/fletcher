@@ -1,13 +1,14 @@
+from datetime import datetime, timedelta
+from PIL import Image
+from sys import exc_info
 import asyncio
 import codecs
-from datetime import datetime, timedelta
 import discord
 import io
 import math
 import messagefuncs
 import random
-from PIL import Image
-from sys import exc_info
+import zalgo.zalgo as zalgo
 
 def smallcaps(text=False):
     if text:
@@ -367,6 +368,19 @@ async def blockquote_embed_function(message, client, args):
         exc_type, exc_obj, exc_tb = exc_info()
         print("BEF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
 
+async def zalgo_function(message, client, args):
+    try:
+        await message.channel.send(zalgo.zalgo(' '.join(args)))
+        try:
+            if 'snappy' in config['discord'] and config['discord']['snappy']:
+                await message.delete()
+        except discord.Forbidden:
+            print("ZF: Couldn't delete messages but snappy mode is on")
+            pass
+    except Exception as e:
+        exc_type, exc_obj, exc_tb = exc_info()
+        print("ZF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+
 def autoload(ch):
     ch.add_command({
         'trigger': ['!rot13', '🕜', '<:rot13:539568301861371905>', '<:rot13:527988322879012894>'],
@@ -393,6 +407,15 @@ def autoload(ch):
         'args_num': 0,
         'args_name': [],
         'description': 'Send contents of image deep fried'
+        })
+
+    ch.add_command({
+        'trigger': ['!zalgo'],
+        'function': zalgo_function,
+        'async': True,
+        'args_num': 1,
+        'args_name': [],
+        'description': 'HE COMES'
         })
 
     ch.add_command({
