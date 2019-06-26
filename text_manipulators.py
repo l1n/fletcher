@@ -350,7 +350,7 @@ async def blockquote_embed_function(message, client, args):
         elif len(rollup) <= 25 * 1024:
             msg_chunks = textwrap.wrap(rollup, 1024, replace_whitespace=False)
             for hunk in msg_chunks:
-                embed.add_field(name='', value=hunk, inline=True)
+                embed.add_field(name=' ', value=hunk, inline=True)
             rollup = None
         else:
             # TODO send multiple embeds instead
