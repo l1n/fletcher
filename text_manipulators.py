@@ -8,6 +8,7 @@ import io
 import math
 import messagefuncs
 import random
+import textwrap
 import zalgo.zalgo as zalgo
 
 def smallcaps(text=False):
