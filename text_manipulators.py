@@ -326,8 +326,7 @@ async def blockquote_embed_function(message, client, args):
                     break
             rollup = ''
             for message in historical_messages:
-                rollup += message.clean_content
-                rollup += '\n'
+                rollup = f'{message.clean_content}\n{rollup}' 
         else:
             if not rollup:
                 if "\n" in message.content:
