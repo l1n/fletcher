@@ -206,7 +206,7 @@ async def scp_function(message, client, args):
                         text=f'On behalf of {message.author.display_name}'
                         )
                 if root.xpath('//div[@class="scp-image-block block-right"]'):
-                    embedPreview.set_thumbnail(url=root.xpath('//div[@class="scp-image-block block-right"]/img')[0].attrib['src'])
+                    embedPreview.set_thumbnail(url=root.xpath('//div[@class="scp-image-block block-right"]//img')[0].attrib['src'])
                 if add_fields:
                     embedPreview.add_field(name='Object Class', value=str(markdownify(etree.tostring(content[1]).decode()[3:-5].strip()))[:2000], inline=True)
                     scp = str(markdownify(etree.tostring(content[2]).decode()[3:-5].strip()))[:2000]
