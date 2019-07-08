@@ -29,7 +29,7 @@ def renderLatex(formula, fontsize=12, dpi=300, format='svg', file=None):
 
 async def latex_render_function(message, client, args):
     try:
-        renderstring = "$"+" ".join(args)+"$"
+        renderstring = "$"+message.content.split(" ", 1)[1]+"$"
         await message.channel.send("`"+renderstring+"`", file=discord.File(renderLatex(renderstring, format='png'), filename="fletcher-render.png"))
     except RuntimeError as e:
         exc_type, exc_obj, exc_tb = exc_info()
