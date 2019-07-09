@@ -195,7 +195,7 @@ async def roll_function(message, client, args):
                 }
         result = ", ".join(map(num_to_string, result))
         response = f'Rolled {scalar} {dice} ({size} sides).\n**Result**: {result}'
-        if size > 1:
+        if scalar > 1:
             response += f'\n**Sum**: {result_stats["sum"]}\n**Max**: {result_stats["max"]}\n**Min**: {result_stats["min"]}'
         return await message.channel.send(response)
     except Exception as e:
