@@ -8,6 +8,7 @@ from lxml import html, etree
 from sys import exc_info
 from datetime import datetime, timedelta
 from markdownify import markdownify
+from functools import partial
 # Super Waifu Animated Girlfriend
 
 uwu_responses = {
@@ -152,17 +153,29 @@ async def roll_function(message, client, args):
             size = 10000
         if size < 2:
             size = 2 
+        def basic_num_to_string(n):
+            return str(n)
+        def coin_num_to_string(f, n):
+            if n == 1:
+                return "Tails"
+            elif n == 2:
+                return "Heads"
+            else:
+                return str(f(n))
+        num_to_string = basic_num_to_string
         if scalar > 1:
             if size > 2:
                 dice = "dice"
             else:
                 dice = "coins"
+                num_to_string = partial(coin_num_to_string, basic_num_to_string)
         else:
             if size > 2:
                 dice = "die"
             else:
                 dice = "coin"
-        result = ", ".join([str(random.randint(1, size)) for i in range(scalar)])
+                num_to_string = coin_num_to_string
+        result = ", ".join([num_to_string(random.randint(1, size)) for i in range(scalar)])
         return await message.channel.send(f'Rolled {scalar} {dice} ({size} sides).\n**Result**: {result}')
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
