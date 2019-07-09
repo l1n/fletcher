@@ -138,6 +138,19 @@ async def shindan_function(message, client, args):
 
 pick_regex = re.compile(r'[,\s]\s*(?:and|or|but|nor|for|so|yet)?\s*')
 
+async def roll_function(message, client, args):
+    try:
+        if 'd' in args[0]:
+            args[0] = args[0].split('d')
+            scalar = int(args[0][0]) or 1
+            size = int(args[0][1]) or 6
+            result = ", ".join([random.randint(1, size) for i in xrange(scalar)])
+            srandom.sample(choices, many)))
+            return await message.channel.send("Rolled {scalar} dice ({size} sides).\n**Result**: {result}")
+    except Exception as e:
+        exc_type, exc_obj, exc_tb = exc_info()
+        print("RDF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+
 async def pick_function(message, client, args):
     try:
         if args[0] in ["between", "among", "in", "of"]:
@@ -238,6 +251,14 @@ def autoload(ch):
         'args_num': 1,
         'args_name': [],
         'description': 'pick among comma seperated choices'
+        })
+    ch.add_command({
+        'trigger': ['!roll'],
+        'function': roll_function,
+        'async': True,
+        'args_num': 1,
+        'args_name': [],
+        'description': 'Roll dice in #d# format'
         })
     ch.add_command({
         'trigger': ['!fio', '!optimal'],
