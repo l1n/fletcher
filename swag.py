@@ -165,13 +165,13 @@ async def scp_function(message, client, args):
         url = None
         if len(args) == 0:
             if '-' in message.content:
-                args.append(message.content.split('-')[1].strip())
+                args.append(message.content.split('-', 1)[1].strip())
             else:
                 async with aiohttp.ClientSession() as session:
                     async with session.get('http://www.scp-wiki.net/random:random-scp') as resp:
                         request_body = (await resp.read()).decode('UTF-8')
                         args.append(request_body.split('iframe-redirect#')[1].split('"')[0].split('-')[2])
-        if args[0].isdigit():
+        if args[0][0].isdigit():
              url = "http://www.scp-wiki.net/scp-"+args[0]
         elif args[0].startswith("http://www.scp-wiki.net/"):
             url = args[0]
