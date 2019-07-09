@@ -187,7 +187,7 @@ async def roll_function(message, client, args):
             else:
                 dice = "coin"
 
-        result = [random.randint(1, size)) for i in range(scalar)]
+        result = [random.randint(1, size) for i in range(scalar)]
         result_stats = {
                 'sum': sum(result),
                 'max': max(result),
