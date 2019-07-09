@@ -182,12 +182,13 @@ async def roll_function(message, client, args):
                     return "die"
                 else:
                     return "dice"
-            if n == 1:
-                return "Tails"
-            elif n == 2:
-                return "Heads"
             else:
-            return str(f(n, n_is_size=n_is_size))
+                if n == 1:
+                    return "Tails"
+                elif n == 2:
+                    return "Heads"
+                else:
+                    return str(f(n, n_is_size=n_is_size))
         num_to_string = basic_num_to_string
         if size > 2:
             if size == 20:
