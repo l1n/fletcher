@@ -142,12 +142,14 @@ async def roll_function(message, client, args):
     try:
         if 'd' in args[0]:
             args[0] = args[0].split('d')
-            scalar = int(args[0][0]) or 1
-            if scalar > 10000:
-                scalar = 10000
-            size = int(args[0][1]) or 6
-            result = ", ".join([str(random.randint(1, size)) for i in range(scalar)])
-            return await message.channel.send(f'Rolled {scalar} dice ({size} sides).\n**Result**: {result}')
+        else:
+            args[0] = [None, None]
+        scalar = int(args[0][0]) or 1
+        if scalar > 10000:
+            scalar = 10000
+        size = int(args[0][1]) or 6
+        result = ", ".join([str(random.randint(1, size)) for i in range(scalar)])
+        return await message.channel.send(f'Rolled {scalar} dice ({size} sides).\n**Result**: {result}')
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
         print("RDF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
@@ -257,7 +259,7 @@ def autoload(ch):
         'trigger': ['!roll'],
         'function': roll_function,
         'async': True,
-        'args_num': 1,
+        'args_num': 0,
         'args_name': [],
         'description': 'Roll dice in #d# format'
         })
