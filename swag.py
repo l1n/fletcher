@@ -144,7 +144,7 @@ async def roll_function(message, client, args):
             args[0] = args[0].split('d')
             scalar = int(args[0][0]) or 1
             size = int(args[0][1]) or 6
-            result = ", ".join([random.randint(1, size) for i in xrange(1, scalar)])
+            result = ", ".join([random.randint(1, size) for i in range(1, scalar)])
             return await message.channel.send("Rolled {scalar} dice ({size} sides).\n**Result**: {result}")
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
