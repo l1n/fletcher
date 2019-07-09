@@ -162,7 +162,7 @@ async def roll_function(message, client, args):
             size = 10000
         if size < 2:
             size = 2 
-        def basic_num_to_string(n):
+        def basic_num_to_string(n, is_size=False):
             if is_size:
                 if n == 1:
                     return "die"
