@@ -143,7 +143,7 @@ async def roll_function(message, client, args):
         if len(args) and 'd' in args[0]:
             args[0] = args[0].split('d')
         else:
-            args = [[None, None]]
+            args = [[0, 0]]
         scalar = int(args[0][0]) or 1
         if scalar > 10000:
             scalar = 10000
