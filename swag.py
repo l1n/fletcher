@@ -193,7 +193,7 @@ async def roll_function(message, client, args):
                 'max': max(result),
                 'min': min(result)
                 }
-        result = ", ".join(num_to_string(result))
+        result = ", ".join(map(num_to_string, result))
         response = f'Rolled {scalar} {dice} ({size} sides).\n**Result**: {result}'
         if size > 1:
             response += f'\n**Sum**: {result_stats["sum"]}\n**Max**: {result_stats["max"]}\n**Min**: {result_stats["min"]}'
