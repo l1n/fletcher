@@ -155,6 +155,13 @@ async def roll_function(message, client, args):
             size = 2 
         def basic_num_to_string(n):
             return str(n)
+        def d20_num_to_string(f, n):
+            if n == 1:
+                return "Crit Failure"
+            elif n == 20:
+                return "Crit Success"
+            else:
+                return str(f(n))
         def coin_num_to_string(f, n):
             if n == 1:
                 return "Tails"
@@ -163,20 +170,34 @@ async def roll_function(message, client, args):
             else:
                 return str(f(n))
         num_to_string = basic_num_to_string
+        if size > 2:
+            if size == 20:
+                num_to_string = partial(d20_num_to_string, num_to_string)
+        else:
+            num_to_string = partial(coin_num_to_string, num_to_string)
+
         if scalar > 1:
             if size > 2:
                 dice = "dice"
             else:
                 dice = "coins"
-                num_to_string = partial(coin_num_to_string, basic_num_to_string)
         else:
             if size > 2:
                 dice = "die"
             else:
                 dice = "coin"
-                num_to_string = coin_num_to_string
-        result = ", ".join([num_to_string(random.randint(1, size)) for i in range(scalar)])
-        return await message.channel.send(f'Rolled {scalar} {dice} ({size} sides).\n**Result**: {result}')
+
+        result = [random.randint(1, size)) for i in range(scalar)]
+        result_stats = {
+                'sum': sum(result),
+                'max': max(result),
+                'min': min(result)
+                }
+        result = ", ".join(num_to_string(result))
+        response = f'Rolled {scalar} {dice} ({size} sides).\n**Result**: {result}'
+        if size > 1:
+            response += f'\n**Sum**: {result_stats["sum"]}\n**Max**: {result_stats["max"]}\n**Min**: {result_stats["min"]}'
+        return await message.channel.send(response)
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
         print("RDF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
