@@ -141,10 +141,19 @@ pick_regex = re.compile(r'[,\s]\s*(?:and|or|but|nor|for|so|yet)?\s*')
 
 async def roll_function(message, client, args):
     try:
-        if len(args) and 'd' in args[0]:
-            args[0] = args[0].split('d')
+        if len(args):
+            if 'd' in args[0]:
+                args[0] = args[0].split('d')
+            elif args[0].startswith('coin'):
+                args[0] = [0, 2]
+            else:
+                args = [[0, 0]]
         else:
             args = [[0, 0]]
+        if not args[0][0]:
+            args[0][0] = 0
+        if not args[0][1]:
+            args[0][1] = 0
         scalar = int(args[0][0]) or 1
         if scalar > 10000:
             scalar = 10000
@@ -154,21 +163,31 @@ async def roll_function(message, client, args):
         if size < 2:
             size = 2 
         def basic_num_to_string(n):
+            if n_is_size:
+                if n == 1:
+                    return "die"
+                else:
+                    return "dice"
             return str(n)
-        def d20_num_to_string(f, n):
-            if n == 1:
-                return "Crit Failure"
-            elif n == 20:
-                return "Crit Success"
-            else:
-                return str(f(n))
+        def d20_num_to_string(f, n, n_is_size=False):
+            if not n_is_size:
+                if n == 1:
+                    return "Crit Failure"
+                elif n == 20:
+                    return "Crit Success"
+            return str(f(n, n_is_size=n_is_size))
         def coin_num_to_string(f, n):
+            if n_is_size:
+                if n == 1:
+                    return "die"
+                else:
+                    return "dice"
             if n == 1:
                 return "Tails"
             elif n == 2:
                 return "Heads"
             else:
-                return str(f(n))
+            return str(f(n, n_is_size=n_is_size))
         num_to_string = basic_num_to_string
         if size > 2:
             if size == 20:
