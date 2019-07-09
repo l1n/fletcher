@@ -148,8 +148,22 @@ async def roll_function(message, client, args):
         if scalar > 10000:
             scalar = 10000
         size = int(args[0][1]) or 6
+        if size > 10000:
+            size = 10000
+        if size < 2:
+            size = 2 
+        if scalar > 1:
+            if size > 2:
+                dice = "dice"
+            else:
+                dice = "coins"
+        else:
+            if size > 2:
+                dice = "die"
+            else:
+                dice = "coin"
         result = ", ".join([str(random.randint(1, size)) for i in range(scalar)])
-        return await message.channel.send(f'Rolled {scalar} dice ({size} sides).\n**Result**: {result}')
+        return await message.channel.send(f'Rolled {scalar} {dice} ({size} sides).\n**Result**: {result}')
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
         print("RDF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
