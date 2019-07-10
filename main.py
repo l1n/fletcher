@@ -218,14 +218,14 @@ async def reload_function(message=None, client=client, args=[]):
                     guild_config = configparser.ConfigParser()
                     guild_config.read(f'config["extra"]["rc-path"]/{file_name}')
                     try:
-                         for section_name, section in guild_config.items():
-                             if section_name == 'DEFAULT':
-                                 section_key = f'Guild {file_name}'
-                             else:
-                                 section_key = f'Guild {file_name} - {section_name}'
-                                 config.add_section(section_key)
-                             for k, v in section:
-                                 config.set(section_key, k, v)
+                        for section_name, section in guild_config.items():
+                            if section_name == 'DEFAULT':
+                                section_key = f'Guild {file_name}'
+                            else:
+                                section_key = f'Guild {file_name} - {section_name}'
+                            config.add_section(section_key)
+                            for k, v in section:
+                                config.set(section_key, k, v)
                     except configparser.DuplicateSectionError:
                         print(f'RM: Duplicate section definition for {section_key}, duplicate keys may be overwritten')
                         pass
