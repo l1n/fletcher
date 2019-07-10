@@ -186,8 +186,6 @@ class CommandHandler:
             continue_flag = await greeting.regex_filter(message, self.client, channel_config)
             if not continue_flag:
                 return
-        if not searchString.startswith("!"):
-            return
         for command in self.commands:
             if searchString.lower().startswith(tuple(command['trigger'])) and allowCommand(command, message):
                 if 'long_run' in command:
@@ -221,7 +219,7 @@ class CommandHandler:
                     else:
                         await message.channel.send(f'command "{command["trigger"][0]}" requires {command["args_num"]} argument(s) "{", ".join(command["args_name"])}"')
                         break
-        if channel_config and 'regex' in channel_config and channel_config['regex'] == 'post-command':
+        if channel_config and channel_config.get('regex') == 'post-command':
             continue_flag = await greeting.regex_filter(message, self.client, channel_config)
             if not continue_flag:
                 return
