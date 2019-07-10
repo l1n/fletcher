@@ -198,15 +198,26 @@ async def roll_function(message, client, args):
             num_to_string = partial(coin_num_to_string, num_to_string)
 
         result = [random.randint(1, size) for i in range(scalar)]
-        result_stats = {
-                'sum': sum(result),
-                'max': max(result),
-                'min': min(result)
-                }
-        result = ", ".join(map(num_to_string, result))
-        response = f'Rolled {scalar} {num_to_string(scalar, is_size=True)} ({size} sides).\n**Result**: {result}'
-        if scalar > 1:
-            response += f'\n**Sum**: {result_stats["sum"]}\n**Max**: {result_stats["max"]}\n**Min**: {result_stats["min"]}'
+        if size > 2:
+            result_stats = {
+                    'sum': sum(result),
+                    'max': max(result),
+                    'min': min(result)
+                    }
+            result = " + ".join(map(num_to_string, result))
+        else:
+            result_stats = {
+                    'heads': len(filter(lambda x: x==1, result)),
+                    'tails': len(filter(lambda x: x==2, result))
+                    }
+            result = ", ".join(map(num_to_string, result))
+        response = f'Rolled {scalar} {num_to_string(scalar, is_size=True)} ({size} sides).'
+        if scalar > 1 and size > 2:
+            response += f' {result} = {result_stats["sum"]}\n**Max**: {result_stats["max"]}, **Min**: {result_stats["min"]}'
+        elif:
+            response += f' {result}\n**Heads**: {result_stats["heads"]}, **Tails**: {result_stats["tails"]}'
+        else:
+            response += f'\n**Result**: result'
         return await message.channel.send(response)
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
