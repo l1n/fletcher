@@ -182,12 +182,12 @@ class CommandHandler:
                 searchString = "!"+searchString[:-1]
             searchString = self.bang_remover.sub('!', searchString)
         searchString = searchString.rstrip()
-        if not searchString.startswith("!"):
-            return
-        if channel_config and 'regex' in channel_config and channel_config['regex'] == 'pre-command':
+        if channel_config and channel_config.get('regex') == 'pre-command':
             continue_flag = greeting.regex_filter(message, self.client, channel_config)
             if not continue_flag:
                 return
+        if not searchString.startswith("!"):
+            return
         for command in self.commands:
             if searchString.lower().startswith(tuple(command['trigger'])) and allowCommand(command, message):
                 if 'long_run' in command:

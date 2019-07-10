@@ -128,7 +128,7 @@ async def regex_filter(message, client, config):
         if 'regex-target' in config and config['regex-target'] == 'author':
             subject = str(message.author)
         else:
-            subject = str(message.text_content)
+            subject = str(message.content)
         matching = re.search(config['regex-pattern'], subject)
         if matching and whitelist_mode:
             allowed = True
@@ -160,7 +160,6 @@ async def regex_filter(message, client, config):
                     print("MRF: Forbidden to delete message in "+str(message.channel))
                     pass
         return allowed
-
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
         print(f'MRF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
