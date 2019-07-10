@@ -119,7 +119,6 @@ async def chanban_reload_function(guild, client, config):
         print(f'CBRF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
 
 async def regex_filter(message, client, config):
-    # TODO cache this compiled regex, perhaps overloading config in the global state
     try:
         if config.get('regex-listmode') == "whitelist":
             whitelist_mode = True
@@ -129,7 +128,9 @@ async def regex_filter(message, client, config):
             subject = str(message.author)
         else:
             subject = str(message.content)
-        matching = re.search(config['regex-pattern'], subject)
+        if type(config['regex-pattern']) is not re.Pattern:
+            config['regex-pattern'] = re.compile(config['regex-pattern'])
+        matching = config['regex-pattern'].search(subject)
         if matching and whitelist_mode:
             allowed = True
         elif not matching and whitelist_mode:
@@ -151,7 +152,7 @@ async def regex_filter(message, client, config):
                         timeout = None
                 else:
                     timeout = 60
-                await target.send(config['regex-warn'], delete_after=timeout)
+                await target.send(config['regex-warn'].format(**vars()), delete_after=timeout)
 
             if config.get('regex-kill') == "On":
                 try:
