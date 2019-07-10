@@ -127,8 +127,8 @@ class CommandHandler:
             channel_config = config[f'Guild {message.guild.id}']
         else:
             guild_config = None
-        if f'Guild {message.guild.id} - {channel.id}' in config:
-            channel_config = config[f'Guild {message.guild.id} - {channel.id}']
+        if f'Guild {message.guild.id} - {message.channel.id}' in config:
+            channel_config = config[f'Guild {message.guild.id} - {message.channel.id}']
         else:
             channel_config = None
 
