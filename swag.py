@@ -140,6 +140,7 @@ async def shindan_function(message, client, args):
 pick_regex = re.compile(r'[,\s]\s*(?:and|or|but|nor|for|so|yet)?\s*')
 
 async def roll_function(message, client, args):
+    usage_message = "Usage: !roll `number of probability objects`d`number of sides`"
     try:
         if len(args):
             if 'd' in args[0]:
@@ -158,14 +159,14 @@ async def roll_function(message, client, args):
             args[0][1] = 0
         scalar = int(args[0][0]) or 1
         if scalar > 10000:
-            return await message.channel.send("Sorry, that's too many probability objects!")
+            raise ValueError("Sorry, that's too many probability objects!")
         if scalar < 1:
-            return await message.channel.send("Sorry, that's not enough probability objects!")
+            raise ValueError("Sorry, that's not enough probability objects!")
         size = int(args[0][1]) or 6
         if size > 10000:
-            return await message.channel.send("Sorry, that's too many sides!")
+            raise ValueError("Sorry, that's too many sides!")
         if size < 2:
-            return await message.channel.send("Sorry, that's not enough sides!")
+            raise ValueError("Sorry, that's not enough sides!")
         def basic_num_to_string(n, is_size=False):
             if is_size:
                 if n == 1:
@@ -224,7 +225,10 @@ async def roll_function(message, client, args):
             response += f'\nResult: **{result}**'
         return await message.channel.send(response)
     except ValueError as e:
-        await message.channel.send("One of those parameters wasn't an integer!")
+        if e.message.startswith('invalid literal for int()'):
+            await message.channel.send(f"One of those parameters wasn't an integer! {usage_message}")
+        else:
+            await message.channel.send(f"{e.message} {usage_message}")
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
         print("RDF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
