@@ -128,8 +128,9 @@ async def regex_filter(message, client, config):
             subject = str(message.author)
         else:
             subject = str(message.content)
-        # Can't be cached in config since configparser requires string values
-        matching = re.search(config['regex-pattern'], subject)
+        if type(config['regex-pattern']) is not re.Pattern:
+            config['regex-pattern'] = re.compile(config['regex-pattern'])
+        matching = config['regex-pattern'].search(subject)
         if matching and whitelist_mode:
             allowed = True
         elif not matching and whitelist_mode:
