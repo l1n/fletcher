@@ -219,7 +219,7 @@ async def reload_function(message=None, client=client, args=[]):
                     guild_config.read(f'config["extra"]["rc-path"]/{file_name}')
                     try:
                         for section_name, section in guild_config.items():
-                            if section_name == 'DEFAULT':
+                            if section_name == 'DEFAULTSECT':
                                 section_key = f'Guild {file_name}'
                             else:
                                 section_key = f'Guild {file_name} - {section_name}'
