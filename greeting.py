@@ -121,11 +121,11 @@ async def chanban_reload_function(guild, client, config):
 async def regex_filter(message, client, config):
     # TODO cache this compiled regex, perhaps overloading config in the global state
     try:
-        if 'regex-listmode' in config and config['regex-listmode'] == "whitelist":
+        if config.get('regex-listmode') == "whitelist":
             whitelist_mode = True
         else:
             whitelist_mode = False
-        if 'regex-target' in config and config['regex-target'] == 'author':
+        if config.get('regex-target') == 'author':
             subject = str(message.author)
         else:
             subject = str(message.content)
@@ -134,13 +134,13 @@ async def regex_filter(message, client, config):
             allowed = True
         elif not matching and whitelist_mode:
             allowed = False
-        elif matching and blacklist_mode:
+        elif matching and not whitelist_mode:
             allowed = False
-        elif not matching and blacklist_mode:
+        elif not matching and not whitelist_mode:
             allowed = True
         if not allowed:
             if 'regex-warn' in config:
-                if 'regex-warn-target' in config and config['regex-warn-target'] == 'author':
+                if config.get('regex-warn-target') == 'author':
                     target = message.author
                 else:
                     target = message.channel
@@ -153,7 +153,7 @@ async def regex_filter(message, client, config):
                     timeout = 60
                 await target.send(config['regex-warn'], delete_after=timeout)
 
-            if 'regex-kill' in config and config['regex-kill'] == "On":
+            if config.get('regex-kill') == "On":
                 try:
                     message.delete()
                 except discord.Forbidden as e:
