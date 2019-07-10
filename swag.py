@@ -1,4 +1,5 @@
 import aiohttp
+from collections import Counter
 import discord
 import io
 import messagefuncs
@@ -143,12 +144,15 @@ async def roll_function(message, client, args):
     usage_message = "Usage: !roll `number of probability objects`d`number of sides`"
     try:
         if len(args):
-            if 'd' in args[0]:
-                args[0] = args[0].split('d')
-            elif args[0].startswith('coin'):
-                args[0] = [0, 2]
-            elif isnumeric(args[0]):
-                args[0] = [args[0], 0]
+            if len(args) == 1:
+                if 'd' in args[0]:
+                    args[0] = args[0].split('d')
+                elif args[0].startswith('coin'):
+                    args[0] = [0, 2]
+                elif isnumeric(args[0]):
+                    args[0] = [args[0], 0]
+                else:
+                    args = [[0, 0]]
             else:
                 args = [[0, 0]]
         else:
@@ -211,7 +215,12 @@ async def roll_function(message, client, args):
                     'max': max(result),
                     'min': min(result)
                     }
-            result = "** + **".join(map(num_to_string, result))
+            result = map(num_to_string, result)
+            if size > 100:
+                result = Counter(result)
+                result = ", ".join([f'**{key}**x{result[key]}' for key in result.keys().sort()])
+            else:
+                result = "** + **".join(result)
         else:
             result_stats = {
                     'heads': len([r for r in result if r == 2]),
@@ -225,12 +234,12 @@ async def roll_function(message, client, args):
             response += f' {result}\nHeads: **{result_stats["heads"]}**, Tails: **{result_stats["tails"]}**'
         else:
             response += f'\nResult: **{result}**'
-        return await message.channel.send(response)
+            await messagefuncs.sendWrappedMessage(result, message.channel)
     except ValueError as e:
         if 'invalid literal for int()' in str(e):
-            await message.channel.send(f"One of those parameters wasn't a positive integer! {usage_message}")
+            await messagefuncs.sendWrappedMessage(f"One of those parameters wasn't a positive integer! {usage_message}", message.channel)
         else:
-            await message.channel.send(f"{str(e)} {usage_message}")
+            await messagefuncs.sendWrappedMessage(f"{str(e)} {usage_message}", message.channel)
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
         print("RDF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
