@@ -215,7 +215,7 @@ async def roll_function(message, client, args):
             result = ", ".join(map(num_to_string, result))
         response = f'Rolled {scalar} {num_to_string(scalar, is_size=True)} ({size} sides).'
         if scalar > 1 and size > 2:
-            response += f' **{result}** = {result_stats["sum"]}\nMax: **{result_stats["max"]}**, Min: **{result_stats["min"]}**'
+            response += f' **{result}** = **{result_stats["sum"]}**\nMax: **{result_stats["max"]}**, Min: **{result_stats["min"]}**'
         elif scalar > 1 and size == 2:
             response += f' {result}\nHeads: **{result_stats["heads"]}**, Tails: **{result_stats["tails"]}**'
         else:
