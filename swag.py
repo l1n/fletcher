@@ -215,7 +215,7 @@ async def roll_function(message, client, args):
         if scalar > 1 and size > 2:
             response += f' **{result}** = {result_stats["sum"]}\nMax: **{result_stats["max"]}, Min: **{result_stats["min"]}**'
         elif scalar > 1 and size == 2:
-            response += f' **{result}**\nHeads: **{result_stats["heads"]}**, Tails: **{result_stats["tails"]}**'
+            response += f' {result}\nHeads: **{result_stats["heads"]}**, Tails: **{result_stats["tails"]}**'
         else:
             response += f'\nResult: **{result}**'
         return await message.channel.send(response)
