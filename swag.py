@@ -162,6 +162,8 @@ async def roll_function(message, client, args):
             raise ValueError("Sorry, that's too many probability objects!")
         if scalar < 1:
             raise ValueError("Sorry, that's not enough probability objects!")
+        if args[0][1] == '%':
+            args[0][1] = 100
         size = int(args[0][1]) or 6
         if size > 10000:
             raise ValueError("Sorry, that's too many sides!")
@@ -226,7 +228,7 @@ async def roll_function(message, client, args):
         return await message.channel.send(response)
     except ValueError as e:
         if 'invalid literal for int()' in str(e):
-            await message.channel.send(f"One of those parameters wasn't an integer! {usage_message}")
+            await message.channel.send(f"One of those parameters wasn't a positive integer! {usage_message}")
         else:
             await message.channel.send(f"{str(e)} {usage_message}")
     except Exception as e:
