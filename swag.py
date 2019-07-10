@@ -206,7 +206,7 @@ async def roll_function(message, client, args):
                     'max': max(result),
                     'min': min(result)
                     }
-            result = " + ".join(map(num_to_string, result))
+            result = "** + **".join(map(num_to_string, result))
         else:
             result_stats = {
                     'heads': len([r for r in result if r == 2]),
