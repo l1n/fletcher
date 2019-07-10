@@ -218,7 +218,7 @@ async def roll_function(message, client, args):
             result = map(num_to_string, result)
             if scalar > 100:
                 result = Counter(result)
-                result = ", ".join([f'**{key}**x{result[key]}' for key in result.keys().sort()])
+                result = ", ".join([f'**{key}**x{result[key]}' for key in result.keys()])
             else:
                 result = "** + **".join(result)
         else:
