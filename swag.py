@@ -234,7 +234,7 @@ async def roll_function(message, client, args):
             response += f' {result}\nHeads: **{result_stats["heads"]}**, Tails: **{result_stats["tails"]}**'
         else:
             response += f'\nResult: **{result}**'
-            await messagefuncs.sendWrappedMessage(result, message.channel)
+        await messagefuncs.sendWrappedMessage(response, message.channel)
     except ValueError as e:
         if 'invalid literal for int()' in str(e):
             await messagefuncs.sendWrappedMessage(f"One of those parameters wasn't a positive integer! {usage_message}", message.channel)
