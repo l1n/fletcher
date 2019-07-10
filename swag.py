@@ -153,6 +153,8 @@ async def roll_function(message, client, args):
                     args[0] = [args[0], 0]
                 else:
                     args = [[0, 0]]
+            elif len(args) == 2:
+                args = [args[0], args[1]]
             else:
                 args = [[0, 0]]
         else:
