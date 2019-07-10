@@ -207,8 +207,8 @@ async def roll_function(message, client, args):
             result = " + ".join(map(num_to_string, result))
         else:
             result_stats = {
-                    'heads': len(filter(lambda x: x==1, result)),
-                    'tails': len(filter(lambda x: x==2, result))
+                    'heads': len([r for r in result if r == 2]),
+                    'tails': len([r for r in result if r == 1])
                     }
             result = ", ".join(map(num_to_string, result))
         response = f'Rolled {scalar} {num_to_string(scalar, is_size=True)} ({size} sides).'
