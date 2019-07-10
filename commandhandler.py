@@ -182,7 +182,7 @@ class CommandHandler:
                 searchString = "!"+searchString[:-1]
             searchString = self.bang_remover.sub('!', searchString)
         searchString = searchString.rstrip()
-        if channel_config and channel_config.get('regex') == 'pre-command':
+        if channel_config and channel_config.get('regex') == 'pre-command' and not message.channel.permissions_for(message.author).manage_messages:
             continue_flag = await greeting.regex_filter(message, self.client, channel_config)
             if not continue_flag:
                 return
@@ -219,7 +219,7 @@ class CommandHandler:
                     else:
                         await message.channel.send(f'command "{command["trigger"][0]}" requires {command["args_num"]} argument(s) "{", ".join(command["args_name"])}"')
                         break
-        if channel_config and channel_config.get('regex') == 'post-command':
+        if channel_config and channel_config.get('regex') == 'post-command' and not message.channel.permissions_for(message.author).manage_messages:
             continue_flag = await greeting.regex_filter(message, self.client, channel_config)
             if not continue_flag:
                 return
