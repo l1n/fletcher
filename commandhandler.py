@@ -183,7 +183,7 @@ class CommandHandler:
             searchString = self.bang_remover.sub('!', searchString)
         searchString = searchString.rstrip()
         if channel_config and channel_config.get('regex') == 'pre-command':
-            continue_flag = greeting.regex_filter(message, self.client, channel_config)
+            continue_flag = await greeting.regex_filter(message, self.client, channel_config)
             if not continue_flag:
                 return
         if not searchString.startswith("!"):
@@ -205,19 +205,24 @@ class CommandHandler:
                     raise Exception('Blacklisted command attempt by user')
                 if command['args_num'] == 0:
                     if command['async']:
-                        return await command['function'](message, self.client, args)
+                        await command['function'](message, self.client, args)
+                        break
                     else:
-                        return await message.channel.send(str(command['function'](message, self.client, args)))
+                        await message.channel.send(str(command['function'](message, self.client, args)))
+                        break
                 else:
                     if len(args) >= command['args_num']:
                         if command['async']:
-                            return await command['function'](message, self.client, args)
+                            await command['function'](message, self.client, args)
+                            break
                         else:
-                            return await message.channel.send(str(command['function'](message, self.client, args)))
+                            await message.channel.send(str(command['function'](message, self.client, args)))
+                            break
                     else:
-                        return await message.channel.send(f'command "{command["trigger"][0]}" requires {command["args_num"]} argument(s) "{", ".join(command["args_name"])}"')
+                        await message.channel.send(f'command "{command["trigger"][0]}" requires {command["args_num"]} argument(s) "{", ".join(command["args_name"])}"')
+                        break
         if channel_config and 'regex' in channel_config and channel_config['regex'] == 'post-command':
-            continue_flag = greeting.regex_filter(message, self.client, channel_config)
+            continue_flag = await greeting.regex_filter(message, self.client, channel_config)
             if not continue_flag:
                 return
 
