@@ -159,6 +159,8 @@ async def roll_function(message, client, args):
         scalar = int(args[0][0]) or 1
         if scalar > 10000:
             return await message.channel.send('Sorry, that\'s too many probability objects!')
+        if scalar < 1:
+            return await message.channel.send('Sorry, that\'s not enough probability objects!')
         size = int(args[0][1]) or 6
         if size > 10000:
             return await message.channel.send('Sorry, that\'s too many sides!')
