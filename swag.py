@@ -221,6 +221,7 @@ async def roll_function(message, client, args):
                 result = ", ".join([f'**{key}**x{result[key]}' for key in result.keys()])
             else:
                 result = "** + **".join(result)
+                result = f" **{result}**"
         else:
             result_stats = {
                     'heads': len([r for r in result if r == 2]),
@@ -228,15 +229,16 @@ async def roll_function(message, client, args):
                     }
             if scalar <= 100:
                 result = ", ".join(map(num_to_string, result))
+                result = f" {result}"
             else:
                 result = ""
         response = f'Rolled {scalar} {num_to_string(scalar, is_size=True)} ({size} sides).'
         if scalar > 1 and size > 2:
-            response += f' **{result}** = **{result_stats["sum"]}**\nMax: **{result_stats["max"]}**, Min: **{result_stats["min"]}**'
+            response += f'{result} = **{result_stats["sum"]}**\nMax: **{result_stats["max"]}**, Min: **{result_stats["min"]}**'
         elif scalar > 1 and size == 2:
-            response += f' {result}\nHeads: **{result_stats["heads"]}**, Tails: **{result_stats["tails"]}**'
+            response += f'{result}\nHeads: **{result_stats["heads"]}**, Tails: **{result_stats["tails"]}**'
         else:
-            response += f'\nResult: **{result}**'
+            response += f'\nResult: {result}'
         await messagefuncs.sendWrappedMessage(response, message.channel)
     except ValueError as e:
         if 'invalid literal for int()' in str(e):
