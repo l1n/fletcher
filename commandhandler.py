@@ -124,7 +124,7 @@ class CommandHandler:
         global sid
 
         if f'Guild {message.guild.id}' in config:
-            channel_config = config[f'Guild {message.guild.id}']
+            guild_config = config[f'Guild {message.guild.id}']
         else:
             guild_config = None
         if f'Guild {message.guild.id} - {message.channel.id}' in config:
