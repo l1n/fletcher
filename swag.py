@@ -216,7 +216,7 @@ async def roll_function(message, client, args):
                     'min': min(result)
                     }
             result = map(num_to_string, result)
-            if size > 100:
+            if scalar > 100:
                 result = Counter(result)
                 result = ", ".join([f'**{key}**x{result[key]}' for key in result.keys().sort()])
             else:
@@ -226,7 +226,10 @@ async def roll_function(message, client, args):
                     'heads': len([r for r in result if r == 2]),
                     'tails': len([r for r in result if r == 1])
                     }
-            result = ", ".join(map(num_to_string, result))
+            if scalar <= 100:
+                result = ", ".join(map(num_to_string, result))
+            else:
+                result = ""
         response = f'Rolled {scalar} {num_to_string(scalar, is_size=True)} ({size} sides).'
         if scalar > 1 and size > 2:
             response += f' **{result}** = **{result_stats["sum"]}**\nMax: **{result_stats["max"]}**, Min: **{result_stats["min"]}**'
