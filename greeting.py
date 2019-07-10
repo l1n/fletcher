@@ -155,7 +155,7 @@ async def regex_filter(message, client, config):
 
             if config.get('regex-kill') == "On":
                 try:
-                    message.delete()
+                    await message.delete()
                 except discord.Forbidden as e:
                     print("MRF: Forbidden to delete message in "+str(message.channel))
                     pass
