@@ -223,6 +223,8 @@ async def roll_function(message, client, args):
         else:
             response += f'\nResult: **{result}**'
         return await message.channel.send(response)
+    except ValueError as e:
+        await message.channel.send("One of those parameters wasn't an integer!")
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
         print("RDF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
