@@ -145,7 +145,7 @@ async def regex_filter(message, client, config):
                 else:
                     target = message.channel
                 if 'regex-warn-timeout' in config:
-                    if isnumeric(config['regex-warn-timeout']):
+                    if config['regex-warn-timeout'].isdigit():
                         timeout = int(config['regex-warn-timeout'])
                     else:
                         timeout = None
