@@ -156,7 +156,7 @@ async def roll_function(message, client, args):
             elif len(args) == 2:
                 args = [args[0], args[1]]
             else:
-                args = [[0, 0]]
+                raise ValueError("Sorry, that doesn't seem like input!")
         else:
             args = [[0, 0]]
         if not args[0][0]:
