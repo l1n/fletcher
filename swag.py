@@ -145,8 +145,8 @@ async def roll_function(message, client, args):
     try:
         if len(args):
             if len(args) == 1:
-                if 'd' in args[0]:
-                    args[0] = args[0].split('d')
+                if 'd' in args[0].lower():
+                    args[0] = args[0].lower().split('d')
                 elif args[0].startswith('coin'):
                     args[0] = [0, 2]
                 elif isnumeric(args[0]):
@@ -218,7 +218,8 @@ async def roll_function(message, client, args):
             result = map(num_to_string, result)
             if scalar > 100:
                 result = Counter(result)
-                result = ", ".join([f'**{key}**x{result[key]}' for key in result.keys()])
+                result = ", ".join([f'**{key}**x{result[key]}' for key in list(result.keys()).sort()])
+                result = f" {result}"
             else:
                 result = "** + **".join(result)
                 result = f" **{result}**"
