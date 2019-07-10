@@ -14,7 +14,7 @@ def renderLatex(formula, fontsize=12, dpi=300, format='svg', file=None):
     plt.rc('text.latex', preamble=r'\usepackage{amsmath}')
     plt.rc('font', family='serif')
     fig = plt.figure(figsize=(0.01, 0.01))
-    fig.text(0, 0, u'{}'.format(formula), fontsize=fontsize, verticalalignment='center_baseline', clip_on=True)
+    fig.text(0, 0, formula, fontsize=fontsize, verticalalignment='center_baseline', clip_on=True)
     plt.tight_layout()
 
     output = io.BytesIO() if file is None else file
@@ -29,8 +29,8 @@ def renderLatex(formula, fontsize=12, dpi=300, format='svg', file=None):
 
 async def latex_render_function(message, client, args):
     try:
-        renderstring = "$"+message.content.split(" ", 1)[1]+"$"
-        await message.channel.send("`"+renderstring+"`", file=discord.File(renderLatex(renderstring, format='png'), filename="fletcher-render.png"))
+        renderstring = "$"+(message.content.split(" ", 1)[1])+"$"
+        await message.channel.send("||```tex\n"+renderstring+"```||", file=discord.File(renderLatex(renderstring, format='png'), filename="fletcher-render.png"))
     except RuntimeError as e:
         exc_type, exc_obj, exc_tb = exc_info()
         print("LRF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))

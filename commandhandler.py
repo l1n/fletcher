@@ -1,6 +1,7 @@
 from datetime import datetime
 import discord
 import messagefuncs
+import greeting
 import inspect
 import janissary
 import re
@@ -121,13 +122,23 @@ class CommandHandler:
     async def command_handler(self, message):
         global config
         global sid
+
+        if f'Guild {message.guild.id}' in config:
+            channel_config = config[f'Guild {message.guild.id}']
+        else:
+            guild_config = None
+        if f'Guild {message.guild.id} - {channel.id}' in config:
+            channel_config = config[f'Guild {message.guild.id} - {channel.id}']
+        else:
+            channel_config = None
+
         try:
-            if "Guild "+str(message.guild.id) in config and 'automod-blacklist-category' in config["Guild "+str(message.guild.id)]:
-                blacklist_category = [int(i) for i in config["Guild "+str(message.guild.id)]['automod-blacklist-category'].split(',')]
+            if guild_config and 'automod-blacklist-category' in guild_config:
+                blacklist_category = [int(i) for i in guild_config['automod-blacklist-category'].split(',')]
             else:
                 blacklist_category = []
-            if "Guild "+str(message.guild.id) in config and 'automod-blacklist-channel' in config["Guild "+str(message.guild.id)]:
-                blacklist_channel = [int(i) for i in config["Guild "+str(message.guild.id)]['automod-blacklist-channel'].split(',')]
+            if guild_config and 'automod-blacklist-channel' in guild_config:
+                blacklist_channel = [int(i) for i in guild_config['automod-blacklist-channel'].split(',')]
             else:
                 blacklist_channel = []
             if type(message.channel) is discord.TextChannel and message.channel.category_id not in blacklist_category and message.channel.id not in blacklist_channel:
@@ -139,7 +150,7 @@ class CommandHandler:
                 elif message.content == "VADER BAD":
                     sent_com_score = -1
                 print(str(message.id)+" #"+message.guild.name+":"+message.channel.name+" <"+message.author.name+":"+str(message.author.id)+"> ["+str(sent_com_score)+"] "+message.content)
-                if 'Guild '+str(message.guild.id) in config and 'sent-com-score-threshold' in config['Guild '+str(message.guild.id)] and sent_com_score <= float(config['Guild '+str(message.guild.id)]['sent-com-score-threshold']) and message.webhook_id is None and message.guild.name in config['moderation']['guilds'].split(','):
+                if guild_config and 'sent-com-score-threshold' in guild_config and sent_com_score <= float(guild_config['sent-com-score-threshold']) and message.webhook_id is None and message.guild.name in config['moderation']['guilds'].split(','):
                     await janissary.modreport_function(message, self.client, ("\n[Sentiment Analysis Combined Score "+str(sent_com_score)+'] '+message.content).split(' '))
             else:
                 if type(message.channel) is discord.TextChannel:
@@ -173,6 +184,10 @@ class CommandHandler:
         searchString = searchString.rstrip()
         if not searchString.startswith("!"):
             return
+        if channel_config and 'regex' in channel_config and channel_config['regex'] == 'pre-command':
+            continue_flag = greeting.regex_filter(message, self.client, channel_config)
+            if not continue_flag:
+                return
         for command in self.commands:
             if searchString.lower().startswith(tuple(command['trigger'])) and allowCommand(command, message):
                 if 'long_run' in command:
@@ -201,6 +216,10 @@ class CommandHandler:
                             return await message.channel.send(str(command['function'](message, self.client, args)))
                     else:
                         return await message.channel.send(f'command "{command["trigger"][0]}" requires {command["args_num"]} argument(s) "{", ".join(command["args_name"])}"')
+        if channel_config and 'regex' in channel_config and channel_config['regex'] == 'post-command':
+            continue_flag = greeting.regex_filter(message, self.client, channel_config)
+            if not continue_flag:
+                return
 
 async def help_function(message, client, args):
     global ch

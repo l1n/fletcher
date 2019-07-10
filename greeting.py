@@ -2,6 +2,7 @@ import asyncio
 import discord
 import io
 import random
+import re
 from sys import exc_info
 from datetime import datetime, timedelta
 # global conn set by reload_function
@@ -116,6 +117,53 @@ async def chanban_reload_function(guild, client, config):
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
         print(f'CBRF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
+
+async def regex_filter(message, client, config):
+    # TODO cache this compiled regex, perhaps overloading config in the global state
+    try:
+        if 'regex-listmode' in config and config['regex-listmode'] == "whitelist":
+            whitelist_mode = True
+        else:
+            whitelist_mode = False
+        if 'regex-target' in config and config['regex-target'] == 'author':
+            subject = str(message.author)
+        else:
+            subject = str(message.text_content)
+        matching = re.search(config['regex-pattern'], subject)
+        if matching and whitelist_mode:
+            allowed = True
+        elif not matching and whitelist_mode:
+            allowed = False
+        elif matching and blacklist_mode:
+            allowed = False
+        elif not matching and blacklist_mode:
+            allowed = True
+        if not allowed:
+            if 'regex-warn' in config:
+                if 'regex-warn-target' in config and config['regex-warn-target'] == 'author':
+                    target = message.author
+                else:
+                    target = message.channel
+                if 'regex-warn-timeout' in config:
+                    if isnumeric(config['regex-warn-timeout']):
+                        timeout = int(config['regex-warn-timeout'])
+                    else:
+                        timeout = None
+                else:
+                    timeout = 60
+                await target.send(config['regex-warn'], delete_after=timeout)
+
+            if 'regex-kill' in config and config['regex-kill'] == "On":
+                try:
+                    message.delete()
+                except discord.Forbidden as e:
+                    print("MRF: Forbidden to delete message in "+str(message.channel))
+                    pass
+        return allowed
+
+    except Exception as e:
+        exc_type, exc_obj, exc_tb = exc_info()
+        print(f'MRF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
 
 # Register functions in client
 def autoload(ch):

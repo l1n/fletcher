@@ -213,17 +213,22 @@ async def reload_function(message=None, client=client, args=[]):
             pr = cProfile.Profile()
             pr.enable()
         if 'extra' in config and 'rc-path' in config['extra'] and os.path.isdir(config['extra']['rc-path']):
-            for f in os.listdir(config['extra']['rc-path']):
-                if f.isdigit():
+            for file_name in os.listdir(config['extra']['rc-path']):
+                if file_name.isdigit():
                     guild_config = configparser.ConfigParser()
-                    guild_config.read(config['extra']['rc-path']+"/"+f)
+                    guild_config.read(f'config["extra"]["rc-path"]/{file_name}')
                     try:
-                        config.add_section("Guild "+f)
+                         for section_name, section in guild_config.items():
+                             if section_name == 'DEFAULT':
+                                 section_key = f'Guild {file_name}'
+                             else:
+                                 section_key = f'Guild {file_name} - {section_name}'
+                                 config.add_section(section_key)
+                             for k, v in section:
+                                 config.set(section_key, k, v)
                     except configparser.DuplicateSectionError:
-                        print("RM: Duplicate section definition, merging")
+                        print(f'RM: Duplicate section definition for {section_key}, duplicate keys may be overwritten')
                         pass
-                    for k, v in guild_config.items('DEFAULT'):
-                        config.set("Guild "+f, k, v)
         await animate_startup('📝', message)
         conn = psycopg2.connect(host=config['database']['host'],database=config['database']['tablespace'], user=config['database']['user'], password=config['database']['password'])
         await animate_startup('💾', message)
