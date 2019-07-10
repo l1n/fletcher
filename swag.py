@@ -225,10 +225,10 @@ async def roll_function(message, client, args):
             response += f'\nResult: **{result}**'
         return await message.channel.send(response)
     except ValueError as e:
-        if e.message.startswith('invalid literal for int()'):
+        if 'invalid literal for int()' in str(e):
             await message.channel.send(f"One of those parameters wasn't an integer! {usage_message}")
         else:
-            await message.channel.send(f"{e.message} {usage_message}")
+            await message.channel.send(f"{str(e)} {usage_message}")
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
         print("RDF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
