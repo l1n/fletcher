@@ -221,6 +221,9 @@ async def roll_function(message, client, args):
             if scalar > 100:
                 result = Counter(result)
                 result = ", ".join([f'**{tuple[0]}**x{tuple[1]}' for tuple in sorted(result.items())])
+                if len(result) > 2048:
+                    result = ", ".join([f'**{tuple[0]}**x{tuple[1]}' for tuple in sorted(result.most_common(20))])
+                    result = f"Top 20 rolls: {result}"
                 result = f" {result}"
             else:
                 result = "** + **".join(result)
