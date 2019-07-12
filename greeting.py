@@ -153,6 +153,11 @@ async def regex_filter(message, client, config):
                 await target.send(config['regex-warn'].format(**vars()), delete_after=timeout)
 
             if config.get('regex-kill') == "On":
+                if message.channel.permissions_for(message.author).manage_messages:
+                    emoji = u"\U0001F5D9"
+                    await message.add_reaction(emoji)
+                    await asyncio.sleep(10)
+                    await message.remove_reaction(emoji, client.user)
                 try:
                     await message.delete()
                 except discord.Forbidden as e:
