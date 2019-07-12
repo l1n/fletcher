@@ -202,17 +202,17 @@ async def reload_function(message=None, client=client, args=[]):
     now = datetime.utcnow()
     try:
         await client.change_presence(activity=discord.Game(name='Reloading: The Game'))
-        if 'profile' in config['discord'] and config['discord']['profile']:
+        if config['discord'].get('profile'):
             global pr
             if pr:
                 pr.disable()
                 pr.print_stats()
         config = configparser.ConfigParser()
         config.read(FLETCHER_CONFIG)
-        if 'profile' in config['discord'] and config['discord']['profile']:
+        if config['discord'].get('profile'):
             pr = cProfile.Profile()
             pr.enable()
-        if 'extra' in config and 'rc-path' in config['extra'] and os.path.isdir(config['extra']['rc-path']):
+        if config.get('extra') and config['extra'].get('rc-path') and os.path.isdir(config['extra']['rc-path']):
             for file_name in os.listdir(config['extra']['rc-path']):
                 if file_name.isdigit():
                     guild_config = configparser.ConfigParser()
@@ -230,6 +230,7 @@ async def reload_function(message=None, client=client, args=[]):
                     except configparser.DuplicateSectionError:
                         print(f'RM: Duplicate section definition for {section_key}, duplicate keys may be overwritten')
                         pass
+        config = {s:dict(config.items(s)) for s in config.sections()}
         await animate_startup('📝', message)
         conn = psycopg2.connect(host=config['database']['host'],database=config['database']['tablespace'], user=config['database']['user'], password=config['database']['password'])
         await animate_startup('💾', message)
