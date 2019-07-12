@@ -289,11 +289,11 @@ async def blockquote_embed_function(message, client, args):
             limit = int(args[0][2:])
             title = " ".join(args[1:])
         elif len(args) >= 1:
-            urlParts = messagefuncs.extract_identifiers_messagelink.search(message.content).groups()
-            if len(urlParts) == 3:
-                guild_id = int(urlParts[0])
-                channel_id = int(urlParts[1])
-                message_id = int(urlParts[2])
+            urlParts = messagefuncs.extract_identifiers_messagelink.search(message.content)
+            if urlParts and len(urlParts.groups()) == 3:
+                guild_id = int(urlParts.group(1))
+                channel_id = int(urlParts.group(2))
+                message_id = int(urlParts.group(3))
                 guild = client.get_guild(guild_id)
                 if guild is None:
                     print("PMF: Fletcher is not in guild ID "+str(guild_id))
