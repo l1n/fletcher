@@ -127,8 +127,8 @@ class CommandHandler:
         channel_config = self.config(guild=message.guild, channel=message.channel)
 
         try:
-            blacklist_category = [int(i) for i in guild_config.get('automod-blacklist-category', '').split(',')]
-            blacklist_channel = [int(i) for i in guild_config.get('automod-blacklist-channel', '').split(',')]
+            blacklist_category = [int(i) for i in guild_config.get('automod-blacklist-category', '0').split(',')]
+            blacklist_channel = [int(i) for i in guild_config.get('automod-blacklist-channel', '0').split(',')]
             if type(message.channel) is discord.TextChannel and message.channel.category_id not in blacklist_category and message.channel.id not in blacklist_channel:
                 sent_com_score = sid.polarity_scores(message.content)['compound']
                 if message.content == "VADER NEUTRAL":
