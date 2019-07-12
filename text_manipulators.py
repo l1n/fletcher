@@ -336,12 +336,10 @@ async def blockquote_embed_function(message, client, args):
                 else:
                     rollup = message.content.split(" ", 1)[1]
         quoted_by = f'{message.author.name}#{message.author.discriminator}'
-        try:
+        if hasattr(message.author, 'nick') and message.author.nick is not None:
             quoted_by = f'{message.author.nick} ({quoted_by})'
-        except AttributeError:
-            # No nick defined
+        else:
             quoted_by = f'On behalf of {quoted_by}'
-            pass
         embed = discord.Embed().set_footer(icon_url=message.author.avatar_url,text=quoted_by)
         if title:
             embed.title = title
