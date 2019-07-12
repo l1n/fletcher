@@ -285,6 +285,7 @@ async def reaction_request_function(message, client, args):
 async def blockquote_embed_function(message, client, args):
     try:
         title = None
+        rollup = None
         if len(args) >= 1 and args[0][0:2] == '<<':
             limit = int(args[0][2:])
             title = " ".join(args[1:])
