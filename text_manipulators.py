@@ -273,7 +273,7 @@ async def reaction_request_function(message, client, args):
                 pass
             await target.remove_reaction(emoji, client.user)
         try:
-            if 'snappy' in config['discord'] and config['discord']['snappy']:
+            if config['discord'].get('snappy'):
                 await message.delete()
         except discord.Forbidden:
             print("XRF: Couldn't delete message but snappy mode is on")
@@ -288,7 +288,7 @@ async def blockquote_embed_function(message, client, args):
         if len(args) >= 1 and args[0][0:2] == '<<':
             limit = int(args[0][2:])
             title = " ".join(args[1:])
-        elif len(args) >=1:
+        elif len(args) >= 1:
             urlParts = messagefuncs.extract_identifiers_messagelink.search(message.content).groups()
             if len(urlParts) == 3:
                 guild_id = int(urlParts[0])
@@ -314,7 +314,7 @@ async def blockquote_embed_function(message, client, args):
             limit = None
         else:
             limit = None
-        if len(args) == 0 or limit and limit <= 0:
+        if len(args) == 0 or (limit and limit <= 0):
             limit = 1
         if limit:
             historical_messages = []
@@ -357,7 +357,7 @@ async def blockquote_embed_function(message, client, args):
         if not rollup:
             await message.channel.send(embed=embed)
             try:
-                if 'snappy' in config['discord'] and config['discord']['snappy']:
+                if config['discord'].get('snappy'):
                     for message in historical_messages:
                         await message.delete()
                     await message.delete()
@@ -372,7 +372,7 @@ async def zalgo_function(message, client, args):
     try:
         await message.channel.send(zalgo.zalgo(' '.join(args)))
         try:
-            if 'snappy' in config['discord'] and config['discord']['snappy']:
+            if config['discord'].get('snappy'):
                 await message.delete()
         except discord.Forbidden:
             print("ZF: Couldn't delete messages but snappy mode is on")
