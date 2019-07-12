@@ -123,24 +123,12 @@ class CommandHandler:
         global config
         global sid
 
-        if f'Guild {message.guild.id}' in config:
-            guild_config = config[f'Guild {message.guild.id}']
-        else:
-            guild_config = None
-        if f'Guild {message.guild.id} - {message.channel.id}' in config:
-            channel_config = config[f'Guild {message.guild.id} - {message.channel.id}']
-        else:
-            channel_config = None
+        guild_config = self.config(guild=message.guild)
+        channel_config = self.config(guild=message.guild, channel=message.channel)
 
         try:
-            if guild_config and 'automod-blacklist-category' in guild_config:
-                blacklist_category = [int(i) for i in guild_config['automod-blacklist-category'].split(',')]
-            else:
-                blacklist_category = []
-            if guild_config and 'automod-blacklist-channel' in guild_config:
-                blacklist_channel = [int(i) for i in guild_config['automod-blacklist-channel'].split(',')]
-            else:
-                blacklist_channel = []
+            blacklist_category = [int(i) for i in guild_config.get('automod-blacklist-category', '').split(',')]
+            blacklist_channel = [int(i) for i in guild_config.get('automod-blacklist-channel', '').split(',')]
             if type(message.channel) is discord.TextChannel and message.channel.category_id not in blacklist_category and message.channel.id not in blacklist_channel:
                 sent_com_score = sid.polarity_scores(message.content)['compound']
                 if message.content == "VADER NEUTRAL":
@@ -150,7 +138,7 @@ class CommandHandler:
                 elif message.content == "VADER BAD":
                     sent_com_score = -1
                 print(str(message.id)+" #"+message.guild.name+":"+message.channel.name+" <"+message.author.name+":"+str(message.author.id)+"> ["+str(sent_com_score)+"] "+message.content)
-                if guild_config and 'sent-com-score-threshold' in guild_config and sent_com_score <= float(guild_config['sent-com-score-threshold']) and message.webhook_id is None and message.guild.name in config['moderation']['guilds'].split(','):
+                if guild_config.get('sent-com-score-threshold') and sent_com_score <= float(guild_config['sent-com-score-threshold']) and message.webhook_id is None and message.guild.name in config.get('moderation', dict()).get('guilds', '').split(','):
                     await janissary.modreport_function(message, self.client, ("\n[Sentiment Analysis Combined Score "+str(sent_com_score)+'] '+message.content).split(' '))
             else:
                 if type(message.channel) is discord.TextChannel:
@@ -170,11 +158,11 @@ class CommandHandler:
                 pass
             pass
         if messagefuncs.extract_identifiers_messagelink.search(message.content) and not (message.content.startswith("!preview") or message.content.startswith("!blockquote")):
-            if str(message.author.id) not in config['moderation']['blacklist-user-usage'].split(','):
+            if str(message.author.id) not in config.get('moderation', dict()).get('blacklist-user-usage', '').split(','):
                 await messagefuncs.preview_messagelink_function(message, self.client, None)
         if 'rot13' in message.content:
-            if str(message.author.id) not in config['moderation']['blacklist-user-usage'].split(','):
-                await message.add_reaction(self.client.get_emoji(int(config['discord']['rot13'])))
+            if str(message.author.id) not in config.get('moderation', dict()).get('blacklist-user-usage', '').split(','):
+                await message.add_reaction(self.client.get_emoji(int(config.get('discord', dict()).get('rot13','clock1130'))))
         searchString = message.content
         searchString = self.tag_id_as_command.sub('!', searchString)
         if config['interactivity']['enhanced-command-finding'] == "on":
@@ -182,7 +170,7 @@ class CommandHandler:
                 searchString = "!"+searchString[:-1]
             searchString = self.bang_remover.sub('!', searchString)
         searchString = searchString.rstrip()
-        if channel_config and channel_config.get('regex') == 'pre-command' and not message.channel.permissions_for(message.author).manage_messages:
+        if channel_config.get('regex') == 'pre-command' and not message.channel.permissions_for(message.author).manage_messages:
             continue_flag = await greeting.regex_filter(message, self.client, channel_config)
             if not continue_flag:
                 return
@@ -197,7 +185,7 @@ class CommandHandler:
                 args = searchString.split(' ')
                 args = [item for item in args if item]
                 args.pop(0)
-                if str(message.author.id) in config['moderation']['blacklist-user-usage'].split(','):
+                if str(message.author.id) in config.get('moderation', dict()).get('blacklist-user-usage', '').split(','):
                     await message.add_reaction('💔')
                     await message.channel.send("I'll only talk to you when you stop being mean to me, "+message.author.display_name+"!")
                     raise Exception('Blacklisted command attempt by user')
@@ -219,10 +207,32 @@ class CommandHandler:
                     else:
                         await message.channel.send(f'command "{command["trigger"][0]}" requires {command["args_num"]} argument(s) "{", ".join(command["args_name"])}"')
                         break
-        if channel_config and channel_config.get('regex') == 'post-command' and not message.channel.permissions_for(message.author).manage_messages:
+        if channel_config.get('regex') == 'post-command' and not message.channel.permissions_for(message.author).manage_messages:
             continue_flag = await greeting.regex_filter(message, self.client, channel_config)
             if not continue_flag:
                 return
+
+    def config(self, message, channel=None, guild=None):
+        if guild is None:
+            if channel:
+                guild = channel.guild
+            elif message:
+                guild = message.guild
+            else:
+                raise ValueError('No message, channel or guild specified')
+        if channel is None:
+            if message:
+                channel = message.channel
+        if guild and type(guild) is not int:
+            guild = guild.id
+        if channel and type(channel) is not int:
+            channel = channel.id
+        if channel:
+            channel = f' - {int(channel)}'
+        try:
+            return dict(config.get(f'Guild {guild}{channel}'))
+        except TypeError:
+            return dict()
 
 async def help_function(message, client, args):
     global ch
