@@ -213,6 +213,7 @@ class CommandHandler:
                 return
 
     def config(self, message, channel=None, guild=None):
+        global config
         if guild is None:
             if channel:
                 guild = channel.guild
