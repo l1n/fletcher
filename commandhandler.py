@@ -123,8 +123,14 @@ class CommandHandler:
         global config
         global sid
 
-        guild_config = self.config(guild=message.guild)
-        channel_config = self.config(guild=message.guild, channel=message.channel)
+        try:
+            guild_config = self.config(guild=message.guild)
+            channel_config = self.config(guild=message.guild, channel=message.channel)
+        except ValueError as e:
+            if 'guild' in e.message:
+                # DM configuration, default to none
+                guild_config = dict()
+                channel_config = dict()
 
         try:
             blacklist_category = [int(i) for i in guild_config.get('automod-blacklist-category', '0').split(',')]
