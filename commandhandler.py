@@ -212,7 +212,7 @@ class CommandHandler:
             if not continue_flag:
                 return
 
-    def config(self, message, channel=None, guild=None):
+    def config(self, message=None, channel=None, guild=None):
         global config
         if guild is None:
             if channel:
