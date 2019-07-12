@@ -135,7 +135,7 @@ async def load_webhooks():
                 print(f'LWH: Querying {guild.name}')
                 for webhook in await guild.webhooks():
                     print(f'LWH: * {webhook.name}')
-                    if webhook.name.startswith(config['discord']['botNavel']+' ('):
+                    if webhook.name.startswith(config.get('discord', dict()).get('botNavel', 'botNavel')+' ('):
                         toChannelName = guild.name+':'+str(guild.get_channel(webhook.channel_id))
                         fromTuple = webhook.name.split("(")[1].split(")")[0].split(":")
                         fromTuple[0] = messagefuncs.expand_guild_name(fromTuple[0])
@@ -209,28 +209,26 @@ async def reload_function(message=None, client=client, args=[]):
                 pr.print_stats()
         config = configparser.ConfigParser()
         config.read(FLETCHER_CONFIG)
-        if config['discord'].get('profile'):
+        config = {s:dict(config.items(s)) for s in config.sections()}
+        if config.get('discord', dict()).get('profile'):
             pr = cProfile.Profile()
             pr.enable()
-        if config.get('extra') and config['extra'].get('rc-path') and os.path.isdir(config['extra']['rc-path']):
+        if os.path.isdir(config.get('extra', dict()).get('rc-path', '/unavailable')):
             for file_name in os.listdir(config['extra']['rc-path']):
                 if file_name.isdigit():
                     guild_config = configparser.ConfigParser()
                     guild_config.read(f'{config["extra"]["rc-path"]}/{file_name}')
-                    try:
-                        for section_name, section in guild_config.items():
-                            if section_name == 'DEFAULT':
-                                section_key = f'Guild {file_name}'
-                            else:
-                                section_key = f'Guild {file_name} - {section_name}'
-                            print(f'RM: Adding section for {section_key}')
-                            config.add_section(section_key)
-                            for k, v in guild_config.items(section_name):
-                                config.set(section_key, k, v)
-                    except configparser.DuplicateSectionError:
-                        print(f'RM: Duplicate section definition for {section_key}, duplicate keys may be overwritten')
-                        pass
-        config = {s:dict(config.items(s)) for s in config.sections()}
+                    for section_name, section in guild_config.items():
+                        if section_name == 'DEFAULT':
+                            section_key = f'Guild {file_name}'
+                        else:
+                            section_key = f'Guild {file_name} - {section_name}'
+                        print(f'RM: Adding section for {section_key}')
+                        if section_key in config:
+                            print(f'RM: Duplicate section definition for {section_key}, duplicate keys may be overwritten')
+                        config[section_key] = dict()
+                        for k, v in guild_config.items(section_name):
+                            config[section_key][k] = v
         await animate_startup('📝', message)
         conn = psycopg2.connect(host=config['database']['host'],database=config['database']['tablespace'], user=config['database']['user'], password=config['database']['password'])
         await animate_startup('💾', message)
@@ -297,7 +295,7 @@ async def reload_function(message=None, client=client, args=[]):
             ))
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
-        print(f'RM[{exc_tb.tb_lineno}]: {e}')
+        print(f'RM[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
         await animate_startup('🚫', message)
         await client.change_presence(activity=discord.Game(
             name=f'Error Reloading: RM[{exc_tb.tb_lineno}]: {e}',
@@ -370,7 +368,7 @@ async def on_message(message):
             cur.execute("INSERT INTO messagemap (fromguild, fromchannel, frommessage, toguild, tochannel, tomessage) VALUES (%s, %s, %s, %s, %s, %s);", [message.guild.id, message.channel.id, message.id, syncMessage.guild.id, syncMessage.channel.id, syncMessage.id])
             conn.commit()
         if message.author == client.user:
-            print(config['discord']['botNavel']+": "+message.clean_content)
+            print(config.get('discord', dict()).get('botNavel', 'botNavel')+": "+message.clean_content)
             return
  
         # try to evaluate with the command handler
