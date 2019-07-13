@@ -263,8 +263,11 @@ async def reaction_request_function(message, client, args):
             emoji = emoji[0]
         # FIXME if used in empty channel this breaks
         if emoji:
-            target = await message.channel.history(before=message, limit=1).flatten()
-            target = target[0]
+            target = None
+            async for historical_message in message.channel.history(before=message, oldest_first=False):
+                if historical_message.author != message.author:
+                    target = historical_message
+                    break
             await target.add_reaction(emoji)
             await asyncio.sleep(1)
             try:
