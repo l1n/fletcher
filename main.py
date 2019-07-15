@@ -96,6 +96,8 @@ config.read(FLETCHER_CONFIG)
 # Enable logging to SystemD
 logging.root.addHandler(journal.JournalHandler(SYSLOG_IDENTIFIER=config['discord'].get('botLogName', 'Fletcher')))
 logging.root.setLevel(logging.DEBUG)
+discord_logger = logging.getLogger('discord')
+discord_logger.setLevel(logging.WARNING)
 
 client = discord.Client()
 
