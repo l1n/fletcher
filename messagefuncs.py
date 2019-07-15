@@ -130,7 +130,7 @@ async def preview_messagelink_function(message, client, args):
             message_id = int(urlParts[2])
             guild = client.get_guild(guild_id)
             if guild is None:
-                logging.war ning("PMF: Fletcher is not in guild ID "+str(guild_id))
+                logging.warning("PMF: Fletcher is not in guild ID "+str(guild_id))
                 return
             channel = guild.get_channel(channel_id)
             target_message = await channel.fetch_message(message_id)

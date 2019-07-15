@@ -90,6 +90,7 @@ fletcher=# \d reminders;
 FLETCHER_CONFIG = os.getenv('FLETCHER_CONFIG', './.fletcherrc')
 
 config = configparser.ConfigParser()
+config.optionxform = str
 config.read(FLETCHER_CONFIG)
 
 # Enable logging to SystemD
@@ -213,6 +214,7 @@ async def reload_function(message=None, client=client, args=[]):
                 pr.disable()
                 pr.print_stats()
         config = configparser.ConfigParser()
+        config.optionxform = str
         config.read(FLETCHER_CONFIG)
         config = {s:dict(config.items(s)) for s in config.sections()}
         if config.get('discord', dict()).get('profile'):
@@ -222,6 +224,7 @@ async def reload_function(message=None, client=client, args=[]):
             for file_name in os.listdir(config['extra']['rc-path']):
                 if file_name.isdigit():
                     guild_config = configparser.ConfigParser()
+                    guild_config.optionxform = str
                     guild_config.read(f'{config["extra"]["rc-path"]}/{file_name}')
                     for section_name, section in guild_config.items():
                         if section_name == 'DEFAULT':
