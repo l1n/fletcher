@@ -1,5 +1,6 @@
 from sys import exc_info
 import text_manipulators
+import logging
 from sys import exc_info
 from datetime import datetime, timedelta
 # global conn set by reload_function
@@ -43,7 +44,7 @@ def listbanners_function(message, client, args):
         if cur is not None:
             conn.rollback()
         exc_type, exc_obj, exc_tb = exc_info()
-        print("LBF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+        logging.error("LBF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
 
 # Corresponds to the assemble command
 # Callable from DMs and Channels
@@ -79,7 +80,7 @@ async def assemble_function(message, client, args):
         if cur is not None:
             conn.rollback()
         exc_type, exc_obj, exc_tb = exc_info()
-        print("ABF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+        logging.error("ABF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
 
 # Corresponds to the pledge command
 # Callable from DMs and Channels
@@ -130,7 +131,7 @@ async def pledge_function(message, client, args):
         if cur is not None:
             conn.rollback()
         exc_type, exc_obj, exc_tb = exc_info()
-        print("PBF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+        logging.error("PBF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
 
 # Corresponds to the defect command
 # Callable from DMs and Channels
@@ -177,7 +178,7 @@ async def defect_function(message, client, args):
         if cur is not None:
             conn.rollback()
         exc_type, exc_obj, exc_tb = exc_info()
-        print("DBF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+        logging.error("DBF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
 
 # Register functions in client
 def autoload(ch):

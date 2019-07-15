@@ -2,12 +2,14 @@
 from datetime import datetime
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 from sys import exc_info
+from systemd import journal
 import asyncio
 import configparser
 import cProfile
 import discord
 import importlib
 import io
+import logging
 import math
 import os
 import psycopg2
@@ -90,6 +92,10 @@ FLETCHER_CONFIG = os.getenv('FLETCHER_CONFIG', './.fletcherrc')
 config = configparser.ConfigParser()
 config.read(FLETCHER_CONFIG)
 
+# Enable logging to SystemD
+logging.root.addHandler(journal.JournalHandler(SYSLOG_IDENTIFIER=config['discord'].get('botLogName', 'Fletcher')))
+logging.root.setLevel(logging.DEBUG)
+
 client = discord.Client()
 
 # token from https://discordapp.com/developers
@@ -132,9 +138,9 @@ async def load_webhooks():
     for guild in client.guilds:
         try:
             if "Guild "+str(guild.id) in config and "synchronize" in config["Guild "+str(guild.id)] and config["Guild "+str(guild.id)]["synchronize"] == "on":
-                print(f'LWH: Querying {guild.name}')
+                logging.debug(f'LWH: Querying {guild.name}')
                 for webhook in await guild.webhooks():
-                    print(f'LWH: * {webhook.name}')
+                    logging.debug(f'LWH: * {webhook.name}')
                     if webhook.name.startswith(config.get('discord', dict()).get('botNavel', 'botNavel')+' ('):
                         toChannelName = guild.name+':'+str(guild.get_channel(webhook.channel_id))
                         fromTuple = webhook.name.split("(")[1].split(")")[0].split(":")
@@ -151,17 +157,16 @@ async def load_webhooks():
                         webhook_sync_registry[fromChannelName]['fromChannelObject'] = discord.utils.get(fromGuild.text_channels, name=fromTuple[1])
                         webhook_sync_registry[fromChannelName]['fromWebhook'] = discord.utils.get(await fromGuild.webhooks(), channel__name=fromTuple[1])
             elif "Guild "+str(guild.id) not in config:
-                print(f'LWH: Failed to find config for {guild.name} ({guild.id})')
+                logging.warning(f'LWH: Failed to find config for {guild.name} ({guild.id})')
         except discord.Forbidden as e:
-            print(f'Couldn\'t load webhooks for {guild.name} ({guild.id}), ask an admin to grant additional permissions (https://novalinium.com/go/4/fletcher)')
+            logging.warning(f'Couldn\'t load webhooks for {guild.name} ({guild.id}), ask an admin to grant additional permissions (https://novalinium.com/go/4/fletcher)')
         except AttributeError:
             pass
-    print("Webhooks loaded:")
-    print("\n".join([key+" to "+webhook_sync_registry[key]['toChannelName']+' (Guild '+str(webhook_sync_registry[key]['toChannelObject'].guild.id)+')' for key in list(webhook_sync_registry)]))
+    logging.debug("Webhooks loaded:")
+    logging.debug("\n".join([key+" to "+webhook_sync_registry[key]['toChannelName']+' (Guild '+str(webhook_sync_registry[key]['toChannelObject'].guild.id)+')' for key in list(webhook_sync_registry)]))
     globals()['webhook_sync_registry'] = webhook_sync_registry
 canticum_message = None
 doissetep_omega =  None
-
 def autoload(module, choverride):
     if choverride:
         ch = choverride
@@ -181,17 +186,17 @@ def autoload(module, choverride):
         module.autoload(ch)
     except AttributeError as e:
         # Ignore missing autoload
-        print('[Info] '+module.__name__+' missing autoload(ch), continuing.')
+        logging.info(f'{module.__name__} missing autoload(ch), continuing.')
         exc_type, exc_obj, exc_tb = exc_info()
-        print(f'AL[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
-        print(traceback.format_exc())
+        logging.debug(f'AL[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
+        logging.debug(traceback.format_exc())
         pass
 
 async def animate_startup(emote, message=None):
     if message:
         await message.add_reaction(emote)
     else:
-        print(emote)
+        logging.info(emote)
 
 async def reload_function(message=None, client=client, args=[]):
     global config
@@ -223,9 +228,9 @@ async def reload_function(message=None, client=client, args=[]):
                             section_key = f'Guild {file_name}'
                         else:
                             section_key = f'Guild {file_name} - {section_name}'
-                        print(f'RM: Adding section for {section_key}')
+                        logging.debug(f'RM: Adding section for {section_key}')
                         if section_key in config:
-                            print(f'RM: Duplicate section definition for {section_key}, duplicate keys may be overwritten')
+                            logging.info(f'RM: Duplicate section definition for {section_key}, duplicate keys may be overwritten')
                         config[section_key] = dict()
                         for k, v in guild_config.items(section_name):
                             config[section_key][k] = v
@@ -295,7 +300,7 @@ async def reload_function(message=None, client=client, args=[]):
             ))
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
-        print(f'RM[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
+        logging.critical(f'RM[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
         await animate_startup('🚫', message)
         await client.change_presence(activity=discord.Game(
             name=f'Error Reloading: RM[{exc_tb.tb_lineno}]: {e}',
@@ -311,7 +316,7 @@ async def on_ready():
         global ch
         # print bot information
         await client.change_presence(activity=discord.Game(name='Reloading: The Game'))
-        print(f'Discord.py Version {discord.__version__}, connected as {client.user.name} ({client.user.id})')
+        logging.info(f'Discord.py Version {discord.__version__}, connected as {client.user.name} ({client.user.id})')
         doissetep_omega = await client.get_guild(int(config['audio']['guild'])).get_channel(int(config['audio']['channel'])).connect();
         loop = asyncio.get_running_loop()
         loop.remove_signal_handler(signal.SIGHUP)
@@ -320,7 +325,7 @@ async def on_ready():
         loop.add_signal_handler(signal.SIGHUP, lambda: asyncio.ensure_future(reload_function()))
         loop.add_signal_handler(signal.SIGINT, lambda: asyncio.ensure_future(shutdown_function()))
     except Exception as e:
-        print(e)
+        logging.exception()
 
 async def shutdown_function():
     global client
@@ -355,7 +360,7 @@ async def on_message(message):
                         content = content + "\n• <"+attachment.url+">"
                 else:
                     for attachment in message.attachments:
-                        print("Syncing "+attachment.filename)
+                        logging.debug("Syncing "+attachment.filename)
                         attachment_blob = io.BytesIO()
                         await attachment.save(attachment_blob)
                         attachments.append(discord.File(attachment_blob, attachment.filename))
@@ -368,7 +373,7 @@ async def on_message(message):
             cur.execute("INSERT INTO messagemap (fromguild, fromchannel, frommessage, toguild, tochannel, tomessage) VALUES (%s, %s, %s, %s, %s, %s);", [message.guild.id, message.channel.id, message.id, syncMessage.guild.id, syncMessage.channel.id, syncMessage.id])
             conn.commit()
         if message.author == client.user:
-            print(config.get('discord', dict()).get('botNavel', 'botNavel')+": "+message.clean_content)
+            logging.info(config.get('discord', dict()).get('botNavel', 'botNavel')+": "+message.clean_content)
             return
  
         # try to evaluate with the command handler
@@ -380,7 +385,7 @@ async def on_message(message):
         if cur is not None:
             conn.rollback()
         exc_type, exc_obj, exc_tb = exc_info()
-        print(f'ORMR[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
+        logging.error(f'ORMR[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
 
 # on message update (for webhooks only for now)
 @client.event
@@ -397,9 +402,9 @@ async def on_raw_message_edit(payload):
         fromMessage = await fromChannel.fetch_message(message_id)
         if len(fromMessage.content) > 0:
             if type(fromChannel) is discord.TextChannel:
-                print(str(message_id)+" #"+fromGuild.name+":"+fromChannel.name+" <"+fromMessage.author.name+":"+str(fromMessage.author.id)+"> [Edit] "+fromMessage.content)
+                logging.info(str(message_id)+" #"+fromGuild.name+":"+fromChannel.name+" <"+fromMessage.author.name+":"+str(fromMessage.author.id)+"> [Edit] "+fromMessage.content)
             elif type(fromChannel) is discord.DMChannel:
-                print(str(message_id)+" @"+fromChannel.recipient.name+" <"+fromMessage.author.name+":"+str(fromMessage.author.id)+"> [Edit] "+fromMessage.content)
+                logging.info(str(message_id)+" @"+fromChannel.recipient.name+" <"+fromMessage.author.name+":"+str(fromMessage.author.id)+"> [Edit] "+fromMessage.content)
             else:
                 # Group Channels don't support bots so neither will we
                 pass
@@ -429,7 +434,7 @@ async def on_raw_message_edit(payload):
                             content = content + "\n• <"+attachment.url+">"
                     else:
                         for attachment in fromMessage.attachments:
-                            print("Syncing "+attachment.filename)
+                            logging.debug("Syncing "+attachment.filename)
                             attachment_blob = io.BytesIO()
                             await attachment.save(attachment_blob)
                             attachments.append(discord.File(attachment_blob, attachment.filename))
@@ -441,7 +446,7 @@ async def on_raw_message_edit(payload):
                 cur.execute("UPDATE messagemap SET toguild = %s, tochannel = %s, tomessage = %s WHERE fromguild = %s AND fromchannel = %s AND frommessage = %s;", [syncMessage.guild.id, syncMessage.channel.id, syncMessage.id, int(message['guild_id']), int(message['channel_id']), message_id])
                 conn.commit()
     except discord.Forbidden as e:
-        print("Forbidden to edit synced message from "+str(fromGuild.name)+":"+str(fromChannel.name))
+        logging.error("Forbidden to edit synced message from "+str(fromGuild.name)+":"+str(fromChannel.name))
     # except KeyError as e:
     #     # Eat keyerrors from non-synced channels
     #     pass
@@ -453,7 +458,7 @@ async def on_raw_message_edit(payload):
         if cur is not None:
             conn.rollback()
         exc_type, exc_obj, exc_tb = exc_info()
-        print(f'ORMU[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
+        logging.error(f'ORMU[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
 
 # on message deletion (for webhooks only for now)
 @client.event
@@ -478,15 +483,15 @@ async def on_raw_message_delete(message):
                         toMessage = await toChannel.fetch_message(metuple[2])
                     except discord.NotFound as e:
                         exc_type, exc_obj, exc_tb = exc_info()
-                        print(f'ORMD[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
-                        print(f'ORMD[{exc_tb.tb_lineno}]: {metuple[0]}:{metuple[1]}:{metuple[2]}')
+                        logging.error(f'ORMD[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
+                        logging.error(f'ORMD[{exc_tb.tb_lineno}]: {metuple[0]}:{metuple[1]}:{metuple[2]}')
                         toMessage = None
                         await asyncio.sleep(1)
                         pass
-                print(f'ORMD: Deleting synced message {metuple[0]}:{metuple[1]}:{metuple[2]}')
+                logging.debug(f'ORMD: Deleting synced message {metuple[0]}:{metuple[1]}:{metuple[2]}')
                 await toMessage.delete()
     except discord.Forbidden as e:
-        print(f'Forbidden to delete synced message from {fromGuild.name}:{fromChannel.name}')
+        logging.error(f'Forbidden to delete synced message from {fromGuild.name}:{fromChannel.name}')
     except KeyError as e:
         # Eat keyerrors from non-synced channels
         pass
@@ -498,7 +503,7 @@ async def on_raw_message_delete(message):
         if cur is not None:
             conn.rollback()
         exc_type, exc_obj, exc_tb = exc_info()
-        print(f'ORMD[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
+        logging.error(f'ORMD[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
 
 # on new rxn
 @client.event
@@ -513,21 +518,17 @@ async def on_raw_reaction_add(reaction):
                 await asyncio.sleep(1)
             await ch.reaction_handler(reaction)
 
-        # message doesn't contain a command trigger
-        except TypeError as e:
-            pass
-
         # generic python error
         except Exception as e:
             exc_type, exc_obj, exc_tb = exc_info()
-            print(f'ORRA[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
+            logging.error(f'ORRA[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
 
 # on vox change
 @client.event
 async def on_voice_state_update(member, before, after):
     global canticum_message
     # TODO refactor to CommandHandler
-    print('Vox update in '+str(member.guild))
+    logging.debug(f'Vox update in {member.guild}, {member} {before.channel} -> {after.channel}')
     # Notify only if: 
     # Doissetep
     # New joins only, no transfers

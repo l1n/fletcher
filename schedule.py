@@ -1,5 +1,6 @@
 import asyncio
 import discord
+import logging
 import messagefuncs
 import re
 from sys import exc_info
@@ -33,7 +34,7 @@ async def table_exec_function():
             mode_desc = modes[mode]
             guild = client.get_guild(guild_id)
             if guild is None:
-                print("PMF: Fletcher is not in guild ID "+str(guild_id))
+                logging.warning("PMF: Fletcher is not in guild ID "+str(guild_id))
                 await user.send("You {} in a server that Fletcher no longer services, so this request cannot be fulfilled. The content of the command is reproduced below: {}".format(mode_desc, content))
                 completed.append(tabtuple[:3])
                 tabtuple = cur.fetchone()
@@ -82,13 +83,13 @@ async def table_exec_function():
         await asyncio.sleep(61)
         reminder_timerhandle = asyncio.create_task(table_exec_function())
     except asyncio.CancelledError:
-        print('TXF: Interrupted, bailing out')
+        logging.debug('TXF: Interrupted, bailing out')
         raise
     except Exception as e:
         if cur is not None:
             conn.rollback()
         exc_type, exc_obj, exc_tb = exc_info()
-        print("TXF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+        logging.error("TXF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
 
 async def table_function(message, client, args):
     try:
@@ -104,7 +105,7 @@ async def table_function(message, client, args):
         if cur is not None:
             conn.rollback()
         exc_type, exc_obj, exc_tb = exc_info()
-        print("TF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+        logging.error("TF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
 
 # Register this module's commands
 def autoload(ch):

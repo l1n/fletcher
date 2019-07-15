@@ -2,6 +2,7 @@ import aiohttp
 from collections import Counter
 import discord
 import io
+import logging
 import messagefuncs
 import random
 import re
@@ -45,7 +46,7 @@ async def uwu_function(message, client, args, responses=uwu_responses):
             return await message.channel.send(random.choice(responses['public']))
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
-        print("UWU[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+        logging.error("UWU[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
 
 async def retrowave_function(message, client, args):
     try:
@@ -81,7 +82,7 @@ async def retrowave_function(message, client, args):
             params.add_field('text1',text_parts[0])
             params.add_field('text2',text_parts[1])
             params.add_field('text3',text_parts[2])
-            print("RWF: "+str(text_parts))
+            logging.debug("RWF: "+str(text_parts))
             async with session.post('https://m.photofunia.com/categories/all_effects/retro-wave?server=2', data=params) as resp:
                 request_body = (await resp.read()).decode('UTF-8')
                 root = html.document_fromstring(request_body)
@@ -90,13 +91,13 @@ async def retrowave_function(message, client, args):
                 return await message.channel.send(files=[discord.File(buffer, 'retrowave.jpg')])
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
-        print("RWF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+        logging.error("RWF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
 
 async def shindan_function(message, client, args):
     try:
         if len(args) == 2 and type(args[1]) is discord.User:
             if message.author.id != 429368441577930753:
-                print("SDF: Backing out, not my message.")
+                logging.debug("SDF: Backing out, not my message.")
                 return
             if message.embeds[0].url.startswith("https://en.shindanmaker.com/"):
                 async with aiohttp.ClientSession() as session:
@@ -136,7 +137,7 @@ async def shindan_function(message, client, args):
                     await resp.add_reaction('📛')
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
-        print("SDF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+        logging.error("SDF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
 
 pick_regex = re.compile(r'[,\s]\s*(?:and|or|but|nor|for|so|yet)?\s*')
 
@@ -255,7 +256,7 @@ async def roll_function(message, client, args):
             await messagefuncs.sendWrappedMessage(f"{str(e)} {usage_message}", message.channel)
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
-        print("RDF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+        logging.error("RDF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
 
 async def pick_function(message, client, args):
     try:
@@ -277,7 +278,7 @@ async def pick_function(message, client, args):
             return await message.channel.send("I can't pick that many! Not enough options")
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
-        print("PF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+        logging.error("PF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
 
 async def scp_function(message, client, args):
     try:
@@ -310,7 +311,7 @@ async def scp_function(message, client, args):
                         content[i][0].drop_tree()
                     description = str(markdownify(etree.tostring(content[3]).decode()[3:-5].strip())[:2000])
                 except IndexError as e:
-                    print(f'SCP: {e}')
+                    logging.debug(f'SCP: {e}')
                     add_fields = False
                     description = str(markdownify(etree.tostring(root.xpath('//div[@id="page-content"]')[0]).decode()))[:2000].strip()
                     if not description:
@@ -335,9 +336,9 @@ async def scp_function(message, client, args):
                 resp = await message.channel.send(embed=embedPreview)
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
-        print("SCP[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+        logging.error("SCP[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
         if embedPreview:
-            print('SCP embedPreview: '+str(embedPreview.to_dict()))
+            logging.debug('SCP embedPreview: '+str(embedPreview.to_dict()))
         await message.add_reaction('🚫')
 
 

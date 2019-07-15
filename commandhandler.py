@@ -1,5 +1,6 @@
 from datetime import datetime
 import discord
+import logging
 import messagefuncs
 import greeting
 import inspect
@@ -71,26 +72,26 @@ class CommandHandler:
             channel = self.client.get_channel(reaction.channel_id)
             message = await channel.fetch_message(reaction.message_id)
             if type(channel) is discord.TextChannel:
-                print("#"+channel.guild.name+":"+channel.name+" <"+user.name+":"+str(user.id)+"> reacting with "+messageContent+" to "+str(message.id))
+                logging.info("#"+channel.guild.name+":"+channel.name+" <"+user.name+":"+str(user.id)+"> reacting with "+messageContent+" to "+str(message.id))
             elif type(message.channel) is discord.DMChannel:
-                print("@"+channel.recipient.name+" <"+user.name+":"+str(user.id)+"> reacting with "+messageContent+" to "+str(message.id))
+                logging.info("@"+channel.recipient.name+" <"+user.name+":"+str(user.id)+"> reacting with "+messageContent+" to "+str(message.id))
             else:
                 # Group Channels don't support bots so neither will we
                 pass
             for command in self.commands:
                 if messageContent.startswith(tuple(command['trigger'])) and allowCommand(command, message):
-                    print(command)
+                    logging.debug(command)
                     if command['args_num'] == 0:
                         if str(user.id) in config['moderation']['blacklist-user-usage'].split(','):
                             raise Exception('Blacklisted command attempt by user')
-                        print(command['function'])
+                        logging.debug(command['function'])
                         if command['async']:
                             return await command['function'](message, self.client, [reaction, user])
                         else:
                             return await message.channel.send(str(command['function'](message, self.client, [reaction, user])))
         except Exception as e:
             exc_type, exc_obj, exc_tb = exc_info()
-            print(f'RXH[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
+            logging.error(f'RXH[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
 
     async def remove_handler(self, member):
         if "Guild "+str(member.guild.id) in config and 'on_member_remove' in config["Guild "+str(member.guild.id)]:
@@ -117,7 +118,7 @@ class CommandHandler:
                             await self.reload_handlers[reload_action](guild, self.client, config["Guild "+str(guild.id)])
         except Exception as e:
             exc_type, exc_obj, exc_tb = exc_info()
-            print(f'RLH[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
+            logging.error(f'RLH[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
 
     async def command_handler(self, message):
         global config
@@ -143,22 +144,22 @@ class CommandHandler:
                     sent_com_score = 1
                 elif message.content == "VADER BAD":
                     sent_com_score = -1
-                print(str(message.id)+" #"+message.guild.name+":"+message.channel.name+" <"+message.author.name+":"+str(message.author.id)+"> ["+str(sent_com_score)+"] "+message.content)
+                logging.info(str(message.id)+" #"+message.guild.name+":"+message.channel.name+" <"+message.author.name+":"+str(message.author.id)+"> ["+str(sent_com_score)+"] "+message.content)
                 if guild_config.get('sent-com-score-threshold') and sent_com_score <= float(guild_config['sent-com-score-threshold']) and message.webhook_id is None and message.guild.name in config.get('moderation', dict()).get('guilds', '').split(','):
                     await janissary.modreport_function(message, self.client, ("\n[Sentiment Analysis Combined Score "+str(sent_com_score)+'] '+message.content).split(' '))
             else:
                 if type(message.channel) is discord.TextChannel:
-                    print(str(message.id)+" #"+message.guild.name+":"+message.channel.name+" <"+message.author.nam+":"+str(message.author.id)+"> [Nil] "+message.content)
+                    logging.info(str(message.id)+" #"+message.guild.name+":"+message.channel.name+" <"+message.author.nam+":"+str(message.author.id)+"> [Nil] "+message.content)
                 elif type(message.channel) is discord.DMChannel:
-                    print(str(message.id)+" @"+message.channel.recipient.name+" <"+message.author.nam+":"+str(message.author.id)+"> [Nil] "+message.content)
+                    logging.info(str(message.id)+" @"+message.channel.recipient.name+" <"+message.author.nam+":"+str(message.author.id)+"> [Nil] "+message.content)
                 else:
                     # Group Channels don't support bots so neither will we
                     pass
         except AttributeError as e:
             if type(message.channel) is discord.TextChannel:
-                print(str(message.id)+" #"+message.guild.name+":"+message.channel.name+" <"+message.author.name+":"+str(message.author.id)+"> [Nil] "+message.content)
+                logging.info(str(message.id)+" #"+message.guild.name+":"+message.channel.name+" <"+message.author.name+":"+str(message.author.id)+"> [Nil] "+message.content)
             elif type(message.channel) is discord.DMChannel:
-                        print("@"+message.channel.recipient.name+" <"+message.author.name+":"+str(message.author.id)+"> [Nil] "+message.content)
+                logging.info("@"+message.channel.recipient.name+" <"+message.author.name+":"+str(message.author.id)+"> [Nil] "+message.content)
             else:
                 # Group Channels don't support bots so neither will we
                 pass
@@ -187,7 +188,7 @@ class CommandHandler:
                         message.author.trigger_typing()
                     elif command['long_run']:
                         message.channel.trigger_typing()
-                print("[CH] Triggered "+str(command))
+                logging.debug("[CH] Triggered "+str(command))
                 args = searchString.split(' ')
                 args = [item for item in args if item]
                 args.pop(0)
@@ -304,12 +305,12 @@ async def help_function(message, client, args):
         await messagefuncs.sendWrappedMessage(helpMessageBody, target)
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
-        print(f'HF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
+        logging.error(f'HF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
 
 def dumpconfig_function(message, client, args):
-    print("Channels Loaded:")
+    logging.debug("Channels Loaded:")
     for channel in client.get_all_channels():
-        print(str(channel.guild)+" "+str(channel))
+        logging.debug(str(channel.guild)+" "+str(channel))
 
 def autoload(ch):
     global tag_id_as_command

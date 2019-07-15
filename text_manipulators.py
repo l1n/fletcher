@@ -5,6 +5,7 @@ import asyncio
 import codecs
 import discord
 import io
+import logging
 import math
 import messagefuncs
 import random
@@ -41,7 +42,7 @@ async def scramble_function(message, client, args):
             try:
                 await message.delete()
             except discord.Forbidden as e:
-                print("Forbidden to delete message in "+str(message.channel))
+                logging.error("Forbidden to delete message in "+str(message.channel))
                 pass
         if len(args) == 2 and type(args[1]) is discord.User:
             output_message = await args[1].send(content='Scrambling image... ('+str(input_image_blob.getbuffer().nbytes)+' bytes loaded)')
@@ -56,11 +57,11 @@ async def scramble_function(message, client, args):
         region_lists = create_region_lists(input_image, key_image,
                                            number_of_regions)
         random.seed(input_image.size)
-        print('Shuffling scramble blob')
+        logging.debug('Shuffling scramble blob')
         shuffle(region_lists)
         output_image = swap_pixels(input_image, region_lists)
         output_image_blob = io.BytesIO()
-        print('Saving scramble blob')
+        logging.debug('Saving scramble blob')
         output_image.save(output_image_blob, format="PNG", optimize=True)
         output_image_blob.seek(0)
         await output_message.delete()
@@ -68,7 +69,7 @@ async def scramble_function(message, client, args):
         await output_message.add_reaction('🔎')
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
-        print("SIF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+        logging.error("SIF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
 
 def number_of_colours(image):
     return len(set(list(image.getdata())))
@@ -217,11 +218,11 @@ async def rot13_function(message, client, args):
             try: 
                 await message.delete()
             except discord.Forbidden as e:
-                print("Forbidden to delete message in "+str(message.channel))
+                logging.error("Forbidden to delete message in "+str(message.channel))
                 pass
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
-        print("R13F[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+        logging.error("R13F[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
 
 async def spoiler_function(message, client, args):
     try:
@@ -239,7 +240,7 @@ async def spoiler_function(message, client, args):
                 else:
                     return await args[1].send("Spoiler from conversation in <#{}> ({}) <https://discordapp.com/channels/{}/{}/{}>\n{}**: {}".format(message.channel.id, message.channel.guild.name, message.channel.guild.id, message.channel.id, message.id, message.clean_content.split('**: ', 1)[0], rotate_function(swapcasealpha(message.clean_content.split('**: ', 1)[1])).replace("\n"," ")))
             else:
-                print("MFF: Backing out, not my message.")
+                logging.debug("MFF: Backing out, not my message.")
         else:
             messageContent = "**"+message.author.display_name+"**: "+swapcasealpha(rotate_function(message.clean_content.split(' ', 1)[1].replace(' ',"\n")))
             botMessage = await message.channel.send(messageContent)
@@ -247,11 +248,11 @@ async def spoiler_function(message, client, args):
             try: 
                 await message.delete()
             except discord.Forbidden as e:
-                print("Forbidden to delete message in "+str(message.channel))
+                logging.error("Forbidden to delete message in "+str(message.channel))
                 pass
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
-        print("MFF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+        logging.error("MFF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
 
 async def reaction_request_function(message, client, args):
     try:
@@ -279,11 +280,11 @@ async def reaction_request_function(message, client, args):
             if config['discord'].get('snappy'):
                 await message.delete()
         except discord.Forbidden:
-            print("XRF: Couldn't delete message but snappy mode is on")
+            logging.warning("XRF: Couldn't delete message but snappy mode is on")
             pass
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
-        print("XRF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+        logging.error("XRF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
 
 async def blockquote_embed_function(message, client, args):
     try:
@@ -300,7 +301,7 @@ async def blockquote_embed_function(message, client, args):
                 message_id = int(urlParts.group(3))
                 guild = client.get_guild(guild_id)
                 if guild is None:
-                    print("PMF: Fletcher is not in guild ID "+str(guild_id))
+                    logging.warning("PMF: Fletcher is not in guild ID "+str(guild_id))
                     return
                 channel = guild.get_channel(channel_id)
                 target_message = await channel.fetch_message(message_id)
@@ -367,11 +368,11 @@ async def blockquote_embed_function(message, client, args):
                         await message.delete()
                     await message.delete()
             except discord.Forbidden:
-                print("BEF: Couldn't delete messages but snappy mode is on")
+                logging.warning("BEF: Couldn't delete messages but snappy mode is on")
                 pass
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
-        print("BEF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+        logging.error("BEF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
 
 async def zalgo_function(message, client, args):
     try:
@@ -380,11 +381,11 @@ async def zalgo_function(message, client, args):
             if config['discord'].get('snappy'):
                 await message.delete()
         except discord.Forbidden:
-            print("ZF: Couldn't delete messages but snappy mode is on")
+            logging.warning("ZF: Couldn't delete messages but snappy mode is on")
             pass
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
-        print("ZF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+        logging.error("ZF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
 
 def autoload(ch):
     ch.add_command({

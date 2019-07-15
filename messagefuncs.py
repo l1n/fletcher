@@ -1,14 +1,15 @@
+from sys import exc_info
 import discord
 import io
+import logging
 import re
-from sys import exc_info
 import textwrap
 
 def expand_guild_name(guild, prefix='', suffix=':', global_replace=False):
-    # TODO refactor into config file
-    acro_mapping = [ ('acn', 'a compelling narrative'), ('ACN', 'a compelling narrative'), ('EAC', 'EA Corner'), ('D', 'Doissetep'), ('bocu', 'Book of Creation Undone'), ('abcal', 'Abandoned Castle') ]
+    global config
+    acro_mapping = config.get('discord-guild-expansions', { 'acn': 'a compelling narrative', 'ACN': 'a compelling narrative', 'EAC': 'EA Corner', 'D': 'Doissetep', 'bocu': 'Book of Creation Undone', 'abcal': 'Abandoned Castle'})
     new_guild = guild
-    for k, v in acro_mapping:
+    for k, v in acro_mapping.items():
         new_guild = new_guild.replace(prefix+k+suffix, prefix+v+suffix)
         if not global_replace and new_guild != guild:
             return new_guild
@@ -26,7 +27,7 @@ def xchannel(targetChannel, currentGuild):
         channelLookupBy = "ID"
     elif targetChannel.startswith('#'):
         targetChannel = targetChannel[1:].strip()
-    print('XC: Channel Identifier '+channelLookupBy+':'+targetChannel)
+    logging.debug('XC: Channel Identifier '+channelLookupBy+':'+targetChannel)
     if channelLookupBy == "Name":
         if ":" not in targetChannel:
             toChannel = discord.utils.get(currentGuild.text_channels, name=targetChannel)
@@ -72,10 +73,10 @@ async def teleport_function(message, client, args):
         if not toChannel.permissions_for(toGuild.get_member(message.author.id)).send_messages:
             await fromChannel.send('You do not have permission to post in that channel! Access denied.')
             raise Exception('Attempt to open portal to forbidden channel')
-        print('Entering in '+str(fromChannel))
+        logging.debug('Entering in '+str(fromChannel))
         fromMessage = await fromChannel.send('Opening Portal To <#{}> ({})'.format(toChannel.id, toGuild.name))
         try:
-            print('Exiting in '+str(toChannel))
+            logging.debug('Exiting in '+str(toChannel))
             toMessage = await toChannel.send('Portal Opening From <#{}> ({})'.format(fromChannel.id, fromGuild.name))
         except discord.Forbidden as e:
             await fromMessage.edit(content='Failed to open portal due to missing permissions! Access denied.')
@@ -111,7 +112,7 @@ async def teleport_function(message, client, args):
         return 'Portal opened on behalf of {} to {}'.format(message.author, args[0])
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
-        print("TPF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+        logging.error("TPF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
 
 extract_links = re.compile('(?<!<)((https?|ftp):\/\/|www\.)(\w.+\w\W?)', re.IGNORECASE)
 async def preview_messagelink_function(message, client, args):
@@ -129,7 +130,7 @@ async def preview_messagelink_function(message, client, args):
             message_id = int(urlParts[2])
             guild = client.get_guild(guild_id)
             if guild is None:
-                print("PMF: Fletcher is not in guild ID "+str(guild_id))
+                logging.war ning("PMF: Fletcher is not in guild ID "+str(guild_id))
                 return
             channel = guild.get_channel(channel_id)
             target_message = await channel.fetch_message(message_id)
@@ -158,7 +159,7 @@ async def preview_messagelink_function(message, client, args):
                         content = content + "\n• <"+attachment.url+">"
                 else:
                     for attachment in target_message.attachments:
-                        print("Syncing "+attachment.filename)
+                        logging.debug("Syncing "+attachment.filename)
                         attachment_blob = io.BytesIO()
                         await attachment.save(attachment_blob)
                         attachments.append(discord.File(attachment_blob, attachment.filename))
@@ -169,7 +170,7 @@ async def preview_messagelink_function(message, client, args):
             return await sendWrappedMessage(content, message.channel, files=attachments)
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
-        print("PMF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+        logging.error("PMF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
         # better for there to be no response in that case
 
 async def messagelink_function(message, client, args):
@@ -195,7 +196,7 @@ async def messagelink_function(message, client, args):
             return await message.channel.send('Message not found', delete_after=60)
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
-        print("MLF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+        logging.error("MLF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
 
 async def bookmark_function(message, client, args):
     try:
@@ -209,7 +210,7 @@ async def bookmark_function(message, client, args):
             return await message.add_reaction('✅')
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
-        print("BMF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+        logging.error("BMF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
 
 def localizeName(user, guild):
     localized = guild.get_member(user.id)

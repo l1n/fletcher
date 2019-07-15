@@ -4,6 +4,7 @@ import google.oauth2.credentials
 import google_auth_oauthlib.flow
 from googleapiclient.discovery import build
 import io
+import logging
 import random
 from sys import exc_info
 
@@ -27,7 +28,7 @@ def authorize_googlephotos_function(message=None, client=None, args=None):
             prompt='consent',
             # Enable incremental authorization. Recommended as a best practice.
             include_granted_scopes='true')
-    print('Head to this URL, then use the `!photos_login` command with the resulting URL as the parameter: '+authorization_url)
+    logging.warning('Head to this URL, then use the `!photos_login` command with the resulting URL as the parameter: '+authorization_url)
     return authorization_url
 
 def login_googlephotos_function(message=None, client=None, args=None):
@@ -50,18 +51,17 @@ client_id = {credentials.cleint_id}
 client_secret = {credentials.client_secret}
 scopes = {credentials.scopes}
 ```"""
-    print(freeze)
+    logging.warning(freeze)
     gphotos = build('photoslibrary', 'v1', credentials=credentials)
     return freeze
 
 def listalbums_function(message, client, args):
     global gphotos
     try:
-        print("LAF")
         return "; ".join([album.get("title")+" ("+album.get("id")+")" for album in gphotos.albums().list().execute()['albums']])
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
-        print(f'LAF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
+        logging.error(f'LAF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
 
 async def twilestia_function(message, client, args):
     global config
@@ -82,14 +82,14 @@ async def twilestia_function(message, client, args):
             except (ValueError, BrokenPipeError, IndexError, AttributeError, Exception) as e:
                 # Retry!
                 exc_type, exc_obj, exc_tb = exc_info()
-                print(f'TCF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
-                print(f'TCF: Refreshing twilestia_list, counter is at {counter}')
+                logging.debug(f'TCF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
+                logging.debug(f'TCF: Refreshing twilestia_list, counter is at {counter}')
                 twilestia_list = list(gphotos.mediaItems().search(body={"albumId":config['google-photos']['twilestia']}).execute().get("mediaItems"))
                 random.shuffle(twilestia_list)
                 continue
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
-        print(f'TCF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
+        logging.error(f'TCF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
 
 def autoload(ch):
     global config 
@@ -131,6 +131,6 @@ def autoload(ch):
     except Exception:
         gphotos = build('photoslibrary', 'v1', credentials=google.oauth2.credentials.Credentials(config['google-photos']['token'], refresh_token=config['google-photos']['refresh_token'], token_uri=config['google-photos']['token_uri'], client_id=config['google-photos']['client_id'], client_secret=config['google-photos']['client_secret']))
     try:
-        print("GPAL: length(twilestia_list)="+str(len(twilestia_list)))
+        logging.debug("GPAL: length(twilestia_list)="+str(len(twilestia_list)))
     except Exception:
         twilestia_list = []

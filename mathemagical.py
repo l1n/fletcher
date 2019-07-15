@@ -1,11 +1,12 @@
+from sys import exc_info
 import discord
 import io
-import sympy
-from sys import exc_info
-import tempfile
-import messagefuncs
-
+import logging
 import matplotlib.pyplot as plt
+import messagefuncs
+import sympy
+import tempfile
+
 
 def renderLatex(formula, fontsize=12, dpi=300, format='svg', file=None):
     """Renders LaTeX formula into image or prints to file.
@@ -33,12 +34,12 @@ async def latex_render_function(message, client, args):
         await message.channel.send("||```tex\n"+renderstring+"```||", file=discord.File(renderLatex(renderstring, format='png'), filename="fletcher-render.png"))
     except RuntimeError as e:
         exc_type, exc_obj, exc_tb = exc_info()
-        print("LRF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+        logging.debug("LRF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
         await message.add_reaction('🚫')
         await messagefuncs.sendWrappedMessage(f'Error rendering LaTeX: {e}', message.author)
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
-        print("LRF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+        logging.error("LRF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
 
 # Register functions in client
 def autoload(ch):

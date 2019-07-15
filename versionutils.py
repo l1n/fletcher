@@ -1,5 +1,6 @@
 import aiohttp
 import discord
+import logging
 from git import Repo
 from io import StringIO
 from lxml import html
@@ -52,7 +53,7 @@ async def buglist_function(message, client, args):
                 icon_url="https://download.lin.anticlack.com/fletcher/sr.ht.favicon.png",text="On behalf of {}".format(message.author.display_name)))
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
-        print("BLF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+        logging.error("BLF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
 
 def autoload(ch):
     ch.add_command({
