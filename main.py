@@ -92,6 +92,7 @@ FLETCHER_CONFIG = os.getenv('FLETCHER_CONFIG', './.fletcherrc')
 config = configparser.ConfigParser()
 config.optionxform = str
 config.read(FLETCHER_CONFIG)
+config = {s:dict(config.items(s)) for s in config.sections()}
 
 # Enable logging to SystemD
 logger = logging.getLogger('fletcher')
