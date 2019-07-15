@@ -325,7 +325,6 @@ async def on_ready():
         doissetep_omega = await client.get_guild(int(config['audio']['guild'])).get_channel(int(config['audio']['channel'])).connect();
         loop = asyncio.get_running_loop()
         loop.remove_signal_handler(signal.SIGHUP)
-        await load_webhooks()
         await reload_function()
         loop.add_signal_handler(signal.SIGHUP, lambda: asyncio.ensure_future(reload_function()))
         loop.add_signal_handler(signal.SIGINT, lambda: asyncio.ensure_future(shutdown_function()))
