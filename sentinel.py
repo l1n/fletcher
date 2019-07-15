@@ -5,6 +5,8 @@ from sys import exc_info
 from datetime import datetime, timedelta
 # global conn set by reload_function
 
+logger = logging.getLogger('fletcher')
+
 # Corresponds to the listbanners command
 # Callable from DMs and Channels
 # Dumps records from the sentinel table less than 30 days old
@@ -44,7 +46,7 @@ def listbanners_function(message, client, args):
         if cur is not None:
             conn.rollback()
         exc_type, exc_obj, exc_tb = exc_info()
-        logging.error("LBF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+        logger.error("LBF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
 
 # Corresponds to the assemble command
 # Callable from DMs and Channels
@@ -80,7 +82,7 @@ async def assemble_function(message, client, args):
         if cur is not None:
             conn.rollback()
         exc_type, exc_obj, exc_tb = exc_info()
-        logging.error("ABF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+        logger.error("ABF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
 
 # Corresponds to the pledge command
 # Callable from DMs and Channels
@@ -131,7 +133,7 @@ async def pledge_function(message, client, args):
         if cur is not None:
             conn.rollback()
         exc_type, exc_obj, exc_tb = exc_info()
-        logging.error("PBF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+        logger.error("PBF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
 
 # Corresponds to the defect command
 # Callable from DMs and Channels
@@ -178,7 +180,7 @@ async def defect_function(message, client, args):
         if cur is not None:
             conn.rollback()
         exc_type, exc_obj, exc_tb = exc_info()
-        logging.error("DBF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+        logger.error("DBF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
 
 # Register functions in client
 def autoload(ch):

@@ -4,6 +4,8 @@ import discord
 import logging
 import os
 
+logger = logging.getLogger('fletcher')
+
 base_url = 'https://api.github.com'
 
 async def github_search_function(message, client, args):
@@ -28,7 +30,7 @@ async def github_search_function(message, client, args):
                     await message.channel.send(f"Results truncated, {response_body['total_count']} total responses")
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
-        logging.error(f'GSF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
+        logger.error(f'GSF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
 
 async def github_report_function(message, client, args):
     try:
@@ -47,7 +49,7 @@ async def github_report_function(message, client, args):
                 await message.channel.send(embed=issue_to_embed(response_body, message.author.display_name))
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
-        logging.error(f'GRF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
+        logger.error(f'GRF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
 
 def issue_to_embed(issue, author_name):
     if not issue['body']:

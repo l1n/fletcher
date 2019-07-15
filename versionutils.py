@@ -7,6 +7,8 @@ from lxml import html
 import os
 from sys import exc_info
 
+logger = logging.getLogger('fletcher')
+
 # rorepo is a Repo instance pointing to the git-python repository.
 # For all you know, the first argument to Repo is a path to the repository
 # you want to work with
@@ -53,7 +55,7 @@ async def buglist_function(message, client, args):
                 icon_url="https://download.lin.anticlack.com/fletcher/sr.ht.favicon.png",text="On behalf of {}".format(message.author.display_name)))
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
-        logging.error("BLF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+        logger.error("BLF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
 
 def autoload(ch):
     ch.add_command({

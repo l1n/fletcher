@@ -7,6 +7,8 @@ import textwrap
 import text_manipulators
 # global conn set by reload_function
 
+logger = logging.getLogger('fletcher')
+
 async def addrole_function(message, client, args):
     global config
     try:
@@ -58,7 +60,7 @@ async def addrole_function(message, client, args):
                     await message.delete()
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
-        logging.error(f'ARF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
+        logger.error(f'ARF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
 
 async def assignrole_function(message, client, args):
     global config
@@ -99,7 +101,7 @@ async def assignrole_function(message, client, args):
                     await message.delete()
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
-        logging.error(f'ASRF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
+        logger.error(f'ASRF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
 
 async def revokerole_function(message, client, args):
     global config
@@ -140,7 +142,7 @@ async def revokerole_function(message, client, args):
                     await message.delete()
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
-        logging.error(f'RSRF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
+        logger.error(f'RSRF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
 
 async def delrole_function(message, client, args):
     global config
@@ -173,7 +175,7 @@ async def delrole_function(message, client, args):
                     await message.delete()
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
-        logging.error(f'DRF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
+        logger.error(f'DRF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
 
 async def modping_function(message, client, args):
     global config
@@ -199,10 +201,10 @@ async def modping_function(message, client, args):
                 await role.edit(mentionable=False)
             if 'snappy' in config['discord'] and config['discord']['snappy']:
                 mentionPing.delete()
-            logging.debug(f'MPF: pinged {mentionPing.id} for guild {message.guild.name}')
+            logger.debug(f'MPF: pinged {mentionPing.id} for guild {message.guild.name}')
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
-        logging.error(f'MPF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
+        logger.error(f'MPF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
 
 async def modreport_function(message, client, args):
     global config
@@ -214,7 +216,7 @@ async def modreport_function(message, client, args):
             try:
                 await message.remove_reaction('👁‍🗨', args[1])
             except discord.Forbidden as e:
-                logging.warning("MRF: Forbidden from removing modreport reaction")
+                logger.warning("MRF: Forbidden from removing modreport reaction")
                 pass
             plaintext = message.content
             report_content = f'Mod Report: #{message.channel.name} ({message.channel.guild.name}) {message.jump_url} via reaction to '
@@ -249,7 +251,7 @@ async def modreport_function(message, client, args):
             raise Exception("Moderation disabled on guild "+str(message.guild))
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
-        logging.error(f'MRF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
+        logger.error(f'MRF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
 
 def expand_target_list(targets, guild):
     inputs = list(targets)
@@ -313,7 +315,7 @@ async def lastactive_channel_function(message, client, args):
         await messagefuncs.sendWrappedMessage(msg, message.channel)
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
-        logging.error(f'LACF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
+        logger.error(f'LACF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
 
 async def lastactive_user_function(message, client, args):
     try:
@@ -341,7 +343,7 @@ async def lastactive_user_function(message, client, args):
         for channel in message.channel.guild.text_channels:
             async for message in channel.history(limit=None):
                 try:
-                    logging.debug(f'[{message.created_at} <#{channel.id}>] <@{message.author.id}>: {message.content}')
+                    logger.debug(f'[{message.created_at} <#{channel.id}>] <@{message.author.id}>: {message.content}')
                     if message.created_at < users[message.author.id]:
                         users[message.author.id] = message.created_at
                 except discord.NotFound as e:
@@ -358,7 +360,7 @@ async def lastactive_user_function(message, client, args):
         await messagefuncs.sendWrappedMessage(msg, message.channel)
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
-        logging.error(f'LSU[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
+        logger.error(f'LSU[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
 
 async def kick_user_function(message, client, args):
     try:
@@ -370,19 +372,19 @@ async def kick_user_function(message, client, args):
         if not len(logMessage):
             logMessage = "A message was not provided."
         logMessage = f'You have been kicked from {message.guild.name}. If you have questions, please contact a moderator for that guild.\nReason: {logMessage}'
-        logging.info(f'KUF: <@{message.author.id}> kicked <@{member.id}> from {message.guild.id} for {logMessage}')
+        logger.info(f'KUF: <@{message.author.id}> kicked <@{member.id}> from {message.guild.id} for {logMessage}')
         try:
             await messagefuncs.sendWrappedMessage(logMessage, member)
         # TODO make this a more specific catch block
         except Exception as e:
             exc_type, exc_obj, exc_tb = exc_info()
-            logging.error(f'KUF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
+            logger.error(f'KUF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
             # Ignore blocks etc
             pass
         await member.kick(reason=f'{logMessage} obo {message.author.name}')
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
-        logging.error(f'KUF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
+        logger.error(f'KUF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
 
 async def lockout_user_function(message, client, args):
     try:
@@ -406,7 +408,7 @@ async def lockout_user_function(message, client, args):
         for category, channels in member.guild.by_category():
             if category is not None and ((filter_id and category.id == filter_id) or not filter_id):
                 logMessage = str(member)+" from category "+str(category)+" in "+str(member.guild)
-                logging.debug("LUF: "+logMessage)
+                logger.debug("LUF: "+logMessage)
                 log = log + "\n" + logMessage
                 if mode == "reset":
                     await category.set_permissions(member, overwrite=None, reason="Admin reset lockout obo "+message.author.name)
@@ -415,7 +417,7 @@ async def lockout_user_function(message, client, args):
             if (category is None) or (thorough and category is not None and ((filter_id and category.id == filter_id)) or not filter_id):
                 for channel in channels:
                     logMessage = str(member)+" from non-category channel "+str(channel)+" in "+str(member.guild)
-                    logging.debug("LUF: "+logMessage)
+                    logger.debug("LUF: "+logMessage)
                     log = log + "\n" + logMessage
                     if mode == "reset":
                         await channel.set_permissions(member, overwrite=None, reason="Admin reset lockout obo "+message.author.name)
@@ -424,7 +426,7 @@ async def lockout_user_function(message, client, args):
         await messagefuncs.sendWrappedMessage(log, message.author)
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
-        logging.error(f'LUF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
+        logger.error(f'LUF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
 
 async def part_channel_function(message, client, args):
     try:
@@ -439,14 +441,14 @@ async def part_channel_function(message, client, args):
         await message.author.send("Parted from channel #"+channel.name)
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
-        logging.error(f'PCF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
+        logger.error(f'PCF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
 
 async def optin_channel_function(message, client, args):
     try:
         pass
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
-        logging.error(f'OICF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
+        logger.error(f'OICF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
 
 # Requires schedule.py to clear reminders
 async def snooze_channel_function(message, client, args):
@@ -493,13 +495,13 @@ async def snooze_channel_function(message, client, args):
         if cur is not None:
             conn.rollback()
         exc_type, exc_obj, exc_tb = exc_info()
-        logging.error(f'SNCF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
+        logger.error(f'SNCF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
         await message.channel.send("Snooze forbidden! I don't have the authority to do that.")
     except Exception as e:
         if cur is not None:
             conn.rollback()
         exc_type, exc_obj, exc_tb = exc_info()
-        logging.error(f'SNCF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
+        logger.error(f'SNCF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
 
 async def sudo_function(message, client, args):
     try:
@@ -521,15 +523,15 @@ async def sudo_function(message, client, args):
                 entry = None
                 pass
             if entry.created_at > now:
-                logging.info("SUDOF: "+str(entry))
+                logger.info("SUDOF: "+str(entry))
                 await message.author.remove_roles(role, reason="Sudo deescalation (commanded)", atomic=False)
                 return
             tries = tries + 1
-        logging.info("SUDOF: timeout")
+        logger.info("SUDOF: timeout")
         await message.author.remove_roles(role, reason="Sudo deescalation (timeout)", atomic=False)
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
-        logging.error(f'SUDOF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
+        logger.error(f'SUDOF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
 
 
 def autoload(ch):

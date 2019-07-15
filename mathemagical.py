@@ -7,6 +7,7 @@ import messagefuncs
 import sympy
 import tempfile
 
+logger = logging.getLogger('fletcher')
 
 def renderLatex(formula, fontsize=12, dpi=300, format='svg', file=None):
     """Renders LaTeX formula into image or prints to file.
@@ -34,12 +35,12 @@ async def latex_render_function(message, client, args):
         await message.channel.send("||```tex\n"+renderstring+"```||", file=discord.File(renderLatex(renderstring, format='png'), filename="fletcher-render.png"))
     except RuntimeError as e:
         exc_type, exc_obj, exc_tb = exc_info()
-        logging.debug("LRF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+        logger.debug("LRF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
         await message.add_reaction('🚫')
         await messagefuncs.sendWrappedMessage(f'Error rendering LaTeX: {e}', message.author)
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
-        logging.error("LRF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+        logger.error("LRF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
 
 # Register functions in client
 def autoload(ch):
