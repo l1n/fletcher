@@ -1,6 +1,7 @@
 import asyncio
 from datetime import datetime, timedelta
 import discord
+import logging
 import messagefuncs
 from sys import exc_info
 import textwrap
