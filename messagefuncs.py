@@ -15,7 +15,7 @@ def expand_guild_name(guild, prefix='', suffix=':', global_replace=False, case_s
         regex = re.compile(f'{prefix}{k}{suffix}|^{k}$', re.IGNORECASE)
         new_guild = regex.sub(prefix+v+suffix, new_guild)
         if not global_replace and new_guild != guild:
-            logging.debug(f'Replacement found {k} -> {v}')
+            logger.debug(f'Replacement found {k} -> {v}')
             return new_guild.replace('_', ' ')
     return new_guild.replace('_', ' ')
 
