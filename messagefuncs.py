@@ -13,7 +13,7 @@ def expand_guild_name(guild, prefix='', suffix=':', global_replace=False, case_s
     new_guild = guild
     for k, v in acro_mapping.items():
         regex = re.compile(re.escape(prefix+k+suffix), re.IGNORECASE)
-        new_guild = regex.sub(regex, new_guild)
+        new_guild = regex.sub(v, new_guild)
         if not global_replace and new_guild != guild:
             return new_guild
         if k == new_guild:
