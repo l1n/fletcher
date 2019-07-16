@@ -88,7 +88,7 @@ async def table_exec_function():
         logger.debug('TXF: Interrupted, bailing out')
         raise
     except Exception as e:
-        if cur is not None:
+        if cur and conn:
             conn.rollback()
         exc_type, exc_obj, exc_tb = exc_info()
         logger.error("TXF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
@@ -104,7 +104,7 @@ async def table_function(message, client, args):
                 conn.commit()
                 return await args[1].send("Tabling conversation in #{} ({}) https://discordapp.com/channels/{}/{}/{} via reaction to {} for {}".format(message.channel.name, message.channel.guild.name, message.channel.guild.id, message.channel.id, message.id, message.content, interval))
     except Exception as e:
-        if cur is not None:
+        if cur and conn:
             conn.rollback()
         exc_type, exc_obj, exc_tb = exc_info()
         logger.error("TF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))

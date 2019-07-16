@@ -43,7 +43,7 @@ def listbanners_function(message, client, args):
         else:
             return "No banners modified within the last 30 days. Raise a sentinel with `!assemble`"
     except Exception as e:
-        if cur is not None:
+        if cur and conn:
             conn.rollback()
         exc_type, exc_obj, exc_tb = exc_info()
         logger.error("LBF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
@@ -79,7 +79,7 @@ async def assemble_function(message, client, args):
         else:
             return await message.channel.send('Banner created! `!pledge {}` to commit to this pledge.'.format(bannerName))
     except Exception as e:
-        if cur is not None:
+        if cur and conn:
             conn.rollback()
         exc_type, exc_obj, exc_tb = exc_info()
         logger.error("ABF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
@@ -130,7 +130,7 @@ async def pledge_function(message, client, args):
                 conn.commit()
                 return await message.channel.send('You pledged your support for banner {} (one of {} supporters). It needs {} more supporters to reach its goal.'.format(bannerInfo[2], bannerInfo[0], str(bannerInfo[1] - bannerInfo[0])))
     except Exception as e:
-        if cur is not None:
+        if cur and conn:
             conn.rollback()
         exc_type, exc_obj, exc_tb = exc_info()
         logger.error("PBF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
@@ -177,7 +177,7 @@ async def defect_function(message, client, args):
             conn.commit()
             return await message.channel.send('You have not committed to this banner. `!pledge {}` to pledge support.'.format(" ".join(args)))
     except Exception as e:
-        if cur is not None:
+        if cur and conn:
             conn.rollback()
         exc_type, exc_obj, exc_tb = exc_info()
         logger.error("DBF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
