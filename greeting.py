@@ -28,7 +28,7 @@ async def restorerole_function(member, client, config):
         logger.info(f'RPR: Restoring roles {",".join([str(role) for role in roles])} for {member.id} in {member.guild.id}')
         await member.edit(nick=name, roles=roles, reason='Restoring Previous Roles')
     except Exception as e:
-        if cur and conn:
+        if "cur" in locals() and "conn" in locals():
             conn.rollback()
         exc_type, exc_obj, exc_tb = exc_info()
         logger.error(f'RPR[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
@@ -43,7 +43,7 @@ async def saverole_function(member, client, config):
             cur.execute("INSERT INTO permaRoles (userid, guild, roles, updated, nickname) VALUES (%s, %s, %s, %s, %s);", [member.id, member.guild.id, [role.id for role in member.roles], datetime.now(), member.display_name])
             conn.commit()
     except Exception as e:
-        if cur and conn:
+        if "cur" in locals() and "conn" in locals():
             conn.rollback()
         exc_type, exc_obj, exc_tb = exc_info()
         logger.error(f'SRF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
