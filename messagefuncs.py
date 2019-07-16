@@ -7,12 +7,13 @@ import textwrap
 
 logger = logging.getLogger('fletcher')
 
-def expand_guild_name(guild, prefix='', suffix=':', global_replace=False):
+def expand_guild_name(guild, prefix='', suffix=':', global_replace=False, case_sensitive=False):
     global config
     acro_mapping = config.get('discord-guild-expansions', { 'acn': 'a compelling narrative', 'ACN': 'a compelling narrative', 'EAC': 'EA Corner', 'D': 'Doissetep', 'bocu': 'Book of Creation Undone', 'abcal': 'Abandoned Castle'})
     new_guild = guild
     for k, v in acro_mapping.items():
-        new_guild = new_guild.replace(prefix+k+suffix, prefix+v+suffix)
+        regex = re.compile(re.escape(prefix+k+suffix), re.IGNORECASE)
+        new_guild = regex.sub(regex, new_guild)
         if not global_replace and new_guild != guild:
             return new_guild
         if k == new_guild:
