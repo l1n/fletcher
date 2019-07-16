@@ -12,35 +12,34 @@ def expand_guild_name(guild, prefix='', suffix=':', global_replace=False, case_s
     acro_mapping = config.get('discord-guild-expansions', { 'acn': 'a compelling narrative', 'ACN': 'a compelling narrative', 'EAC': 'EA Corner', 'D': 'Doissetep', 'bocu': 'Book of Creation Undone', 'abcal': 'Abandoned Castle'})
     new_guild = guild
     for k, v in acro_mapping.items():
-        regex = re.compile(re.escape(prefix+k+suffix), re.IGNORECASE)
-        new_guild = regex.sub(v, new_guild)
+        regex = re.compile(f'{prefix}{k}{suffix}|^{k}$', re.IGNORECASE)
+        new_guild = regex.sub(prefix+v+suffix, new_guild)
         if not global_replace and new_guild != guild:
-            return new_guild
-        if k == new_guild:
-            return v
-    return new_guild
+            logging.debug(f'Replacement found {k} -> {v}')
+            return new_guild.replace('_', ' ')
+    return new_guild.replace('_', ' ')
 
 def xchannel(targetChannel, currentGuild):
     global ch
-    channelLookupBy = "Name"
+    channelLookupBy = 'Name'
     toChannel = None
     toGuild = None
     if targetChannel.startswith('<#'):
         targetChannel = targetChannel[2:-1].strip()
-        channelLookupBy = "ID"
+        channelLookupBy = 'ID'
     elif targetChannel.startswith('#'):
         targetChannel = targetChannel[1:].strip()
-    logger.debug('XC: Channel Identifier '+channelLookupBy+':'+targetChannel)
-    if channelLookupBy == "Name":
-        if ":" not in targetChannel:
+    logger.debug(f'XC: Channel Identifier {channelLookupBy}:{targetChannel}')
+    if channelLookupBy == 'Name':
+        if ':' not in targetChannel:
             toChannel = discord.utils.get(currentGuild.text_channels, name=targetChannel)
             toGuild = currentGuild
         else:
             targetChannel = expand_guild_name(targetChannel)
-            toTuple = targetChannel.split(":")
-            toGuild = discord.utils.get(ch.client.guilds, name=toTuple[0].replace("_", " "))
+            toTuple = targetChannel.split(':')
+            toGuild = discord.utils.get(ch.client.guilds, name=toTuple[0])
             toChannel = discord.utils.get(toGuild.text_channels, name=toTuple[1])
-    elif channelLookupBy == "ID":
+    elif channelLookupBy == 'ID':
         toChannel = ch.client.get_channel(int(targetChannel))
         toGuild = toChannel.guild
     return toChannel
