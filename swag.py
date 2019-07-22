@@ -383,7 +383,7 @@ async def qdb_get_function(message, client, args):
     try:
         global conn
         cur = conn.cursor()
-        cur.execute("SELECT user_id, value FROM qdb WHERE guild_id = %s AND quote_id = %s);", [message.guild.id, args[0]])
+        cur.execute("SELECT user_id, value FROM qdb WHERE guild_id = %s AND quote_id = %s;", [message.guild.id, args[0]])
         quote = cur.fetchone()
         conn.commit()
         await messagefuncs.sendWrappedMessage(f'{quote[1]}\n*Quoted by <@!{quote[0]}>*', message.channel)
