@@ -351,7 +351,7 @@ async def qdb_add_function(message, client, args):
                 cur = conn.cursor()
                 cur.execute("INSERT INTO qdb (user_id, guild_id, value) VALUES (%s, %s, %s);", [args[1].id, message.guild.id, message.content])
                 conn.commit()
-                return await sendWrappedMessage(f'Added to quotedb for {message.guild.name}: {message.content}\n<https://discordapp.com/channels/{message.guild.id}/{message.channel.id}/{message.id}>', args[1])
+                return await messagefuncs.sendWrappedMessage(f'Added to quotedb for {message.guild.name}: {message.content}\n<https://discordapp.com/channels/{message.guild.id}/{message.channel.id}/{message.id}>', args[1])
         elif len(args) == 1:
             urlParts = extract_identifiers_messagelink.search(in_content).groups()
             if len(urlParts) == 3:
@@ -367,7 +367,7 @@ async def qdb_add_function(message, client, args):
                 cur = conn.cursor()
                 cur.execute("INSERT INTO qdb (user_id, guild_id, value) VALUES (%s, %s, %s);", [args[1].id, target_message.guild.id, target_message.content])
                 conn.commit()
-                await sendWrappedMessage(f'Added to quotedb for {message.guild.name}: {target_message.content}\n<https://discordapp.com/channels/{target_message.guild.id}/{target_message.channel.id}/{target_message.id}>', message.author)
+                await messagefuncs.sendWrappedMessage(f'Added to quotedb for {message.guild.name}: {target_message.content}\n<https://discordapp.com/channels/{target_message.guild.id}/{target_message.channel.id}/{target_message.id}>', message.author)
                 return await message.add_reaction('✅')
     except Exception as e:
         if "cur" in locals() and "conn" in locals():
