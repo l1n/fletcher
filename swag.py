@@ -343,6 +343,36 @@ async def scp_function(message, client, args):
             logger.debug('SCP embedPreview: '+str(embedPreview.to_dict()))
         await message.add_reaction('🚫')
 
+async def qdb_add_function(message, client, args):
+    try:
+        global conn
+        if len(args) == 2 and type(args[1]) is discord.User:
+            if str(args[0].emoji) == "🗨":
+                cur = conn.cursor()
+                cur.execute("INSERT INTO qdb (user_id, guild_id, value) VALUES (%s, %s, %s);", [args[1].id, message.guild.id, message.content])
+                conn.commit()
+                return await sendWrappedMessage(f'Added to quotedb for {message.guild.name}: {message.content}\n<https://discordapp.com/channels/{message.guild.id}/{message.channel.id}/{message.id}>', args[1])
+        elif len(args) == 1:
+            urlParts = extract_identifiers_messagelink.search(in_content).groups()
+            if len(urlParts) == 3:
+                guild_id = int(urlParts[0])
+                channel_id = int(urlParts[1])
+                message_id = int(urlParts[2])
+                guild = client.get_guild(guild_id)
+                if guild is None:
+                    logger.warning("QAF: Fletcher is not in guild ID "+str(guild_id))
+                    return
+                channel = guild.get_channel(channel_id)
+                target_message = await channel.fetch_message(message_id)
+                cur = conn.cursor()
+                cur.execute("INSERT INTO qdb (user_id, guild_id, value) VALUES (%s, %s, %s);", [args[1].id, target_message.guild.id, target_message.content])
+                conn.commit()
+                await sendWrappedMessage(f'Added to quotedb for {message.guild.name}: {target_message.content}\n<https://discordapp.com/channels/{target_message.guild.id}/{target_message.channel.id}/{target_message.id}>', message.author)
+                return await message.add_reaction('✅')
+    except Exception as e:
+        exc_type, exc_obj, exc_tb = exc_info()
+        logger.error("QAF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+
 
 def autoload(ch):
     ch.add_command({
@@ -401,4 +431,13 @@ def autoload(ch):
         'long_run': True,
         'args_name': [],
         'description': 'Retrowave Text Generator'
+        })
+    ch.add_command({
+        'trigger': ['!quoteadd', '🗨'],
+        'function': qdb_add_function,
+        'async': True,
+        'args_num': 0,
+        'long_run': 'quote link',
+        'args_name': [],
+        'description': 'Add to quote database'
         })

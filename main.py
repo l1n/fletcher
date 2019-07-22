@@ -85,6 +85,16 @@ fletcher=# \d reminders;
  scheduled    | timestamp without time zone |           |          | (now() + '1 day'::interval)
  trigger_type | text                        |           |          | 'table'::text
 
+fletcher=# \d qdb
+                                Table "public.qdb"
+  Column  |  Type   | Collation | Nullable |                Default                
+----------+---------+-----------+----------+---------------------------------------
+ user_id  | bigint  |           | not null | 
+ guild_id | bigint  |           | not null | 
+ quote_id | integer |           | not null | nextval('qdb_quote_id_seq'::regclass)
+ key      | text    |           |          | 
+ value    | text    |           | not null | 
+
 """
 
 FLETCHER_CONFIG = os.getenv('FLETCHER_CONFIG', './.fletcherrc')
