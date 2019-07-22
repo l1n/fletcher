@@ -351,7 +351,8 @@ async def qdb_add_function(message, client, args):
                 cur = conn.cursor()
                 cur.execute("INSERT INTO qdb (user_id, guild_id, value) VALUES (%s, %s, %s);", [args[1].id, message.guild.id, message.content])
                 conn.commit()
-                return await messagefuncs.sendWrappedMessage(f'Added to quotedb for {message.guild.name}: {message.content}\n<https://discordapp.com/channels/{message.guild.id}/{message.channel.id}/{message.id}>', args[1])
+                content = f'[{message.created_at}] #{message.channel.name} <{message.author.display_name}>: {message.content}\n<https://discordapp.com/channels/{message.guild.id}/{message.channel.id}/{message.id}>'
+                return await messagefuncs.sendWrappedMessage(f'Added to quotedb for {message.guild.name}: {content}', args[1])
         elif len(args) == 1:
             urlParts = extract_identifiers_messagelink.search(in_content).groups()
             if len(urlParts) == 3:
@@ -364,16 +365,47 @@ async def qdb_add_function(message, client, args):
                     return
                 channel = guild.get_channel(channel_id)
                 target_message = await channel.fetch_message(message_id)
+                content = f'[{target_message.created_at}] #{target_message.channel.name} <{target_message.author.display_name}>: {target_message.content}\n<https://discordapp.com/channels/{target_message.guild.id}/{target_message.channel.id}/{target_message.id}>'
                 cur = conn.cursor()
-                cur.execute("INSERT INTO qdb (user_id, guild_id, value) VALUES (%s, %s, %s);", [args[1].id, target_message.guild.id, target_message.content])
+                cur.execute("INSERT INTO qdb (user_id, guild_id, value) VALUES (%s, %s, %s);", [message.id, target_message.guild.id, content])
                 conn.commit()
-                await messagefuncs.sendWrappedMessage(f'Added to quotedb for {message.guild.name}: {target_message.content}\n<https://discordapp.com/channels/{target_message.guild.id}/{target_message.channel.id}/{target_message.id}>', message.author)
+                await messagefuncs.sendWrappedMessage(f'Added to quotedb for {message.guild.name}: {content}', message.author)
                 return await message.add_reaction('✅')
     except Exception as e:
         if "cur" in locals() and "conn" in locals():
             conn.rollback()
         exc_type, exc_obj, exc_tb = exc_info()
         logger.error("QAF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+
+async def qdb_get_function(message, client, args):
+    try:
+        global conn
+        cur = conn.cursor()
+        cur.execute("SELECT user_id, content FROM qdb WHERE guild_id = %s AND quote_id = %s);", [message.guild.id, args[1]])
+        quote = cur.fetchone()
+        conn.commit()
+        await messagefuncs.sendWrappedMessage(f'{quote[1]}\n*Quoted by <@!{quote[0]}>*', message.channel)
+        return await message.add_reaction('✅')
+    except Exception as e:
+        if "cur" in locals() and "conn" in locals():
+            conn.rollback()
+        exc_type, exc_obj, exc_tb = exc_info()
+        logger.error("QGF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+
+async def qdb_search_function(message, client, args):
+    try:
+        global conn
+        cur = conn.cursor()
+        cur.execute("SELECT user_id, content FROM qdb WHERE guild_id = %s AND key LIKE '%%s%');", [message.guild.id, args[1]])
+        quote = cur.fetchone()
+        conn.commit()
+        await messagefuncs.sendWrappedMessage(f'{quote[1]}\n*Quoted by <@!{quote[0]}>*', message.channel)
+        return await message.add_reaction('✅')
+    except Exception as e:
+        if "cur" in locals() and "conn" in locals():
+            conn.rollback()
+        exc_type, exc_obj, exc_tb = exc_info()
+        logger.error("QSF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
 
 
 def autoload(ch):
@@ -442,4 +474,24 @@ def autoload(ch):
         'long_run': 'quote link',
         'args_name': [],
         'description': 'Add to quote database'
+        })
+    ch.add_command({
+        'trigger': ['!quoteget'],
+        'function': qdb_get_function,
+        'async': True,
+        'hidden': True,
+        'args_num': 1,
+        'long_run': 'quote id',
+        'args_name': [],
+        'description': 'Get from quote database by id number'
+        })
+    ch.add_command({
+        'trigger': ['!quotesearch'],
+        'function': qdb_search_function,
+        'async': True,
+        'hidden': True,
+        'args_num': 1,
+        'long_run': 'keyword',
+        'args_name': [],
+        'description': 'Get from quote database by keyword'
         })

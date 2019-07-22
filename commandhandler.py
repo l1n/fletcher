@@ -151,7 +151,7 @@ class CommandHandler:
                     await janissary.modreport_function(message, self.client, ("\n[Sentiment Analysis Combined Score "+str(sent_com_score)+'] '+message.content).split(' '))
             else:
                 if type(message.channel) is discord.TextChannel:
-                    logger.info(str(message.id)+" #"+message.guild.name+":"+message.channel.name+" <"+message.author.nam+":"+str(message.author.id)+"> [Nil] "+message.content)
+                    logger.info(str(message.id)+" #"+message.guild.name+":"+message.channel.name+" <"+message.author.name+":"+str(message.author.id)+"> [Nil] "+message.content)
                 elif type(message.channel) is discord.DMChannel:
                     logger.info(str(message.id)+" @"+message.channel.recipient.name+" <"+message.author.nam+":"+str(message.author.id)+"> [Nil] "+message.content)
                 else:
