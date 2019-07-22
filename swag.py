@@ -370,6 +370,8 @@ async def qdb_add_function(message, client, args):
                 await sendWrappedMessage(f'Added to quotedb for {message.guild.name}: {target_message.content}\n<https://discordapp.com/channels/{target_message.guild.id}/{target_message.channel.id}/{target_message.id}>', message.author)
                 return await message.add_reaction('✅')
     except Exception as e:
+        if "cur" in locals() and "conn" in locals():
+            conn.rollback()
         exc_type, exc_obj, exc_tb = exc_info()
         logger.error("QAF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
 
