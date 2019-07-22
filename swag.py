@@ -351,7 +351,7 @@ async def qdb_add_function(message, client, args):
                 content = f'[{message.created_at}] #{message.channel.name} <{message.author.display_name}>: {message.content}\n<https://discordapp.com/channels/{message.guild.id}/{message.channel.id}/{message.id}>'
                 cur = conn.cursor()
                 cur.execute("INSERT INTO qdb (user_id, guild_id, value) VALUES (%s, %s, %s);", [args[1].id, message.guild.id, content])
-                cur.execute("SELECT quote_id FROM qdb WHERE user_id = %s AND guild_id = %s AND value = %s;", [args[1].id, message.guild.id, message.content])
+                cur.execute("SELECT quote_id FROM qdb WHERE user_id = %s AND guild_id = %s AND value = %s;", [args[1].id, message.guild.id, content])
                 quote_id = cur.fetchone()[0]
                 conn.commit()
                 return await messagefuncs.sendWrappedMessage(f'Quote #{quote_id} added to quotedb for {message.guild.name}: {content}', args[1])
