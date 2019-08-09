@@ -157,7 +157,7 @@ async def load_webhooks():
                     if webhook.name.startswith(config.get('discord', dict()).get('botNavel', 'botNavel')+' ('):
                         toChannelName = guild.name+':'+str(guild.get_channel(webhook.channel_id))
                         fromTuple = webhook.name.split("(")[1].split(")")[0].split(":")
-                        fromTuple[0] = messagefuncs.expand_guild_name(fromTuple[0]).replace("::", ":")
+                        fromTuple[0] = messagefuncs.expand_guild_name(fromTuple[0]).replace(":", "")
                         fromGuild = discord.utils.get(client.guilds, name=fromTuple[0].replace("_", " "))
                         fromChannelName = fromTuple[0].replace("_", " ")+":"+fromTuple[1]
                         webhook_sync_registry[fromChannelName] = {
@@ -176,7 +176,7 @@ async def load_webhooks():
         except AttributeError:
             pass
     logger.debug("Webhooks loaded:")
-    logger.debug("\n".join([key+" to "+webhook_sync_registry[key]['toChannelName']+' (Guild '+str(webhook_sync_registry[key]['toChannelObject'].guild.id)+')' for key in list(webhook_sync_registry)]))
+    logger.debug("\n".join([f'{key} to {webhook_sync_registry[key]["toChannelName"]} (Guild {webhook_sync_registry[key]["toChannelObject"].guild.id})' for key in list(webhook_sync_registry)]))
     globals()['webhook_sync_registry'] = webhook_sync_registry
 canticum_message = None
 doissetep_omega =  None
