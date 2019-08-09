@@ -166,7 +166,7 @@ async def preview_messagelink_function(message, client, args):
                         await attachment.save(attachment_blob)
                         attachments.append(discord.File(attachment_blob, attachment.filename))
 
-            if args is not None and args[0].isdigit():
+            if args is not None and len(args) >= 1 and args[0].isdigit():
                 content = content + f'\nSource: https://discordapp.com/channels/{guild_id}/{channel_id}/{message_id}'
             # TODO 🔭 to preview?
             return await sendWrappedMessage(content, message.channel, files=attachments)
