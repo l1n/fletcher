@@ -158,6 +158,8 @@ async def load_webhooks():
                         toChannelName = guild.name+':'+str(guild.get_channel(webhook.channel_id))
                         fromTuple = webhook.name.split("(")[1].split(")")[0].split(":")
                         fromTuple[0] = messagefuncs.expand_guild_name(fromTuple[0])
+                        if fromTuple[0][-1] == ":":
+                            fromTuple[0] = fromTuple[:-1]
                         fromGuild = discord.utils.get(client.guilds, name=fromTuple[0].replace("_", " "))
                         fromChannelName = fromTuple[0].replace("_", " ")+":"+fromTuple[1]
                         webhook_sync_registry[fromChannelName] = {
