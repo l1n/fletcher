@@ -220,9 +220,7 @@ async def paste_function(message, client, args):
             if historical_message.author == client.user:
                 paste_content = historical_message.content
                 paste_message = await message.channel.send(paste_content)
-                urlParts = extract_identifiers_messagelink.search(paste_content).groups()
-                if len(urlParts[3]):
-                    await preview_messagelink_function(paste_message, client, args)
+                await preview_messagelink_function(paste_message, client, args)
                 return
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
