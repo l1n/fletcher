@@ -214,6 +214,21 @@ async def bookmark_function(message, client, args):
         exc_type, exc_obj, exc_tb = exc_info()
         logger.error("BMF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
 
+async def paste_function(message, client, args):
+    try:
+        for historical_message in message.author.history(oldest_first=False, limit=10):
+            if historical_message.author == client.user:
+                paste_content = historical_message.content
+                paste_message = await message.channel.send(paste_content)
+                urlParts = extract_identifiers_messagelink.search(paste_content).groups()
+                if len(urlParts[3]):
+                    await preview_messagelink_function(paste_message, client, args)
+                return
+    except Exception as e:
+        exc_type, exc_obj, exc_tb = exc_info()
+        logger.error("PF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+
+
 def localizeName(user, guild):
     localized = guild.get_member(user.id)
     if localized is None:
@@ -258,4 +273,12 @@ def autoload(ch):
         'args_num': 0,
         'args_name': [],
         'description': 'DM the user a bookmark to the current place in conversation',
+        })
+    ch.add_command({
+        'trigger': ['!paste'],
+        'function': paste_function,
+        'async': True,
+        'args_num': 0,
+        'args_name': [],
+        'description': 'Paste last copied link',
         })
