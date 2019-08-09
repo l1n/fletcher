@@ -216,7 +216,7 @@ async def bookmark_function(message, client, args):
 
 async def paste_function(message, client, args):
     try:
-        for historical_message in message.author.history(oldest_first=False, limit=10):
+        async for historical_message in message.author.history(oldest_first=False, limit=10):
             if historical_message.author == client.user:
                 paste_content = historical_message.content
                 paste_message = await message.channel.send(paste_content)
