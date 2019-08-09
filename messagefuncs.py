@@ -120,7 +120,7 @@ extract_links = re.compile('(?<!<)((https?|ftp):\/\/|www\.)(\w.+\w\W?)', re.IGNO
 async def preview_messagelink_function(message, client, args):
     try:
         in_content = None
-        if args is not None and args[0].isdigit():
+        if args is not None and len(args) >= 1 and args[0].isdigit():
             in_content = await messagelink_function(message, client, [args[0], 'INTPROC'])
         else:
             in_content = message.content
