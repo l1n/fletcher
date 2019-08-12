@@ -74,9 +74,9 @@ class CommandHandler:
             channel = self.client.get_channel(reaction.channel_id)
             message = await channel.fetch_message(reaction.message_id)
             if type(channel) is discord.TextChannel:
-                logger.info(f'#{channel.guild.name}:{channel.name} <{user.name}:{user.id}> reacting with {messageContent} to {message.id}', extra={'GUILD_IDENTIFIER': channel.guild.name, 'CHANNEL_IDENTIFIER': channel.name, 'SENDER_NAME': user.name, 'SENDER_ID': user.id, 'MESSAGE_ID': message.id})
+                logger.info(f'#{channel.guild.name}:{channel.name} <{user.name}:{user.id}> reacting with {messageContent} to {message.id}', extra={'GUILD_IDENTIFIER': channel.guild.name, 'CHANNEL_IDENTIFIER': channel.name, 'SENDER_NAME': user.name, 'SENDER_ID': user.id, 'MESSAGE_ID': str(message.id)})
             elif type(message.channel) is discord.DMChannel:
-                logger.info(f'@{channel.recipient.name} <{user.name}:{user.id}> reacting with {messageContent} to {message.id}', extra={'GUILD_IDENTIFIER': '@', 'CHANNEL_IDENTIFIER': channel.recipient.name, 'SENDER_NAME': user.name, 'SENDER_ID': user.id, 'MESSAGE_ID': message.id})
+                logger.info(f'@{channel.recipient.name} <{user.name}:{user.id}> reacting with {messageContent} to {message.id}', extra={'GUILD_IDENTIFIER': '@', 'CHANNEL_IDENTIFIER': channel.recipient.name, 'SENDER_NAME': user.name, 'SENDER_ID': user.id, 'MESSAGE_ID': str(message.id)})
             else:
                 # Group Channels don't support bots so neither will we
                 pass
@@ -146,22 +146,22 @@ class CommandHandler:
                     sent_com_score = 1
                 elif message.content == "VADER BAD":
                     sent_com_score = -1
-                logger.info(f'{message.id} #{message.guild.name}:{message.channel.name} <{message.author.name}:{message.author.id}> [{sent_com_score}] {message.content}', extra={'GUILD_IDENTIFIER': message.guild.name, 'CHANNEL_IDENTIFIER': message.channel.name, 'SENDER_NAME': message.author.name, 'SENDER_ID': message.author.id, 'MESSAGE_ID': message.id, 'SENT_COM_SCORE': sent_com_score})
+                logger.info(f'{message.id} #{message.guild.name}:{message.channel.name} <{message.author.name}:{message.author.id}> [{sent_com_score}] {message.content}', extra={'GUILD_IDENTIFIER': message.guild.name, 'CHANNEL_IDENTIFIER': message.channel.name, 'SENDER_NAME': message.author.name, 'SENDER_ID': message.author.id, 'MESSAGE_ID': str(message.id), 'SENT_COM_SCORE': sent_com_score})
                 if guild_config.get('sent-com-score-threshold') and sent_com_score <= float(guild_config['sent-com-score-threshold']) and message.webhook_id is None and message.guild.name in config.get('moderation', dict()).get('guilds', '').split(','):
                     await janissary.modreport_function(message, self.client, ("\n[Sentiment Analysis Combined Score "+str(sent_com_score)+'] '+message.content).split(' '))
             else:
                 if type(message.channel) is discord.TextChannel:
-                    logger.info(f'{message.id} #{message.guild.name}:{message.channel.name} <{message.author.name}:{message.author.id}> [Nil] {message.content}', extra={'GUILD_IDENTIFIER': message.guild.name, 'CHANNEL_IDENTIFIER': message.channel.name, 'SENDER_NAME': message.author.name, 'SENDER_ID': message.author.id, 'MESSAGE_ID': message.id})
+                    logger.info(f'{message.id} #{message.guild.name}:{message.channel.name} <{message.author.name}:{message.author.id}> [Nil] {message.content}', extra={'GUILD_IDENTIFIER': message.guild.name, 'CHANNEL_IDENTIFIER': message.channel.name, 'SENDER_NAME': message.author.name, 'SENDER_ID': message.author.id, 'MESSAGE_ID': str(message.id)})
                 elif type(message.channel) is discord.DMChannel:
-                    logger.info(f'{message.id} @{message.channel.recipient.name} <{message.author.name}:{message.author.id}> [Nil] {message.content}', extra={'GUILD_IDENTIFIER': '@', 'CHANNEL_IDENTIFIER': message.channel.recipient.name, 'SENDER_NAME': message.author.name, 'SENDER_ID': message.author.id, 'MESSAGE_ID': message.id})
+                    logger.info(f'{message.id} @{message.channel.recipient.name} <{message.author.name}:{message.author.id}> [Nil] {message.content}', extra={'GUILD_IDENTIFIER': '@', 'CHANNEL_IDENTIFIER': message.channel.recipient.name, 'SENDER_NAME': message.author.name, 'SENDER_ID': message.author.id, 'MESSAGE_ID': str(message.id)})
                 else:
                     # Group Channels don't support bots so neither will we
                     pass
         except AttributeError as e:
             if type(message.channel) is discord.TextChannel:
-                logger.info(f'{message.id} #{message.guild.name}:{message.channel.name} <{message.author.name}:{message.author.id}> [Nil] {message.content}', extra={'GUILD_IDENTIFIER': message.guild.name, 'CHANNEL_IDENTIFIER': message.channel.name, 'SENDER_NAME': message.author.name, 'SENDER_ID': message.author.id, 'MESSAGE_ID': message.id})
+                logger.info(f'{message.id} #{message.guild.name}:{message.channel.name} <{message.author.name}:{message.author.id}> [Nil] {message.content}', extra={'GUILD_IDENTIFIER': message.guild.name, 'CHANNEL_IDENTIFIER': message.channel.name, 'SENDER_NAME': message.author.name, 'SENDER_ID': message.author.id, 'MESSAGE_ID': str(message.id)})
             elif type(message.channel) is discord.DMChannel:
-                logger.info(f'{message.id} @{message.channel.recipient.name} <{message.author.name}:{message.author.id}> [Nil] {message.content}', extra={'GUILD_IDENTIFIER': '@', 'CHANNEL_IDENTIFIER': message.channel.recipient.name, 'SENDER_NAME': message.author.name, 'SENDER_ID': message.author.id, 'MESSAGE_ID': message.id})
+                logger.info(f'{message.id} @{message.channel.recipient.name} <{message.author.name}:{message.author.id}> [Nil] {message.content}', extra={'GUILD_IDENTIFIER': '@', 'CHANNEL_IDENTIFIER': message.channel.recipient.name, 'SENDER_NAME': message.author.name, 'SENDER_ID': message.author.id, 'MESSAGE_ID': str(message.id)})
             else:
                 # Group Channels don't support bots so neither will we
                 pass
