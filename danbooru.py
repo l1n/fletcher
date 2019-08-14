@@ -46,4 +46,4 @@ def autoload(ch):
         })
     if session:
         session.close()
-    session = aiohttp.ClientSession(auth=aiohttp.BasicAuth(config['danbooru']['user'], config['danbooru']['api_key']), headers={'User-Agent': 'Fletcher/0.1 (operator@noblejury.com)'})
+    session = aiohttp.ClientSession(auth=aiohttp.BasicAuth(login=config['danbooru']['user'], password=config['danbooru']['api_key']), headers={'User-Agent': 'Fletcher/0.1 (operator@noblejury.com)'})
