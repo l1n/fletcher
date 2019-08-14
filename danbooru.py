@@ -1,4 +1,5 @@
 import aiohttp
+from base64 import b64encode
 import discord
 import io
 from sys import exc_info
@@ -46,4 +47,8 @@ def autoload(ch):
         })
     if session:
         session.close()
-    session = aiohttp.ClientSession(auth=aiohttp.BasicAuth(login=config['danbooru']['user'], password=config['danbooru']['api_key']), headers={'User-Agent': 'Fletcher/0.1 (operator@noblejury.com)'})
+    bauth = b64encode(bytes(config['danbooru']['user']+":"+config['danbooru']['api_key'], "utf-8")).decode("ascii")
+    session = aiohttp.ClientSession(headers={
+        'User-Agent': 'Fletcher/0.1 (operator@noblejury.com)',
+        'Authorization': f'Basic {bauth}'
+        })
