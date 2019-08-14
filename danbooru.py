@@ -10,7 +10,7 @@ async def posts_search_function(message, client, args):
     global config
     try:
         params = {
-                'random': True,
+                'random': 'true',
                 'limit': 1,
                 'tags': f'{args[0]}+rating:safe'
                 }
