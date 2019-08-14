@@ -41,7 +41,7 @@ def autoload(ch):
         'function': posts_search_function,
         'async': True,
         'admin': False,
-        'hidden': True,
+        'hidden': False,
         'args_num': 1,
         'args_name': ['tag'],
         'description': 'Search Danbooru for an image tagged as argument'
