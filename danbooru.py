@@ -9,7 +9,7 @@ logger = logging.getLogger('fletcher')
 
 
 session = None
-base_url = "https://testbooru.donmai.us"
+base_url = "https://danbooru.donmai.us"
 
 async def posts_search_function(message, client, args):
     global config
