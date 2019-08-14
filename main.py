@@ -131,6 +131,7 @@ import text_manipulators
 import schedule
 import swag
 import googlephotos
+import danbooru
 import github
 
 versioninfo = versionutils.VersionInfo()
@@ -290,8 +291,9 @@ async def reload_function(message=None, client=client, args=[]):
         # Super Waifu Animated Girlfriend (SWAG)
         autoload(swag, ch)
         await animate_startup('🙉', message)
-        # Google Photos Connector (for !twilestia et al)
+        # Photos Connectors (for !twilestia et al)
         autoload(googlephotos, ch)
+        autoload(danbooru, ch)
         await animate_startup('📷', message)
         # GitHub Connector
         autoload(github, ch)
