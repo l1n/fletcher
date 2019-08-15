@@ -17,7 +17,7 @@ async def posts_search_function(message, client, args):
         params = {
                 'random': 'true',
                 'limit': 1,
-                'tags': f'{args[0]} rating:safe'
+                'tags': f'{" ".join(args)} rating:safe'
                 }
         async with session.get(f'{base_url}/posts.json', params=params) as resp:
             response_body = await resp.json()
@@ -40,6 +40,7 @@ def autoload(ch):
         'trigger': ['!dan'],
         'function': posts_search_function,
         'async': True,
+        'long_run': True,
         'admin': False,
         'hidden': False,
         'args_num': 1,
