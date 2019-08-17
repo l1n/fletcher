@@ -185,11 +185,12 @@ class CommandHandler:
                 return
         for command in self.commands:
             if searchString.lower().startswith(tuple(command['trigger'])) and allowCommand(command, message):
+                tt = None
                 if 'long_run' in command:
                     if command['long_run'] == 'author':
-                        message.author.trigger_typing()
+                        await message.author.trigger_typing()
                     elif command['long_run']:
-                        message.channel.trigger_typing()
+                        await message.channel.trigger_typing()
                 logger.debug("[CH] Triggered "+str(command))
                 args = searchString.split(' ')
                 args = [item for item in args if item]
