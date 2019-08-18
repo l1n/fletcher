@@ -19,7 +19,7 @@ async def posts_search_function(message, client, args):
 
         channel_config = ch.config(guild=message.guild, channel=message.channel)
         if type(message.channel) is not discord.DMChannel and channel_config and channel_config.get('danbooru_default_filter'):
-            params['tags'] += channel_config.get('danbooru_default_filter')
+            params['tags'] += " "+channel_config.get('danbooru_default_filter')
 
         if type(message.channel) is not discord.DMChannel and message.channel.is_nsfw():
             params['tags'] += ' -loli -shota -toddlercon'
@@ -60,7 +60,7 @@ def autoload(ch):
         'long_run': True,
         'admin': False,
         'hidden': False,
-        'args_num': 1,
+        'args_num': 0,
         'args_name': ['tag'],
         'description': 'Search Danbooru for an image tagged as argument'
         })
