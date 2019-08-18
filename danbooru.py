@@ -16,10 +16,16 @@ async def posts_search_function(message, client, args):
     try:
         params = {}
         params['tags'] = " ".join(args)
+
+        channel_config = ch.config(guild=message.guild, channel=message.channel)
+        if type(message.channel) is not discord.DMChannel and channel_config and channel_config.get('danbooru_default_filter'):
+            params['tags'] += channel_config.get('danbooru_default_filter')
+
         if type(message.channel) is not discord.DMChannel and message.channel.is_nsfw():
             params['tags'] += ' -loli -shota -toddlercon'
         else:
             params['tags'] += ' rating:safe'
+
         async with session.get(f'{base_url}/counts/posts.json', params=params) as resp:
             response_body = await resp.json()
             logger.debug(resp.url)
