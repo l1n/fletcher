@@ -14,9 +14,12 @@ base_url = "https://danbooru.donmai.us"
 async def posts_search_function(message, client, args):
     global config
     try:
-        params = {
-                'tags': f'{" ".join(args)} rating:safe'
-                }
+        params = {}
+        params['tags'] = " ".join(args)
+        if type(message.channel) is not discord.DMChannel and message.channel.is_nsfw():
+            params['tags'] += ' -loli -shota -toddlercon'
+        else:
+            params['tags'] += ' rating:safe'
         async with session.get(f'{base_url}/counts/posts.json', params=params) as resp:
             response_body = await resp.json()
             logger.debug(resp.url)
