@@ -68,19 +68,19 @@ class CommandHandler:
 
     async def reaction_handler(self, reaction):
         try:
-            guild_config = self.config(guild=message.guild)
-            channel_config = self.config(guild=message.guild, channel=message.channel)
-        except ValueError as e:
-            if 'guild' in str(e):
-                # DM configuration, default to none
-                guild_config = dict()
-                channel_config = dict()
-        try:
             global config
             messageContent = str(reaction.emoji)
             user = self.client.get_user(reaction.user_id)
             channel = self.client.get_channel(reaction.channel_id)
             message = await channel.fetch_message(reaction.message_id)
+            try:
+                guild_config = self.config(guild=message.guild)
+                channel_config = self.config(guild=message.guild, channel=message.channel)
+            except ValueError as e:
+                if 'guild' in str(e):
+                    # DM configuration, default to none
+                    guild_config = dict()
+                    channel_config = dict()
             if type(channel) is discord.TextChannel:
                 logger.info(f'#{channel.guild.name}:{channel.name} <{user.name}:{user.id}> reacting with {messageContent} to {message.id}', extra={'GUILD_IDENTIFIER': channel.guild.name, 'CHANNEL_IDENTIFIER': channel.name, 'SENDER_NAME': user.name, 'SENDER_ID': user.id, 'MESSAGE_ID': str(message.id)})
             elif type(message.channel) is discord.DMChannel:
