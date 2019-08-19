@@ -17,7 +17,8 @@ async def posts_search_function(message, client, args):
         params = {}
         params['tags'] = " ".join(args)
 
-        channel_config = ch.config(guild=message.guild, channel=message.channel)
+        if type(message.channel) is not discord.DMChannel:
+            channel_config = ch.config(guild=message.guild, channel=message.channel)
         if type(message.channel) is not discord.DMChannel and channel_config and channel_config.get('danbooru_default_filter'):
             params['tags'] += " "+channel_config.get('danbooru_default_filter')
 
