@@ -68,6 +68,14 @@ class CommandHandler:
 
     async def reaction_handler(self, reaction):
         try:
+            guild_config = self.config(guild=message.guild)
+            channel_config = self.config(guild=message.guild, channel=message.channel)
+        except ValueError as e:
+            if 'guild' in str(e):
+                # DM configuration, default to none
+                guild_config = dict()
+                channel_config = dict()
+        try:
             global config
             messageContent = str(reaction.emoji)
             user = self.client.get_user(reaction.user_id)
@@ -80,6 +88,9 @@ class CommandHandler:
             else:
                 # Group Channels don't support bots so neither will we
                 pass
+            if channel_config.get('blacklist-emoji') and not message.channel.permissions_for(message.author).manage_messages and messageContent in channel_config.get('blacklist-emoji'):
+                logger.info('Emoji removed by blacklist')
+                return await message.remove_reaction(messageContent, user)
             for command in self.commands:
                 if messageContent.startswith(tuple(command['trigger'])) and allowCommand(command, message):
                     logger.debug(command)
