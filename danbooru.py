@@ -40,9 +40,14 @@ async def posts_search_function(message, client, args):
             async with session.get(f'{base_url}/posts.json', params=params) as resp:
                 response_body = await resp.json()
                 logger.debug(resp.url)
+                logger.debug(response_body)
                 if len(response_body) == 0:
                     return await message.channel.send('No images found for query')
-                async with session.get(response_body[0]['file_url']) as resp:
+                if response_body[0]['file_size'] > 8000000:
+                    url = response_body[0]['preview_file_url']
+                else:
+                    url = response_body[0]['file_url']
+                async with session.get(url) as resp:
                     buffer = io.BytesIO(await resp.read())
                     if resp.status != 200:
                         raise Exception('HttpProcessingError: '+str(resp.status)+" Retrieving image failed!")
