@@ -1,6 +1,6 @@
 import aiohttp
 from base64 import b64encode
-import cachetools
+import cachetools.func
 import discord
 import io
 from sys import exc_info
