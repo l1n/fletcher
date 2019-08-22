@@ -53,7 +53,7 @@ async def posts_search_function(message, client, args):
         exc_type, exc_obj, exc_tb = exc_info()
         logger.error(f"PSF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}")
 
-@cached(TTLCache(1024, 60))
+@cached(TTLCache(1024, 86400))
 async def count_search_function(tags):
     async with session.get(f'{base_url}/counts/posts.json', params={'tags': tags}) as resp:
         response_body = await resp.json()
