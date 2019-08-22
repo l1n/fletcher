@@ -1,6 +1,7 @@
 import aiohttp
 from base64 import b64encode
-import cachetools.func
+from asyncache import cached
+from cachetools import TTLCache
 import discord
 import io
 from sys import exc_info
@@ -28,7 +29,7 @@ async def posts_search_function(message, client, args):
         else:
             params['tags'] += ' rating:safe'
 
-        post_count = await count_search_function(params)
+        post_count = await count_search_function(params['tags'])
         if not post_count or post_count == 0:
             return await message.channel.send('No images found for query')
         params['random'] = 'true'
@@ -52,9 +53,9 @@ async def posts_search_function(message, client, args):
         exc_type, exc_obj, exc_tb = exc_info()
         logger.error(f"PSF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}")
 
-@cachetools.func.ttl_cache
-async def count_search_function(params):
-    async with session.get(f'{base_url}/counts/posts.json', params=params) as resp:
+@cached(TTLCache(1024, 60))
+async def count_search_function(tags):
+    async with session.get(f'{base_url}/counts/posts.json', params={'tags': tags}) as resp:
         response_body = await resp.json()
         logger.debug(resp.url)
         if len(response_body) == 0:
