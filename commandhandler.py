@@ -119,6 +119,8 @@ class CommandHandler:
             for member_join_action in member_join_actions:
                 if member_join_action in self.join_handlers.keys():
                     await self.join_handlers[member_join_action](member, self.client, config["Guild "+str(member.guild.id)])
+                else:
+                    logger.error(f'Unknown member_join_action [{member_join_action}]')
 
     async def reload_handler(self):
         try:
