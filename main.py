@@ -418,9 +418,9 @@ async def on_raw_message_edit(payload):
         fromMessage = await fromChannel.fetch_message(message_id)
         if len(fromMessage.content) > 0:
             if type(fromChannel) is discord.TextChannel:
-                logger.info(str(message_id)+" #"+fromGuild.name+":"+fromChannel.name+" <"+fromMessage.author.name+":"+str(fromMessage.author.id)+"> [Edit] "+fromMessage.content)
+                logger.info(str(message_id)+" #"+fromGuild.name+":"+fromChannel.name+" <"+fromMessage.author.name+":"+str(fromMessage.author.id)+"> [Edit] "+fromMessage.content, extra={'GUILD_IDENTIFIER': fromGuild.name, 'CHANNEL_IDENTIFIER': fromChannel.name, 'SENDER_NAME': fromMessage.author.name, 'SENDER_ID': fromMessage.author.id, 'MESSAGE_ID': str(fromMessage.id)})
             elif type(fromChannel) is discord.DMChannel:
-                logger.info(str(message_id)+" @"+fromChannel.recipient.name+" <"+fromMessage.author.name+":"+str(fromMessage.author.id)+"> [Edit] "+fromMessage.content)
+                logger.info(str(message_id)+" @"+fromChannel.recipient.name+" <"+fromMessage.author.name+":"+str(fromMessage.author.id)+"> [Edit] "+fromMessage.content, extra={'GUILD_IDENTIFIER': '@', 'CHANNEL_IDENTIFIER': fromChannel.name, 'SENDER_NAME': fromMessage.author.name, 'SENDER_ID': fromMessage.author.id, 'MESSAGE_ID': str(fromMessage.id)})
             else:
                 # Group Channels don't support bots so neither will we
                 pass
