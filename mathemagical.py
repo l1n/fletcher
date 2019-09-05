@@ -32,7 +32,9 @@ def renderLatex(formula, fontsize=12, dpi=300, format='svg', file=None, preamble
 async def latex_render_function(message, client, args):
     global config
     try:
-        renderstring = "$"+(message.content.split(" ", 1)[1])+"$"
+        renderstring = message.content.split(" ", 1)[1]
+        if message.content.split(" ", 1)[0] == "!math":
+            renderstring = f'${renderstring}$'
         if 'math' in config and 'extra-packages' in config['math']:
             preamble = r'}\usepackage{'.join(config['math']['extra-packages'].split(','))[1]+'}'
         else:
@@ -56,5 +58,5 @@ def autoload(ch):
         'args_num': 0,
         'long_run': True,
         'args_name': [],
-        'description': 'Render arguments as LaTeX formula (does not require `$$`)'
+        'description': 'Render arguments as LaTeX formula (does not require `$$` in `!math` mode)'
         })
