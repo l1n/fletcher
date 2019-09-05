@@ -36,7 +36,7 @@ async def latex_render_function(message, client, args):
         if message.content.split(" ", 1)[0] == "!math":
             renderstring = f'${renderstring}$'
         if 'math' in config and 'extra-packages' in config['math']:
-            preamble = r'}\usepackage{'.join(config['math']['extra-packages'].split(',')[1])+r'}'
+            preamble = r'}\usepackage{'.join(config['math']['extra-packages'].split(','))+r'}'
         else:
             preamble = ''
         await message.channel.send("||```tex\n"+renderstring+"```||", file=discord.File(renderLatex(renderstring, format='png', preamble=preamble), filename="fletcher-render.png"))
