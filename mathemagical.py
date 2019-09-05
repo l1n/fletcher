@@ -9,11 +9,11 @@ import tempfile
 
 logger = logging.getLogger('fletcher')
 
-def renderLatex(formula, fontsize=12, dpi=300, format='svg', file=None):
+def renderLatex(formula, fontsize=12, dpi=300, format='svg', file=None, preamble=''):
     """Renders LaTeX formula into image or prints to file.
     """
     plt.rc('text', usetex=True)
-    plt.rc('text.latex', preamble=r'\usepackage{amsmath}')
+    plt.rc('text.latex', preamble=preamble)
     plt.rc('font', family='serif')
     fig = plt.figure(figsize=(0.01, 0.01))
     fig.text(0, 0, formula, fontsize=fontsize, verticalalignment='center_baseline', clip_on=True)
@@ -30,9 +30,14 @@ def renderLatex(formula, fontsize=12, dpi=300, format='svg', file=None):
         return output
 
 async def latex_render_function(message, client, args):
+    global config
     try:
         renderstring = "$"+(message.content.split(" ", 1)[1])+"$"
-        await message.channel.send("||```tex\n"+renderstring+"```||", file=discord.File(renderLatex(renderstring, format='png'), filename="fletcher-render.png"))
+        if 'math' in config and 'extra-packages' in config['math']:
+            preamble = r'}\usepackage{'.join(config['math']['extra-packages'].split(','))[1]+'}'
+        else:
+            preamble = ''
+        await message.channel.send("||```tex\n"+renderstring+"```||", file=discord.File(renderLatex(renderstring, format='png', preamble=preamble), filename="fletcher-render.png"))
     except RuntimeError as e:
         exc_type, exc_obj, exc_tb = exc_info()
         logger.debug("LRF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
