@@ -74,7 +74,7 @@ async def warm_post_cache(tags):
             }
     if search_results_cache.get(tags) and len(search_results_cache[tags]):
         return search_results_cache[tags]
-    async with session.get(f'{base_url}/posts_cache.json', params=params) as resp:
+    async with session.get(f'{base_url}/posts.json', params=params) as resp:
         response_body = await resp.json()
         logger.debug(resp.url)
         if len(response_body) == 0:
