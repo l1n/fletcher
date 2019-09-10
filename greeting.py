@@ -21,7 +21,10 @@ async def restorerole_function(member, client, config):
             roles = roles[1]
             cur.execute("DELETE FROM permaRoles WHERE userid = %s AND guild = %s;", [member.id, member.guild.id])
         conn.commit()
-        if roles is None:
+        if roles is None and config.get("default_join_role"):
+            name = None
+            roles = config.get("default_join_role")
+        elif roles is None:
             return
         # Silently drop deleted roles
         roles = list(filter(None, [member.guild.get_role(role) for role in roles]))
