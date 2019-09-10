@@ -12,7 +12,7 @@ logger = logging.getLogger('fletcher')
 
 
 session = None
-search_results = None
+search_results_cache = None
 base_url = "https://danbooru.donmai.us"
 
 async def posts_search_function(message, client, args):
@@ -67,20 +67,18 @@ async def warm_post_cache(tags):
             'random': 'true',
             'limit': 100
             }
-    if search_results.get(tags) and len(search_results[tags]):
-        return search_results[tags]
-    async with session.get(f'{base_url}/posts.json', params=params) as resp:
+    if search_results_cache.get(tags) and len(search_results_cache[tags]):
+        return search_results_cache[tags]
+    async with session.get(f'{base_url}/posts_cache.json', params=params) as resp:
         response_body = await resp.json()
         logger.debug(resp.url)
         if len(response_body) == 0:
             return []
-        search_results[tags] = shuffle(response_body)
-        return search_results[tags]
+        search_results_cache[tags] = shuffle(response_body)
+        return search_results_cache[tags]
 
 def autoload(ch):
     global config 
-    global session
-    global search_results
     ch.add_command({
         'trigger': ['!dan'],
         'function': posts_search_function,
@@ -92,8 +90,8 @@ def autoload(ch):
         'args_name': ['tag'],
         'description': 'Search Danbooru for an image tagged as argument'
         })
-    if not search_results:
-        search_results = TTLCache(1024, 86400)
+    if not search_results_cache:
+        search_results_cache = TTLCache(1024, 86400)
     if session:
         session.close()
     bauth = b64encode(bytes(config['danbooru']['user']+":"+config['danbooru']['api_key'], "utf-8")).decode("ascii")
