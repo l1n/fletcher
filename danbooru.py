@@ -17,7 +17,6 @@ base_url = "https://danbooru.donmai.us"
 
 async def posts_search_function(message, client, args):
     global config
-    global search_results_cache
     global session
     try:
         tags = " ".join(args)
@@ -72,15 +71,19 @@ async def warm_post_cache(tags):
             'random': 'true',
             'limit': 100
             }
-    if search_results_cache.get(tags) and len(search_results_cache[tags]):
-        return search_results_cache[tags]
-    async with session.get(f'{base_url}/posts.json', params=params) as resp:
-        response_body = await resp.json()
-        logger.debug(resp.url)
-        if len(response_body) == 0:
-            return []
-        search_results_cache[tags] = shuffle(response_body)
-        return search_results_cache[tags]
+    try:
+        if search_results_cache.get(tags) and len(search_results_cache[tags]):
+            return search_results_cache[tags]
+        async with session.get(f'{base_url}/posts.json', params=params) as resp:
+            response_body = await resp.json()
+            logger.debug(resp.url)
+            if len(response_body) == 0:
+                return []
+            search_results_cache[tags] = shuffle(response_body)
+            return search_results_cache[tags]
+    except Exception as e:
+        exc_type, exc_obj, exc_tb = exc_info()
+        logger.error(f"WPC[{exc_tb.tb_lineno}]: {type(e).__name__} {e}")
 
 def autoload(ch):
     global config 
