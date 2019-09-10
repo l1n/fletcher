@@ -5,7 +5,7 @@ attrs==18.2.0
 cachetools==3.1.1
 cffi==1.11.5
 chardet==3.0.4
-discord.py==1.1.1
+discord.py==1.2.3
 gitdb2==2.0.5
 GitPython==2.1.11
 google-api-python-client==1.7.6
