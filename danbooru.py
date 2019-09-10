@@ -12,6 +12,7 @@ logger = logging.getLogger('fletcher')
 
 
 session = None
+search_results = None
 base_url = "https://danbooru.donmai.us"
 
 async def posts_search_function(message, client, args):
