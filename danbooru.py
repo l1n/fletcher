@@ -67,13 +67,15 @@ async def warm_post_cache(tags):
             'random': 'true',
             'limit': 100
             }
+    if search_results.get(tags) and len(search_results[tags]):
+        return search_results[tags]
     async with session.get(f'{base_url}/posts.json', params=params) as resp:
         response_body = await resp.json()
         logger.debug(resp.url)
         if len(response_body) == 0:
             return []
-        search_results[params['tags']] = shuffle(response_body)
-        return search_results[params['tags']]
+        search_results[tags] = shuffle(response_body)
+        return search_results[tags]
 
 def autoload(ch):
     global config 
