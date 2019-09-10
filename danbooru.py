@@ -47,7 +47,7 @@ async def posts_search_function(message, client, args):
             buffer = io.BytesIO(await resp.read())
             if resp.status != 200:
                 raise Exception('HttpProcessingError: '+str(resp.status)+" Retrieving image failed!")
-            await message.channel.send(f"{post_count} results\n<{base_url}/posts/?md5={response_body[0]['md5']}>", files=[discord.File(buffer, search_result["md5"]+"."+search_result["file_ext"])])
+            await message.channel.send(f"{post_count} results\n<{base_url}/posts/?md5={search_result['md5']}>", files=[discord.File(buffer, search_result["md5"]+"."+search_result["file_ext"])])
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
         logger.error(f"PSF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}")
