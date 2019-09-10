@@ -17,6 +17,8 @@ base_url = "https://danbooru.donmai.us"
 
 async def posts_search_function(message, client, args):
     global config
+    global search_results_cache
+    global session
     try:
         tags = " ".join(args)
 
@@ -53,6 +55,7 @@ async def posts_search_function(message, client, args):
 
 @cached(TTLCache(1024, 86400))
 async def count_search_function(tags):
+    global session
     async with session.get(f'{base_url}/counts/posts.json', params={'tags': tags}) as resp:
         response_body = await resp.json()
         logger.debug(resp.url)
@@ -62,6 +65,8 @@ async def count_search_function(tags):
         return post_count
 
 async def warm_post_cache(tags):
+    global search_results_cache
+    global session
     params = {
             'tags': tags,
             'random': 'true',
@@ -79,6 +84,8 @@ async def warm_post_cache(tags):
 
 def autoload(ch):
     global config 
+    global search_results_cache
+    global session
     ch.add_command({
         'trigger': ['!dan'],
         'function': posts_search_function,
