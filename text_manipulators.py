@@ -466,7 +466,7 @@ def autoload(ch):
         'trigger': ['!ocr', '\x1F50F'],
         'function': ocr_function,
         'async': True,
-        'args_num': 1,
-        'args_name': [],
+        'args_num': 0,
+        'args_name': ['Image to be OCRed'],
         'description': 'OCR'
         })
