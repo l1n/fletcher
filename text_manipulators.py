@@ -45,6 +45,8 @@ async def ocr_function(message, client, args):
             await message.attachments[0].save(input_image_blob)
         elif len(message.embeds):
             input_image_blob = await netcode.simple_get_image(mesage.embeds[0].image.url)
+        elif args[0]:
+            input_image_blob = await netcode.simple_get_image(args[0])
         input_image_blob.seek(0)
         input_image = Image.open(input_image_blob)
         output_message = '>>> '+pytesseract.image_to_string(input_image)
