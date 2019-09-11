@@ -473,8 +473,7 @@ def autoload(ch):
         'function': qdb_add_function,
         'async': True,
         'args_num': 0,
-        'long_run': 'quote link',
-        'args_name': [],
+        'args_name': ['quote link'],
         'description': 'Add to quote database'
         })
     ch.add_command({
@@ -483,8 +482,7 @@ def autoload(ch):
         'async': True,
         'hidden': True,
         'args_num': 1,
-        'long_run': 'quote id',
-        'args_name': [],
+        'args_name': ['quote id'],
         'description': 'Get from quote database by id number'
         })
     ch.add_command({
@@ -493,7 +491,6 @@ def autoload(ch):
         'async': True,
         'hidden': True,
         'args_num': 1,
-        'long_run': 'keyword',
-        'args_name': [],
+        'args_name': ['keyword'],
         'description': 'Get from quote database by keyword'
         })

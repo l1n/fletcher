@@ -44,10 +44,10 @@ async def ocr_function(message, client, args):
             input_image_blob = io.BytesIO()
             await message.attachments[0].save(input_image_blob)
         elif len(message.embeds):
-            input_image_blob = await netcode.simple_get_image(message.embeds[0].image.url)
+            input_image_blob = await netcode.simple_get_image(mesage.embeds[0].image.url)
         input_image_blob.seek(0)
         input_image = Image.open(input_image_blob)
-        output_message = pytesseract.image_to_string(input_image)
+        output_message = '>>> '+pytesseract.image_to_string(input_image)
         if len(args) == 2 and type(args[1]) is discord.User and args[1] == message.author:
             await messagefuncs.sendWrappedMessage(output_message, message.channel)
         elif len(args) == 2 and type(args[1]) is discord.User:
@@ -469,7 +469,7 @@ def autoload(ch):
     ch.add_command({
         'trigger': ['!ocr', u"\U0001F50F"],
         'function': ocr_function,
-        'long_run': True,
+        'long_run': 'author',
         'async': True,
         'args_num': 0,
         'args_name': ['Image to be OCRed'],
