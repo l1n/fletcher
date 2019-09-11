@@ -8,6 +8,7 @@ import io
 import logging
 import math
 import messagefuncs
+import netcode
 import pytesseract
 import random
 import textwrap
@@ -39,8 +40,11 @@ def convert_hex_to_ascii(h):
 
 async def ocr_function(message, client, args):
     try:
-        input_image_blob = io.BytesIO()
-        await message.attachments[0].save(input_image_blob)
+        if len(message.attachments):
+            input_image_blob = io.BytesIO()
+            await message.attachments[0].save(input_image_blob)
+        elif len(message.embeds):
+            input_image_blob = await netcode.simple_get_image(message.embeds[0].image.url)
         input_image_blob.seek(0)
         input_image = Image.open(input_image_blob)
         output_message = pytesseract.image_to_string(input_image)
