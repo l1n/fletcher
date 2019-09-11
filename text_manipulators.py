@@ -44,7 +44,7 @@ async def ocr_function(message, client, args):
             input_image_blob = io.BytesIO()
             await message.attachments[0].save(input_image_blob)
         elif len(message.embeds):
-            input_image_blob = await netcode.simple_get_image(mesage.embeds[0].image.url)
+            input_image_blob = await netcode.simple_get_image(message.embeds[0].image.url)
         elif args[0]:
             input_image_blob = await netcode.simple_get_image(args[0])
         input_image_blob.seek(0)
