@@ -8,6 +8,7 @@ import io
 import logging
 import math
 import messagefuncs
+import pytesseract
 import random
 import textwrap
 import zalgo.zalgo as zalgo
@@ -35,6 +36,23 @@ def convert_hex_to_ascii(h):
     chars_in_reverse.reverse()
     return ''.join(chars_in_reverse)
 
+
+async def ocr_function(message, client, args):
+    try:
+        input_image_blob = io.BytesIO()
+        await message.attachments[0].save(input_image_blob)
+        input_image_blob.seek(0)
+        input_image = Image.open(input_image_blob)
+        output_message = pytesseract.image_to_string(input_image)
+        if len(args) == 2 and type(args[1]) is discord.User and args[1] == message.author:
+            await messagefuncs.sendWrappedMessage(output_message, message.channel)
+        elif len(args) == 2 and type(args[1]) is discord.User:
+            await messagefuncs.sendWrappedMessage(output_message, args[1])
+        else:
+            await messagefuncs.sendWrappedMessage(output_message, message.author)
+    except Exception as e:
+        exc_type, exc_obj, exc_tb = exc_info()
+        logger.error("OCR[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
 
 async def scramble_function(message, client, args):
     try:
@@ -440,6 +458,15 @@ def autoload(ch):
         'function': reaction_request_function,
         'async': True,
         'args_num': 1,
-        'args_name': [],
+        'args_name': ['Reaction name', 'offset if ambiguous (optional)'],
         'description': 'Request reaction (x-server)'
+        })
+
+    ch.add_command({
+        'trigger': ['!ocr', '\x1F50F'],
+        'function': ocr_function,
+        'async': True,
+        'args_num': 1,
+        'args_name': [],
+        'description': 'OCR'
         })
