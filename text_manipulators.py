@@ -463,8 +463,9 @@ def autoload(ch):
         })
 
     ch.add_command({
-        'trigger': ['!ocr', '\x1F50F'],
+        'trigger': ['!ocr', u"\U0001F50F"],
         'function': ocr_function,
+        'long_run': True,
         'async': True,
         'args_num': 0,
         'args_name': ['Image to be OCRed'],
