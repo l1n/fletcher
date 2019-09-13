@@ -77,10 +77,13 @@ async def mobilespoil_function(message, client, args):
                 pass
         if len(args) == 2 and type(args[1]) is discord.User:
             channel = args[1]
+            content = ''
         else:
+            content = '\n'+(' '.join(args))
             channel = message.channel
+        content = f'Spoilered for {message.author.display_name}{content}'
         input_image_blob.seek(0)
-        output_message = await channel.send(content='Spoilered for '+message.author.display_name, files=[discord.File(input_image_blob, 'SPOILER_'+message.attachments[0].filename)])
+        output_message = await channel.send(content=content, files=[discord.File(input_image_blob, 'SPOILER_'+message.attachments[0].filename)])
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
         logger.error("MSF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
