@@ -219,7 +219,14 @@ async def paste_function(message, client, args):
         async for historical_message in message.author.history(oldest_first=False, limit=10):
             if historical_message.author == client.user:
                 paste_content = historical_message.content
-                paste_message = await message.channel.send(paste_content)
+                attachments = []
+                if len(historical_message.attachments) > 0:
+                    for attachment in historical_message.attachments:
+                        logger.debug("Syncing "+attachment.filename)
+                        attachment_blob = io.BytesIO()
+                        await attachment.save(attachment_blob)
+                        attachments.append(discord.File(attachment_blob, attachment.filename))
+                    paste_message = await message.channel.send(paste_content, files=attachments)
                 await preview_messagelink_function(paste_message, client, args)
                 return
     except Exception as e:
