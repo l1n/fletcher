@@ -43,10 +43,15 @@ async def ocr_function(message, client, args):
         if len(message.attachments):
             input_image_blob = io.BytesIO()
             await message.attachments[0].save(input_image_blob)
-        elif len(message.embeds):
-            input_image_blob = await netcode.simple_get_image(message.embeds[0].image.url)
-        elif args[0]:
-            input_image_blob = await netcode.simple_get_image(args[0])
+        else:
+            if len(message.embeds) and message.embeds[0].image.url != discord.Embed.Empty:
+                url = message.embeds[0].image.url
+            elif len(message.embeds) and message.embeds[0].thumbnail.url != discord.Embed.Empty:
+                url = message.embeds[0].thumbnail.url
+            elif args[0]:
+                url = args[0]
+            logger.debug(url)
+            input_image_blob = await netcode.simple_get_image(url)
         input_image_blob.seek(0)
         input_image = Image.open(input_image_blob)
         output_message = '>>> '+pytesseract.image_to_string(input_image)
@@ -59,6 +64,26 @@ async def ocr_function(message, client, args):
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
         logger.error("OCR[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+
+async def mobilespoil_function(message, client, args):
+    try:
+        input_image_blob = io.BytesIO()
+        await message.attachments[0].save(input_image_blob)
+        if len(args) != 2 or type(args[1]) is not discord.User or (type(message.channel) == discord.DMChannel and message.author.id == client.user.id):
+            try:
+                await message.delete()
+            except discord.Forbidden as e:
+                logger.error("Forbidden to delete message in "+str(message.channel))
+                pass
+        if len(args) == 2 and type(args[1]) is discord.User:
+            channel = args[1]
+        else:
+            channel = message.channel
+        input_image_blob.seek(0)
+        output_message = await channel.send(content='Spoilered for '+message.author.display_name, files=[discord.File(input_image_blob, 'SPOILER_'+message.attachments[0].filename)])
+    except Exception as e:
+        exc_type, exc_obj, exc_tb = exc_info()
+        logger.error("MSF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
 
 async def scramble_function(message, client, args):
     try:
@@ -439,6 +464,15 @@ def autoload(ch):
         'args_num': 0,
         'args_name': [],
         'description': 'Send contents of image deep fried'
+        })
+
+    ch.add_command({
+        'trigger': ['!mobilespoil', '\u1F4F3'],
+        'function': mobilespoil_function,
+        'async': True,
+        'args_num': 0,
+        'args_name': [],
+        'description': 'Re-upload image as a spoiler'
         })
 
     ch.add_command({
