@@ -226,7 +226,7 @@ async def paste_function(message, client, args):
                         attachment_blob = io.BytesIO()
                         await attachment.save(attachment_blob)
                         attachments.append(discord.File(attachment_blob, attachment.filename))
-                    paste_message = await message.channel.send(paste_content, files=attachments)
+                paste_message = await message.channel.send(paste_content, files=attachments)
                 await preview_messagelink_function(paste_message, client, args)
                 return
     except Exception as e:
