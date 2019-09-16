@@ -535,6 +535,23 @@ async def sudo_function(message, client, args):
         logger.error(f'SUDOF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
 
 
+async def chanlog_function(message, client, args):
+    try:
+        await message.add_reaction('✅')
+        content = f'Log for {message.guild.name}:{message.channel.name} as of {datetime.utcnow()}\n'
+        async for message in channel.history(limit=None):
+            content += f'{message.id} {message.created_at} <{message.author.display_name}:{message.author.id}> {message.system_content}\n'
+            for attachment in message.attachments:
+                content += f'{message.id} {message.created_at} <{message.author.display_name}:{message.author.id}> {attachment.url}\n'
+            for reaction in message.reactions:
+                async for user in reaction.users():
+                    content += f'Reaction to {message.id}: {reaction.emoji} from {user.display_name} ({user.id})\n'
+        await message.author.send(await text_manipulators.fiche_function(content))
+    except Exception as e:
+        exc_type, exc_obj, exc_tb = exc_info()
+        logger.error(f'CLF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
+
+
 def autoload(ch):
     ch.add_command({
         'trigger': ['!roleadd', '!addrole'],
@@ -661,4 +678,13 @@ def autoload(ch):
         'args_num': 0,
         'args_name': [],
         'description': 'Elevate permissions for one command', # by assigning a temporary admin-grant role
+        })
+    ch.add_command({
+        'trigger': ['!chanlog'],
+        'function': chanlog_function,
+        'async': True,
+        'admin': 'server',
+        'args_num': 0,
+        'args_name': [],
+        'description': 'Dump channel logs to a pastebin',
         })
