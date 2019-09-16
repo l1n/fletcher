@@ -537,6 +537,7 @@ async def sudo_function(message, client, args):
 
 async def chanlog_function(message, client, args):
     try:
+        caller = message.author
         await message.add_reaction('🔜')
         content = f'Log for {message.guild.name}:{message.channel.name} as of {datetime.utcnow()}\n'
         async for message in message.channel.history(limit=None):
@@ -548,7 +549,7 @@ async def chanlog_function(message, client, args):
                     content += f'Reaction to {message.id}: {reaction.emoji} from {user.display_name} ({user.id})\n'
         link = text_manipulators.fiche_function(content)
         logger.debug(link)
-        await message.author.send(link)
+        await caller.send(link)
         await message.remove_reaction('🔜', client.user)
         await message.add_reaction('✅')
     except Exception as e:
