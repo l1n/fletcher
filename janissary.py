@@ -546,7 +546,7 @@ async def chanlog_function(message, client, args):
             for reaction in message.reactions:
                 async for user in reaction.users():
                     content += f'Reaction to {message.id}: {reaction.emoji} from {user.display_name} ({user.id})\n'
-        await message.author.send(await text_manipulators.fiche_function(content))
+        await message.author.send(str(await text_manipulators.fiche_function(content)))
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
         logger.error(f'CLF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
@@ -684,6 +684,7 @@ def autoload(ch):
         'function': chanlog_function,
         'async': True,
         'admin': 'server',
+        'long_run': 'author',
         'args_num': 0,
         'args_name': [],
         'description': 'Dump channel logs to a pastebin',
