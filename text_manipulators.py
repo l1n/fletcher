@@ -444,18 +444,13 @@ async def zalgo_function(message, client, args):
 
 def fiche_function(content):
     try:
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.connect((config['pastebin']['host'], int(config['pastebin']['port'])))
-        s.sendall(content.encode())
-        s.shutdown(socket.SHUT_WR)
-        link = ""
-        while True:
-            data = s.recv(4096)
-            if not data:
-                break
-            link += repr(data)
-        s.close()
-        link = link[:-2].decode()
+        if len(content) > config['pastebin']['max_size']:
+            raise Exception(f'Exceeds max file size in pastebin > max_size ({config["pastebin"]["max_size"]})')
+        link = config['pastebin']['base_url']
+        uuid = shortuuid.uuid(name=link)
+        link += f'/{uuid}.txt'
+        with open(f'{config["pastebin"]["base_path"]}/{uuid}.txt', 'w') as output:
+            output.write(content)
         return link
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
