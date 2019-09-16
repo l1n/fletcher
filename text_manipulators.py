@@ -444,7 +444,7 @@ async def zalgo_function(message, client, args):
 
 def fiche_function(content):
     try:
-        if len(content) > config['pastebin']['max_size']:
+        if len(content) > str(config['pastebin']['max_size']):
             raise Exception(f'Exceeds max file size in pastebin > max_size ({config["pastebin"]["max_size"]})')
         link = config['pastebin']['base_url']
         uuid = shortuuid.uuid(name=link)
