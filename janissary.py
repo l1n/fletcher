@@ -546,9 +546,9 @@ async def chanlog_function(message, client, args):
             for reaction in message.reactions:
                 async for user in reaction.users():
                     content += f'Reaction to {message.id}: {reaction.emoji} from {user.display_name} ({user.id})\n'
-        link = await text_manipulators.fiche_function(content)
+        link = text_manipulators.fiche_function(content)
         logger.debug(link)
-        await message.author.send(str(link))
+        await message.author.send(link)
         await message.remove_reaction('🔜', client.user)
         await message.add_reaction('✅')
     except Exception as e:

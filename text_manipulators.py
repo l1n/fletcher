@@ -442,7 +442,7 @@ async def zalgo_function(message, client, args):
         exc_type, exc_obj, exc_tb = exc_info()
         logger.error("ZF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
 
-async def fiche_function(content):
+def fiche_function(content):
     try:
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.connect((config['pastebin']['host'], int(config['pastebin']['port'])))
