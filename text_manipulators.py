@@ -11,7 +11,7 @@ import messagefuncs
 import netcode
 import pytesseract
 import random
-import socket
+import shortuuid
 import textwrap
 import zalgo.zalgo as zalgo
 
