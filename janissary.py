@@ -539,7 +539,7 @@ async def chanlog_function(message, client, args):
     try:
         await message.add_reaction('✅')
         content = f'Log for {message.guild.name}:{message.channel.name} as of {datetime.utcnow()}\n'
-        async for message in channel.history(limit=None):
+        async for message in message.channel.history(limit=None):
             content += f'{message.id} {message.created_at} <{message.author.display_name}:{message.author.id}> {message.system_content}\n'
             for attachment in message.attachments:
                 content += f'{message.id} {message.created_at} <{message.author.display_name}:{message.author.id}> {attachment.url}\n'
