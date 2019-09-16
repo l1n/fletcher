@@ -537,19 +537,17 @@ async def sudo_function(message, client, args):
 
 async def chanlog_function(message, client, args):
     try:
-        caller = message.author
         await message.add_reaction('🔜')
         content = f'Log for {message.guild.name}:{message.channel.name} as of {datetime.utcnow()}\n'
-        async for message in message.channel.history(limit=None):
-            content += f'{message.id} {message.created_at} <{message.author.display_name}:{message.author.id}> {message.system_content}\n'
-            for attachment in message.attachments:
-                content += f'{message.id} {message.created_at} <{message.author.display_name}:{message.author.id}> {attachment.url}\n'
-            for reaction in message.reactions:
+        async for historical_message in historical_message.channel.history(limit=None, oldest_first=True):
+            content += f'{historical_message.id} {historical_message.created_at} <{historical_message.author.display_name}:{historical_message.author.id}> {historical_message.system_content}\n'
+            for attachment in historical_message.attachments:
+                content += f'{historical_message.id} {historical_message.created_at} <{historical_message.author.display_name}:{historical_message.author.id}> {attachment.url}\n'
+            for reaction in historical_message.reactions:
                 async for user in reaction.users():
-                    content += f'Reaction to {message.id}: {reaction.emoji} from {user.display_name} ({user.id})\n'
+                    content += f'Reaction to {historical_message.id}: {reaction.emoji} from {user.display_name} ({user.id})\n'
         link = text_manipulators.fiche_function(content)
-        logger.debug(link)
-        await caller.send(link)
+        await message.author.send(link)
         await message.remove_reaction('🔜', client.user)
         await message.add_reaction('✅')
     except Exception as e:
