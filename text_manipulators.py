@@ -455,6 +455,7 @@ async def fiche_function(content):
                 break
             link += repr(data)
         s.close()
+        link = link[:-2].decode()
         return link
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
