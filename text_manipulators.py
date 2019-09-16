@@ -11,6 +11,7 @@ import messagefuncs
 import netcode
 import pytesseract
 import random
+import socket
 import textwrap
 import zalgo.zalgo as zalgo
 
@@ -440,6 +441,24 @@ async def zalgo_function(message, client, args):
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
         logger.error("ZF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+
+async def fiche_function(content):
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.connect((config['pastebin']['host'], int(config['pastebin']['port'])))
+        s.sendall(content.encode())
+        s.shutdown(socket.SHUT_WR)
+        link = ""
+        while True:
+            data = s.recv(4096)
+            if not data:
+                break
+            link += repr(data)
+        s.close()
+        return link
+    except Exception as e:
+        exc_type, exc_obj, exc_tb = exc_info()
+        logger.error("FF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
 
 def autoload(ch):
     ch.add_command({
