@@ -50,6 +50,7 @@ class CommandHandler:
         self.join_handlers = {}
         self.remove_handlers = {}
         self.reload_handlers = {}
+        self.message_reaction_handlers = {}
         self.tag_id_as_command = re.compile('(?:^(?:Oh)?\s*(?:<@'+str(client.user.id)+'>|Fletch[er]*)[, .]*)|(?:[, .]*(?:<@'+str(client.user.id)+'>|Fletch[er]*)[, .]*$)', re.IGNORECASE)
         self.bang_remover = re.compile('^!+')
 
@@ -65,6 +66,9 @@ class CommandHandler:
 
     def add_reload_handler(self, func_name, func):
         self.reload_handlers[func_name] = func
+
+    def add_message_reaction_handler(self, message_id, func):
+        self.message_reaction_handlers[int(message_id)] = func
 
     async def reaction_handler(self, reaction):
         try:
@@ -91,17 +95,27 @@ class CommandHandler:
             if channel_config.get('blacklist-emoji') and not message.channel.permissions_for(message.author).manage_messages and messageContent in channel_config.get('blacklist-emoji'):
                 logger.info('Emoji removed by blacklist')
                 return await message.remove_reaction(messageContent, user)
-            for command in self.commands:
-                if messageContent.startswith(tuple(command['trigger'])) and allowCommand(command, message):
+            if self.message_reaction_handlers.get(message.id):
+                command = self.message_reaction_handlers[message.id]
+                if messageContent.startswith(tuple(command['trigger'])) and allowCommand(command, message) and command['args_num'] == 0:
                     logger.debug(command)
-                    if command['args_num'] == 0:
-                        if str(user.id) in config['moderation']['blacklist-user-usage'].split(','):
-                            raise Exception('Blacklisted command attempt by user')
-                        logger.debug(command['function'])
-                        if command['async']:
-                            return await command['function'](message, self.client, [reaction, user])
-                        else:
-                            return await message.channel.send(str(command['function'](message, self.client, [reaction, user])))
+                    if str(user.id) in config['moderation']['blacklist-user-usage'].split(','):
+                        raise Exception('Blacklisted command attempt by user')
+                    logger.debug(command['function'])
+                    if command['async']:
+                        return await command['function'](message, self.client, [reaction, user])
+                    else:
+                        return await message.channel.send(str(command['function'](message, self.client, [reaction, user])))
+            for command in self.commands:
+                if messageContent.startswith(tuple(command['trigger'])) and allowCommand(command, message) and command['args_num'] == 0:
+                    logger.debug(command)
+                    if str(user.id) in config['moderation']['blacklist-user-usage'].split(','):
+                        raise Exception('Blacklisted command attempt by user')
+                    logger.debug(command['function'])
+                    if command['async']:
+                        return await command['function'](message, self.client, [reaction, user])
+                    else:
+                        return await message.channel.send(str(command['function'](message, self.client, [reaction, user])))
         except Exception as e:
             exc_type, exc_obj, exc_tb = exc_info()
             logger.error(f'RXH[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')

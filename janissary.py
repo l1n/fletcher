@@ -506,12 +506,13 @@ async def snooze_channel_function(message, client, args):
 
 async def sudo_function(message, client, args):
     try:
-        if "Guild "+str(message.guild.id) in config:
-            scoped_config = config["Guild "+str(message.guild.id)]
-        else:
+        guild_config = ch.config(guild=message.guild)
+        if 'wheel-role' not in guild_config:
             raise Exception("No guild-specific configuration for wheel on guild "+str(message.guild))
         now = datetime.utcnow()
-        role = message.guild.get_role(int(scoped_config['wheel-role']))
+        role = message.guild.get_role(int(guild_config['wheel-role']))
+        if not role:
+            raise Exception("Wheel role not found")
         await message.author.add_roles(role, reason="Sudo escalation", atomic=False)
         await message.add_reaction('✅')
         tries = 0
@@ -533,6 +534,19 @@ async def sudo_function(message, client, args):
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
         logger.error(f'SUDOF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
+
+async def role_message_function(message, client, args):
+    try:
+        guild_config = ch.config(guild=message.guild)
+        role = discord.utils.get(guild.roles, name=guild_config.get('role-message-'+args[0].emoji))
+        if not role:
+            raise Exception("Matching role not found for reaction to role-message")
+        await message.author.add_roles(role, reason="Self-assigned via reaction to role-message", atomic=False)
+        if guild_config[args[0].emoji] in guild_config.get('role-message-autodelete', list()):
+            await message.remove_reaction(args[0].emoji, args[1])
+    except Exception as e:
+        exc_type, exc_obj, exc_tb = exc_info()
+        logger.error(f'RMF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
 
 
 async def chanlog_function(message, client, args):
@@ -692,3 +706,12 @@ def autoload(ch):
         'args_name': [],
         'description': 'Dump channel logs to a pastebin',
         })
+    for guild_config in filter(lambda m: m is not None, [ch.config(guild=guild).get('role-message') for guild in client.guilds]):
+        ch.add_message_reaction_handler(guild_config['role-message'], {
+            'trigger': [''], # Empty string: a special catch-all trigger
+            'function': role_message_function,
+            'async': True,
+            'args_num': 0,
+            'args_name': [],
+            'description': 'Assign roles based on emoji for a given message',
+            })
