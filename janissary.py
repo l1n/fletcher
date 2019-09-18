@@ -706,7 +706,7 @@ def autoload(ch):
         'args_name': [],
         'description': 'Dump channel logs to a pastebin',
         })
-    for guild_config in filter(lambda m: m is not None, [ch.config(guild=guild).get('role-message') for guild in client.guilds]):
+    for guild_config in filter(lambda m: m is not None, [ch.config(guild=guild).get('role-message') for guild in ch.client.guilds]):
         ch.add_message_reaction_handler(guild_config['role-message'], {
             'trigger': [''], # Empty string: a special catch-all trigger
             'function': role_message_function,
