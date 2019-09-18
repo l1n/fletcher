@@ -142,7 +142,7 @@ class CommandHandler:
         try:
             # Trigger reload handlers
             for guild in self.client.guilds:
-                if self.scope_config(guild=member.guild).get('on_reload'):
+                if self.scope_config(guild=guild).get('on_reload'):
                     reload_actions = self.scope_config(guild=member.guild).get('on_reload').split(',')
                     for reload_action in reload_actions:
                         if reload_action in self.reload_handlers.keys():
