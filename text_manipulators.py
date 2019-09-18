@@ -9,7 +9,7 @@ import logging
 import math
 import messagefuncs
 import netcode
-import pytesseract
+import tesserocr
 import random
 import shortuuid
 import textwrap
@@ -55,7 +55,7 @@ async def ocr_function(message, client, args):
             input_image_blob = await netcode.simple_get_image(url)
         input_image_blob.seek(0)
         input_image = Image.open(input_image_blob)
-        output_message = '>>> '+pytesseract.image_to_string(input_image)
+        output_message = '>>> '+tesserocr.image_to_text(input_image)
         if len(args) == 2 and type(args[1]) is discord.User and args[1] == message.author:
             await messagefuncs.sendWrappedMessage(output_message, message.channel)
         elif len(args) == 2 and type(args[1]) is discord.User:
