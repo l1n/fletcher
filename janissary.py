@@ -506,7 +506,7 @@ async def snooze_channel_function(message, client, args):
 
 async def sudo_function(message, client, args):
     try:
-        guild_config = ch.config(guild=message.guild)
+        guild_config = ch.scope_config(guild=message.guild)
         if 'wheel-role' not in guild_config:
             raise Exception("No guild-specific configuration for wheel on guild "+str(message.guild))
         now = datetime.utcnow()
@@ -537,7 +537,7 @@ async def sudo_function(message, client, args):
 
 async def role_message_function(message, client, args):
     try:
-        guild_config = ch.config(guild=message.guild)
+        guild_config = ch.scope_config(guild=message.guild)
         role = discord.utils.get(guild.roles, name=guild_config.get('role-message-'+args[0].emoji))
         if not role:
             raise Exception("Matching role not found for reaction to role-message")
@@ -706,7 +706,10 @@ def autoload(ch):
         'args_name': [],
         'description': 'Dump channel logs to a pastebin',
         })
-    for guild_config in filter(lambda m: m is not None, [ch.config(guild=guild).get('role-message') for guild in ch.client.guilds]):
+    role_message_guilds = filter(lambda m: m is not None, [ch.scope_config(guild=guild).get('role-message') for guild in ch.client.guilds])
+    logger.debug(list(role_message_guilds))
+    for guild_config in role_message_guilds:
+        logger.debug(f'Adding role emoji handler for {role-message}')
         ch.add_message_reaction_handler(guild_config['role-message'], {
             'trigger': [''], # Empty string: a special catch-all trigger
             'function': role_message_function,

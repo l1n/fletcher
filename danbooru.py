@@ -22,8 +22,10 @@ async def posts_search_function(message, client, args):
         tags = " ".join(args)
 
         if type(message.channel) is not discord.DMChannel:
-            channel_config = ch.config(guild=message.guild, channel=message.channel)
-        if type(message.channel) is not discord.DMChannel and channel_config and channel_config.get('danbooru_default_filter'):
+            channel_config = ch.scope_config(guild=message.guild, channel=message.channel)
+        else:
+            channel_config = dict()
+        if type(message.channel) is not discord.DMChannel and channel_config.get('danbooru_default_filter'):
             tags += " "+channel_config.get('danbooru_default_filter')
 
         if type(message.channel) is not discord.DMChannel and message.channel.is_nsfw():
@@ -105,7 +107,7 @@ def autoload(ch):
         search_results_cache = TTLCache(1024, 86400)
     if session:
         session.close()
-    bauth = b64encode(bytes(config['danbooru']['user']+":"+config['danbooru']['api_key'], "utf-8")).decode("ascii")
+    bauth = b64encode(bytes(config.get('danbooru', dict()).get('user')+":"+config.get('danbooru', dict()).get('api_key'), "utf-8")).decode("ascii")
     session = aiohttp.ClientSession(headers={
         'User-Agent': 'Fletcher/0.1 (operator@noblejury.com)',
         'Authorization': f'Basic {bauth}'

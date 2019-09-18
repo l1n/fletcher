@@ -78,8 +78,8 @@ class CommandHandler:
             channel = self.client.get_channel(reaction.channel_id)
             message = await channel.fetch_message(reaction.message_id)
             try:
-                guild_config = self.config(guild=message.guild)
-                channel_config = self.config(guild=message.guild, channel=message.channel)
+                guild_config = self.scope_config(guild=message.guild)
+                channel_config = self.scope_config(guild=message.guild, channel=message.channel)
             except ValueError as e:
                 if 'guild' in str(e):
                     # DM configuration, default to none
@@ -121,18 +121,20 @@ class CommandHandler:
             logger.error(f'RXH[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
 
     async def remove_handler(self, member):
-        if "Guild "+str(member.guild.id) in config and 'on_member_remove' in config["Guild "+str(member.guild.id)]:
-            member_remove_actions = config["Guild "+str(member.guild.id)]['on_member_remove'].split(',')
+        if self.scope_config(guild=member.guild).get('on_member_remove'):
+            member_remove_actions = self.scope_config(guild=member.guild).get('on_member_remove').split(',')
             for member_remove_action in member_remove_actions:
                 if member_remove_action in self.remove_handlers.keys():
-                    await self.remove_handlers[member_remove_action](member, self.client, config["Guild "+str(member.guild.id)])
+                    await self.remove_handlers[member_remove_action](member, self.client, self.scope_config(guild=member.guild))
+                else:
+                    logger.error(f'Unknown member_remove_action [{member_remove_action}]')
 
     async def join_handler(self, member):
-        if "Guild "+str(member.guild.id) in config and 'on_member_join' in config["Guild "+str(member.guild.id)]:
-            member_join_actions = config["Guild "+str(member.guild.id)]['on_member_join'].split(',')
+        if self.scope_config(guild=member.guild).get('on_member_join'):
+            member_join_actions = self.scope_config(guild=member.guild).get('on_member_join').split(',')
             for member_join_action in member_join_actions:
                 if member_join_action in self.join_handlers.keys():
-                    await self.join_handlers[member_join_action](member, self.client, config["Guild "+str(member.guild.id)])
+                    await self.join_handlers[member_join_action](member, self.client, self.scope_config(guild=member.guild))
                 else:
                     logger.error(f'Unknown member_join_action [{member_join_action}]')
 
@@ -140,11 +142,13 @@ class CommandHandler:
         try:
             # Trigger reload handlers
             for guild in self.client.guilds:
-                if "Guild "+str(guild.id) in config and 'on_reload' in config["Guild "+str(guild.id)]:
-                    reload_actions = config["Guild "+str(guild.id)]['on_reload'].split(',')
+                if self.scope_config(guild=member.guild).get('on_reload'):
+                    reload_actions = self.scope_config(guild=member.guild).get('on_reload').split(',')
                     for reload_action in reload_actions:
                         if reload_action in self.reload_handlers.keys():
-                            await self.reload_handlers[reload_action](guild, self.client, config["Guild "+str(guild.id)])
+                            await self.reload_handlers[reload_action](guild, self.client, self.scope_config(guild=guild))
+                        else:
+                            logger.error(f'Unknown reload_action [{reload_action}]')
         except Exception as e:
             exc_type, exc_obj, exc_tb = exc_info()
             logger.error(f'RLH[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
@@ -154,8 +158,8 @@ class CommandHandler:
         global sid
 
         try:
-            guild_config = self.config(guild=message.guild)
-            channel_config = self.config(guild=message.guild, channel=message.channel)
+            guild_config = self.scope_config(guild=message.guild)
+            channel_config = self.scope_config(guild=message.guild, channel=message.channel)
         except ValueError as e:
             if 'guild' in str(e):
                 # DM configuration, default to none
@@ -173,22 +177,22 @@ class CommandHandler:
                     sent_com_score = 1
                 elif message.content == "VADER BAD":
                     sent_com_score = -1
-                logger.info(f'{message.id} #{message.guild.name}:{message.channel.name} <{message.author.name}:{message.author.id}> [{sent_com_score}] {message.content}', extra={'GUILD_IDENTIFIER': message.guild.name, 'CHANNEL_IDENTIFIER': message.channel.name, 'SENDER_NAME': message.author.name, 'SENDER_ID': message.author.id, 'MESSAGE_ID': str(message.id), 'SENT_COM_SCORE': sent_com_score})
+                logger.info(f'{message.id} #{message.guild.name}:{message.channel.name} <{message.author.name}:{message.author.id}> [{sent_com_score}] {message.system_content}', extra={'GUILD_IDENTIFIER': message.guild.name, 'CHANNEL_IDENTIFIER': message.channel.name, 'SENDER_NAME': message.author.name, 'SENDER_ID': message.author.id, 'MESSAGE_ID': str(message.id), 'SENT_COM_SCORE': sent_com_score})
                 if guild_config.get('sent-com-score-threshold') and sent_com_score <= float(guild_config['sent-com-score-threshold']) and message.webhook_id is None and message.guild.name in config.get('moderation', dict()).get('guilds', '').split(','):
-                    await janissary.modreport_function(message, self.client, ("\n[Sentiment Analysis Combined Score "+str(sent_com_score)+'] '+message.content).split(' '))
+                    await janissary.modreport_function(message, self.client, ("\n[Sentiment Analysis Combined Score "+str(sent_com_score)+'] '+message.system_content).split(' '))
             else:
                 if type(message.channel) is discord.TextChannel:
-                    logger.info(f'{message.id} #{message.guild.name}:{message.channel.name} <{message.author.name}:{message.author.id}> [Nil] {message.content}', extra={'GUILD_IDENTIFIER': message.guild.name, 'CHANNEL_IDENTIFIER': message.channel.name, 'SENDER_NAME': message.author.name, 'SENDER_ID': message.author.id, 'MESSAGE_ID': str(message.id)})
+                    logger.info(f'{message.id} #{message.guild.name}:{message.channel.name} <{message.author.name}:{message.author.id}> [Nil] {message.system_content}', extra={'GUILD_IDENTIFIER': message.guild.name, 'CHANNEL_IDENTIFIER': message.channel.name, 'SENDER_NAME': message.author.name, 'SENDER_ID': message.author.id, 'MESSAGE_ID': str(message.id)})
                 elif type(message.channel) is discord.DMChannel:
-                    logger.info(f'{message.id} @{message.channel.recipient.name} <{message.author.name}:{message.author.id}> [Nil] {message.content}', extra={'GUILD_IDENTIFIER': '@', 'CHANNEL_IDENTIFIER': message.channel.recipient.name, 'SENDER_NAME': message.author.name, 'SENDER_ID': message.author.id, 'MESSAGE_ID': str(message.id)})
+                    logger.info(f'{message.id} @{message.channel.recipient.name} <{message.author.name}:{message.author.id}> [Nil] {message.system_content}', extra={'GUILD_IDENTIFIER': '@', 'CHANNEL_IDENTIFIER': message.channel.recipient.name, 'SENDER_NAME': message.author.name, 'SENDER_ID': message.author.id, 'MESSAGE_ID': str(message.id)})
                 else:
                     # Group Channels don't support bots so neither will we
                     pass
         except AttributeError as e:
             if type(message.channel) is discord.TextChannel:
-                logger.info(f'{message.id} #{message.guild.name}:{message.channel.name} <{message.author.name}:{message.author.id}> [Nil] {message.content}', extra={'GUILD_IDENTIFIER': message.guild.name, 'CHANNEL_IDENTIFIER': message.channel.name, 'SENDER_NAME': message.author.name, 'SENDER_ID': message.author.id, 'MESSAGE_ID': str(message.id)})
+                logger.info(f'{message.id} #{message.guild.name}:{message.channel.name} <{message.author.name}:{message.author.id}> [Nil] {message.system_content}', extra={'GUILD_IDENTIFIER': message.guild.name, 'CHANNEL_IDENTIFIER': message.channel.name, 'SENDER_NAME': message.author.name, 'SENDER_ID': message.author.id, 'MESSAGE_ID': str(message.id)})
             elif type(message.channel) is discord.DMChannel:
-                logger.info(f'{message.id} @{message.channel.recipient.name} <{message.author.name}:{message.author.id}> [Nil] {message.content}', extra={'GUILD_IDENTIFIER': '@', 'CHANNEL_IDENTIFIER': message.channel.recipient.name, 'SENDER_NAME': message.author.name, 'SENDER_ID': message.author.id, 'MESSAGE_ID': str(message.id)})
+                logger.info(f'{message.id} @{message.channel.recipient.name} <{message.author.name}:{message.author.id}> [Nil] {message.system_content}', extra={'GUILD_IDENTIFIER': '@', 'CHANNEL_IDENTIFIER': message.channel.recipient.name, 'SENDER_NAME': message.author.name, 'SENDER_ID': message.author.id, 'MESSAGE_ID': str(message.id)})
             else:
                 # Group Channels don't support bots so neither will we
                 pass
@@ -249,7 +253,7 @@ class CommandHandler:
             if not continue_flag:
                 return
 
-    def config(self, message=None, channel=None, guild=None):
+    def scope_config(self, message=None, channel=None, guild=None):
         global config
         if guild is None:
             if channel:
