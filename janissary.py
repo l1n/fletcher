@@ -706,15 +706,15 @@ def autoload(ch):
         'args_name': [],
         'description': 'Dump channel logs to a pastebin',
         })
-    role_message_guilds = filter(lambda m: m is not None, [ch.scope_config(guild=guild).get('role-message') for guild in ch.client.guilds])
-    logger.debug(list(role_message_guilds))
-    for guild_config in role_message_guilds:
-        logger.debug(f'Adding role emoji handler for {role-message}')
-        ch.add_message_reaction_handler(guild_config['role-message'], {
-            'trigger': [''], # Empty string: a special catch-all trigger
-            'function': role_message_function,
-            'async': True,
-            'args_num': 0,
-            'args_name': [],
-            'description': 'Assign roles based on emoji for a given message',
-            })
+
+    for guild in ch.client.guilds:
+        if ch.scope_config(guild=guild).get('role-message'):
+            logger.debug(f'Adding role emoji handler for {guild}')
+            ch.add_message_reaction_handler(ch.scope_config(guild=guild).get('role-message'), {
+                'trigger': [''], # Empty string: a special catch-all trigger
+                'function': role_message_function,
+                'async': True,
+                'args_num': 0,
+                'args_name': [],
+                'description': 'Assign roles based on emoji for a given message',
+                })
