@@ -538,7 +538,7 @@ async def sudo_function(message, client, args):
 async def role_message_function(message, client, args):
     try:
         guild_config = ch.scope_config(guild=message.guild)
-        role = discord.utils.get(guild.roles, name=guild_config.get('role-message-'+args[0].emoji))
+        role = discord.utils.get(message.guild.roles, name=guild_config.get('role-message-'+args[0].emoji))
         if not role:
             raise Exception("Matching role not found for reaction to role-message")
         await message.author.add_roles(role, reason="Self-assigned via reaction to role-message", atomic=False)

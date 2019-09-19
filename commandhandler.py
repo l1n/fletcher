@@ -97,8 +97,8 @@ class CommandHandler:
                 return await message.remove_reaction(messageContent, user)
             if self.message_reaction_handlers.get(message.id):
                 command = self.message_reaction_handlers[message.id]
+                logger.debug(command)
                 if messageContent.startswith(tuple(command['trigger'])) and allowCommand(command, message) and command['args_num'] == 0:
-                    logger.debug(command)
                     if str(user.id) in config['moderation']['blacklist-user-usage'].split(','):
                         raise Exception('Blacklisted command attempt by user')
                     logger.debug(command['function'])
@@ -143,7 +143,7 @@ class CommandHandler:
             # Trigger reload handlers
             for guild in self.client.guilds:
                 if self.scope_config(guild=guild).get('on_reload'):
-                    reload_actions = self.scope_config(guild=member.guild).get('on_reload').split(',')
+                    reload_actions = self.scope_config(guild=guild).get('on_reload').split(',')
                     for reload_action in reload_actions:
                         if reload_action in self.reload_handlers.keys():
                             await self.reload_handlers[reload_action](guild, self.client, self.scope_config(guild=guild))
