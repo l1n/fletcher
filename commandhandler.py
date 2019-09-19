@@ -271,6 +271,8 @@ class CommandHandler:
             channel = channel.id
         if channel:
             channel = f' - {int(channel)}'
+        else:
+            channel = ''
         try:
             return dict(config.get(f'Guild {guild}{channel}'))
         except TypeError:
