@@ -575,14 +575,14 @@ async def copy_permissions_function(message, client, args):
         targetChannel = message.channel
 
         if sourceChannel.startswith('<#'):
-            sourceChannel = message.guild.get_channel(sourceChannel[2:-1])
+            sourceChannel = message.guild.get_channel(int(sourceChannel[2:-1]))
         else:
             sourceChannel = discord.utils.get(message.guild.text_channels, name=sourceChannel)
 
         if len(args) > 1:
             targetChannel = args[1]
             if targetChannel.startswith('<#'):
-                targetChannel = message.guild.get_channel(targetChannel[2:-1])
+                targetChannel = message.guild.get_channel(int(targetChannel[2:-1]))
             else:
                 targetChannel = discord.utils.get(message.guild.text_channels, name=targetChannel)
 
