@@ -569,6 +569,41 @@ async def chanlog_function(message, client, args):
         logger.error(f'CLF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
 
 
+async def copy_permissions_function(message, client, args):
+    try:
+        sourceChannel = args[0]
+        targetChannel = message.channel
+
+        if sourceChannel.startswith('<#'):
+            sourceChannel = message.guild.get_channel(sourceChannel[2:-1])
+        else:
+            sourceChannel = discord.utils.get(message.guild.text_channels, name=sourceChannel)
+
+        if len(args) > 1:
+            targetChannel = args[1]
+            if targetChannel.startswith('<#'):
+                targetChannel = message.guild.get_channel(targetChannel[2:-1])
+            else:
+                targetChannel = discord.utils.get(message.guild.text_channels, name=targetChannel)
+
+        await message.add_reaction('🔜')
+        set_permissions_tasks = []
+        for key, overwrite in targetChannel.overwrites.items():
+            logging.info(f'Removing overwrite {overwrite} for {key} from {targetChannel.name}')
+            set_permissions_tasks.append(targetChannel.set_permissions(key, overwrite=None))
+        await asyncio.gather(*set_permissions_tasks)
+        set_permissions_tasks = []
+        for key, overwrite in sourceChannel.overwrites.items():
+            logging.info(f'Adding overwrite {overwrite} for {key} from {sourceChannel.name} to {targetChannel.name}')
+            set_permissions_tasks.append(targetChannel.set_permissions(key, overwrite=overwrite, reason=f'Sync from {sourceChannel.name} for {message.author.name}'))
+        await asyncio.gather(*set_permissions_tasks)
+        await message.remove_reaction('🔜', client.user)
+        await message.add_reaction('✅')
+    except Exception as e:
+        exc_type, exc_obj, exc_tb = exc_info()
+        logger.error(f'CPF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
+
+
 def autoload(ch):
     ch.add_command({
         'trigger': ['!roleadd', '!addrole'],
@@ -705,6 +740,16 @@ def autoload(ch):
         'args_num': 0,
         'args_name': [],
         'description': 'Dump channel logs to a pastebin',
+        })
+    ch.add_command({
+        'trigger': ['!copy_permissions_from'],
+        'function': copy_permissions_function,
+        'async': True,
+        'admin': 'server',
+        'long_run': 'channel',
+        'args_num': 1,
+        'args_name': ['#source-channel', '#target-channel (optional)'],
+        'description': 'Copy channel permission overrides from a source channel',
         })
 
     for guild in ch.client.guilds:
