@@ -311,6 +311,8 @@ async def spoiler_function(message, client, args):
 
 async def reaction_request_function(message, client, args):
     try:
+        if not message.channel.permissions_for(message.author).external_emojis:
+            return False
         emoji_query = args[0].strip(':')
         emoji = list(filter(lambda m: m.name == emoji_query, client.emojis))
         if len(args) >= 2:
