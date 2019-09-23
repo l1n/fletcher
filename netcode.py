@@ -19,3 +19,19 @@ async def simple_get_image(url):
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
         logger.error("SGI[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+
+async def simple_post_image(url, image):
+    try:
+        async with aiohttp.ClientSession(headers={
+            'User-Agent': 'Fletcher/0.1 (operator@noblejury.com)'
+            }) as session:
+            logger.debug(url)
+            fd = aiohttp.FormData(image)
+            async with session.post(str(url),data=fd) as resp:
+                buffer = io.BytesIO(await resp.read())
+                if resp.status != 200:
+                    raise Exception('HttpProcessingError: '+str(resp.status)+" Retrieving image failed!")
+                return buffer
+    except Exception as e:
+        exc_type, exc_obj, exc_tb = exc_info()
+        logger.error("SGI[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
