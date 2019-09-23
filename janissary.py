@@ -193,7 +193,7 @@ async def modping_function(message, client, args):
                 except asyncio.TimeoutError:
                     raise Exception('Timed out waiting for approval')
             role_list = message.channel.guild.roles
-            role = discord.utils.get(role_list, name=" ".join(args).lstrip("@"))
+            role = discord.utils.get(role_list, name=" ".join(args).lstrip("@").split("\n")[0])
             lay_mentionable = role.mentionable
             if not lay_mentionable:
                 await role.edit(mentionable=True)
