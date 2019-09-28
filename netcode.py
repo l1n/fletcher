@@ -28,9 +28,9 @@ async def simple_post_image(url, image):
             logger.debug(url)
             fd = aiohttp.FormData(image)
             async with session.post(str(url),data=fd) as resp:
-                buffer = io.BytesIO(await resp.read())
+                buffer = await resp.read()
                 if resp.status != 200:
-                    raise Exception('HttpProcessingError: '+str(resp.status)+" Retrieving image failed!")
+                    raise Exception('HttpProcessingError: '+str(resp.status)+" Retrieving response failed!")
                 return buffer
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
