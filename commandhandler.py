@@ -8,8 +8,11 @@ import janissary
 import re
 from sys import exc_info
 import textwrap
+import ujson
 
 logger = logging.getLogger('fletcher')
+
+regex_cache = dict()
 
 def allowCommand(command, message):
     global config
@@ -248,6 +251,10 @@ class CommandHandler:
                     else:
                         await message.channel.send(f'command "{command["trigger"][0]}" requires {command["args_num"]} argument(s) "{", ".join(command["args_name"])}"')
                         break
+        if guild_config.get('hotwords'):
+            for hotword in regex_cache[guild.id]:
+                if hotword['compiled_regex'].search(message.content):
+                    await message.add_reaction(hotword['target_emoji'])
         if channel_config.get('regex') == 'post-command' and not message.channel.permissions_for(message.author).manage_messages:
             continue_flag = await greeting.regex_filter(message, self.client, channel_config)
             if not continue_flag:
@@ -368,3 +375,20 @@ def autoload(ch):
         'args_name': [],
         'description': 'List commands and arguments'
         })
+    for guild in client.guilds:
+        guild_config = self.scope_config(guild=guild)
+        if guild_config.get('hotwords'):
+            hotwords = ujson.loads(guild_config.get('hotwords'))
+            for word in hotwords.keys():
+                target_emoji = hotwords[word]['target_emoji']
+                if len(target_emoji) > 1:
+                    target_emoji = discord.utils.get(guild.emojis, name=target_emoji)
+                flags = None
+                if hotwords[word]['insensitive']:
+                    flags = re.IGNORECASE
+                hotwords[word] = {
+                        'target_eomji': target_emoji,
+                        'regex': hotwords[word]['regex'],
+                        'compiled_regex': re.compile(hotwords[word]['regex'], flags)
+                        }
+            regex_cache['guild_id'] = hotwords.values()
