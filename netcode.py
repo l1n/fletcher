@@ -14,24 +14,25 @@ async def simple_get_image(url):
             async with session.get(str(url)) as resp:
                 buffer = io.BytesIO(await resp.read())
                 if resp.status != 200:
-                    raise Exception('HttpProcessingError: '+str(resp.status)+" Retrieving image failed!")
+                    raise Exception(f'HttpProcessingError: {resp.status} Retrieving image failed!')
                 return buffer
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
         logger.error("SGI[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
 
-async def simple_post_image(url, image):
+async def simple_post_image(post_url, image, filename, image_format, field_name='file'):
     try:
         async with aiohttp.ClientSession(headers={
-            'User-Agent': 'Fletcher/0.1 (operator@noblejury.com)'
+            'User-Agent': 'Fletcher/0.1 (operator@noblejury.com)',
             }) as session:
-            logger.debug(url)
-            fd = aiohttp.FormData(image)
+            logger.debug(f'SPI: {post_url}')
+            fd = aiohttp.FormData()
+            fd.add_field(field_name, image, filename=filename, content_type=image_format)
             async with session.post(str(url),data=fd) as resp:
-                buffer = await resp.read()
+                buffer = await resp.text()
                 if resp.status != 200:
-                    raise Exception('HttpProcessingError: '+str(resp.status)+" Retrieving response failed!")
+                    raise Exception(f'HttpProcessingError: {resp.status} Retrieving response failed!\n')
                 return buffer
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
-        logger.error("SGI[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+        logger.error("SPI[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))

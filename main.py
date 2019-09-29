@@ -299,6 +299,7 @@ async def reload_function(message=None, client=client, args=[]):
         autoload(github, ch)
         await animate_startup('🐙', message)
         # Play it again, Sam
+        await doissetep_omega_autoconnect()
         if not doissetep_omega.is_playing():
             doissetep_omega.play(discord.FFmpegPCMAudio(config['audio']['instreamurl']))
         # Reset canticum_message when reloaded [workaround for https://todo.sr.ht/~nova/fletcher/6]
@@ -334,7 +335,7 @@ async def on_ready():
         # print bot information
         await client.change_presence(activity=discord.Game(name='Reloading: The Game'))
         logger.info(f'Discord.py Version {discord.__version__}, connected as {client.user.name} ({client.user.id})')
-        doissetep_omega = await client.get_guild(int(config['audio']['guild'])).get_channel(int(config['audio']['channel'])).connect();
+        await doissetep_omega_autoconnect()
         loop = asyncio.get_running_loop()
         loop.remove_signal_handler(signal.SIGHUP)
         await reload_function()
@@ -567,6 +568,16 @@ async def on_member_join(member):
 @client.event
 async def on_member_remove(member):
     await ch.remove_handler(member)
+
+async def doissetep_omega_autoconnect():
+    global doissetep_omega
+    if doissetep_omega:
+        return doissetep_omega
+    try:
+        doissetep_omega = await client.get_guild(int(config['audio']['guild'])).get_channel(int(config['audio']['channel'])).connect();
+        return doissetep_omega
+    except AttributeError as e:
+        logger.exception(e)
 
 loop = asyncio.get_event_loop()
 

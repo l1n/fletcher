@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 from PIL import Image
 from sys import exc_info
 import asyncio
+import aiohttp
 import codecs
 import discord
 import io
@@ -41,22 +42,23 @@ def convert_hex_to_ascii(h):
 
 async def ocr_function(message, client, args):
     try:
+        url = None
         if len(message.attachments):
-            input_image_blob = io.BytesIO()
-            await message.attachments[0].save(input_image_blob)
-        else:
-            if len(message.embeds) and message.embeds[0].image.url != discord.Embed.Empty:
-                url = message.embeds[0].image.url
-            elif len(message.embeds) and message.embeds[0].thumbnail.url != discord.Embed.Empty:
-                url = message.embeds[0].thumbnail.url
-            elif args[0]:
-                url = args[0]
-            logger.debug(url)
-            input_image_blob = await netcode.simple_get_image(url)
+            url = message.attachments[0].url
+        elif len(message.embeds) and message.embeds[0].image.url != discord.Embed.Empty:
+            url = message.embeds[0].image.url
+        elif len(message.embeds) and message.embeds[0].thumbnail.url != discord.Embed.Empty:
+            url = message.embeds[0].thumbnail.url
+        elif args[0]:
+            url = args[0]
+        logger.debug(url)
+        input_image_blob = await netcode.simple_get_image(url)
         input_image_blob.seek(0)
         input_image = Image.open(input_image_blob)
-        image_to_text = ujson.loads(await netcode.simple_post_image(f'http://{config["ocr"]["host"]}:{config["ocr"]["port"]}/file', {'file': input_image}))['response']
-        output_message = f'>>> {input_image}'
+        input_image_blob.seek(0)
+        target_url = f'http://{config["ocr"]["host"]}:{config["ocr"]["port"]}/file'
+        image_to_text = ujson.loads(netcode.simple_post_image(target_url, input_image_blob, url.split("/")[-1], Image.MIME[input_image.format]))['result']
+        output_message = f'>>> {image_to_text}'
         if len(args) == 2 and type(args[1]) is discord.User and args[1] == message.author:
             await messagefuncs.sendWrappedMessage(output_message, message.channel)
         elif len(args) == 2 and type(args[1]) is discord.User:
