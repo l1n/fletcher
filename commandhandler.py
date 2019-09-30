@@ -375,20 +375,21 @@ def autoload(ch):
         'args_name': [],
         'description': 'List commands and arguments'
         })
-    for guild in client.guilds:
-        guild_config = self.scope_config(guild=guild)
-        if guild_config.get('hotwords'):
-            hotwords = ujson.loads(guild_config.get('hotwords'))
-            for word in hotwords.keys():
-                target_emoji = hotwords[word]['target_emoji']
-                if len(target_emoji) > 1:
-                    target_emoji = discord.utils.get(guild.emojis, name=target_emoji)
-                flags = None
-                if hotwords[word]['insensitive']:
-                    flags = re.IGNORECASE
-                hotwords[word] = {
-                        'target_eomji': target_emoji,
-                        'regex': hotwords[word]['regex'],
-                        'compiled_regex': re.compile(hotwords[word]['regex'], flags)
-                        }
-            regex_cache['guild_id'] = hotwords.values()
+    if client:
+        for guild in client.guilds:
+            guild_config = self.scope_config(guild=guild)
+            if guild_config.get('hotwords'):
+                hotwords = ujson.loads(guild_config.get('hotwords'))
+                for word in hotwords.keys():
+                    target_emoji = hotwords[word]['target_emoji']
+                    if len(target_emoji) > 1:
+                        target_emoji = discord.utils.get(guild.emojis, name=target_emoji)
+                    flags = None
+                    if hotwords[word]['insensitive']:
+                        flags = re.IGNORECASE
+                    hotwords[word] = {
+                            'target_eomji': target_emoji,
+                            'regex': hotwords[word]['regex'],
+                            'compiled_regex': re.compile(hotwords[word]['regex'], flags)
+                            }
+                regex_cache['guild_id'] = hotwords.values()
