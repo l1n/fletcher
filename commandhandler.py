@@ -375,7 +375,7 @@ def autoload(ch):
         'args_name': [],
         'description': 'List commands and arguments'
         })
-    if client:
+    if client is not None:
         for guild in client.guilds:
             guild_config = self.scope_config(guild=guild)
             if guild_config.get('hotwords'):
