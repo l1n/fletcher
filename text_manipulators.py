@@ -57,7 +57,7 @@ async def ocr_function(message, client, args):
         input_image = Image.open(input_image_blob)
         input_image_blob.seek(0)
         target_url = f'http://{config["ocr"]["host"]}:{config["ocr"]["port"]}/file'
-        image_to_text = ujson.loads(netcode.simple_post_image(target_url, input_image_blob, url.split("/")[-1], Image.MIME[input_image.format]))['result']
+        image_to_text = ujson.loads(await netcode.simple_post_image(target_url, input_image_blob, url.split("/")[-1], Image.MIME[input_image.format]))['result']
         output_message = f'>>> {image_to_text}'
         if len(args) == 2 and type(args[1]) is discord.User and args[1] == message.author:
             await messagefuncs.sendWrappedMessage(output_message, message.channel)
