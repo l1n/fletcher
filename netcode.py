@@ -28,7 +28,7 @@ async def simple_post_image(post_url, image, filename, image_format, field_name=
             logger.debug(f'SPI: {post_url}')
             fd = aiohttp.FormData()
             fd.add_field(field_name, image, filename=filename, content_type=image_format)
-            async with session.post(str(url),data=fd) as resp:
+            async with session.post(str(post_url),data=fd) as resp:
                 buffer = await resp.text()
                 if resp.status != 200:
                     raise Exception(f'HttpProcessingError: {resp.status} Retrieving response failed!\n')
