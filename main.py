@@ -319,6 +319,7 @@ async def reload_function(message=None, client=client, args=[]):
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
         logger.critical(f'RM[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
+        logger.debug(traceback.format_exc())
         await animate_startup('🚫', message)
         await client.change_presence(activity=discord.Game(
             name=f'Error Reloading: RM[{exc_tb.tb_lineno}]: {e}',

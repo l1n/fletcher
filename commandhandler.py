@@ -375,7 +375,7 @@ def autoload(ch):
         'args_name': [],
         'description': 'List commands and arguments'
         })
-    if client is not None:
+    try:
         for guild in client.guilds:
             guild_config = self.scope_config(guild=guild)
             if guild_config.get('hotwords'):
@@ -393,3 +393,5 @@ def autoload(ch):
                             'compiled_regex': re.compile(hotwords[word]['regex'], flags)
                             }
                 regex_cache['guild_id'] = hotwords.values()
+    except NameError:
+        pass
