@@ -542,7 +542,7 @@ async def role_message_function(message, client, args):
         if not role:
             raise Exception("Matching role not found for reaction to role-message")
         await message.author.add_roles(role, reason="Self-assigned via reaction to role-message", atomic=False)
-        if guild_config[args[0].emoji] in guild_config.get('role-message-autodelete', list()):
+        if args[0].emoji in guild_config.get('role-message-autodelete', list()):
             await message.remove_reaction(args[0].emoji, args[1])
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
