@@ -535,15 +535,18 @@ async def sudo_function(message, client, args):
         exc_type, exc_obj, exc_tb = exc_info()
         logger.error(f'SUDOF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
 
-async def role_message_function(message, client, args):
+async def role_message_function(message, client, args, remove=False):
     try:
         guild_config = ch.scope_config(guild=message.guild)
         role = discord.utils.get(message.guild.roles, name=guild_config.get(f'role-message-{args[0].emoji}'))
         if not role:
             raise Exception("Matching role not found for reaction to role-message")
-        await message.author.add_roles(role, reason="Self-assigned via reaction to role-message", atomic=False)
-        if args[0].emoji in guild_config.get('role-message-autodelete', list()):
-            await message.remove_reaction(args[0].emoji, args[1])
+        if not remove:
+            await message.author.add_roles(role, reason="Self-assigned via reaction to role-message", atomic=False)
+            if args[0].emoji in guild_config.get('role-message-autodelete', list()):
+                await message.remove_reaction(args[0].emoji, args[1])
+        else:
+            await message.author.remove_roles(role, reason="Self-removed via reaction to role-message", atomic=False)
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
         logger.error(f'RMF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
@@ -755,6 +758,14 @@ def autoload(ch):
     for guild in ch.client.guilds:
         if ch.scope_config(guild=guild).get('role-message'):
             logger.debug(f'Adding role emoji handler for {guild}')
+            ch.add_message_reaction_handler(ch.scope_config(guild=guild).get('role-message'), {
+                'trigger': [''], # Empty string: a special catch-all trigger
+                'function': lambda message, client, args: role_message_function(message, client, args, remove=True),
+                'async': True,
+                'args_num': 0,
+                'args_name': [],
+                'description': 'Assign roles based on emoji for a given message',
+                })
             ch.add_message_reaction_handler(ch.scope_config(guild=guild).get('role-message'), {
                 'trigger': [''], # Empty string: a special catch-all trigger
                 'function': role_message_function,

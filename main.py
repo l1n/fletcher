@@ -541,6 +541,24 @@ async def on_raw_reaction_add(reaction):
             exc_type, exc_obj, exc_tb = exc_info()
             logger.error(f'ORRA[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
 
+# on new rxn
+@client.event
+async def on_raw_reaction_remove(reaction):
+    # if the reaction is from the bot itself ignore it
+    if reaction.user_id == client.user.id:
+        pass
+    else:
+        # try to evaluate with the command handler
+        try:
+            while ch is None:
+                await asyncio.sleep(1)
+            await ch.reaction_remove_handler(reaction)
+
+        # generic python error
+        except Exception as e:
+            exc_type, exc_obj, exc_tb = exc_info()
+            logger.error(f'ORRR[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
+
 # on vox change
 @client.event
 async def on_voice_state_update(member, before, after):
