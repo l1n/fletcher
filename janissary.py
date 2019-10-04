@@ -563,7 +563,7 @@ async def chanlog_function(message, client, args):
             for reaction in historical_message.reactions:
                 async for user in reaction.users():
                     content += f'Reaction to {historical_message.id}: {reaction.emoji} from {user.display_name} ({user.id})\n'
-        link = text_manipulators.fiche_function(content)
+        link = text_manipulators.fiche_function(content, message.id)
         await message.author.send(link)
         await message.remove_reaction('🔜', client.user)
         await message.add_reaction('✅')
