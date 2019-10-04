@@ -452,7 +452,7 @@ def fiche_function(content, message_id):
         if len(content) > int(config['pastebin']['max_size']):
             raise Exception(f'Exceeds max file size in pastebin > max_size ({config["pastebin"]["max_size"]})')
         link = config['pastebin']['base_url']
-        uuid = shortuuid.uuid(name=link+message_id)
+        uuid = shortuuid.uuid(name=link+"/"+str(message_id))
         link += f'/{uuid}.txt'
         with open(f'{config["pastebin"]["base_path"]}/{uuid}.txt', 'w') as output:
             output.write(content)
