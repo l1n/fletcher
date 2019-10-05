@@ -141,7 +141,10 @@ async def shindan_function(message, client, args):
         exc_type, exc_obj, exc_tb = exc_info()
         logger.error("SDF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
 
-pick_regex = re.compile(r'[,\s]\s*(?:and|or|but|nor|for|so|yet)?\s*')
+pick_regexes = {
+        'no_commas':  re.compile(r'[\s]\s*(?:and|or|but|nor|for|so|yet)?\s*'),
+        'has_commas': re.compile(r'[,]\s*(?:and|or|but|nor|for|so|yet)?\s*')
+        }
 
 async def roll_function(message, client, args):
     usage_message = "Usage: !roll `number of probability objects`d`number of sides`"
@@ -271,7 +274,12 @@ async def pick_function(message, client, args):
                 args = args[2:]
         except ValueError:
             pass
-        choices = [choice.strip() for choice in pick_regex.split(" ".join(args).rstrip(" ?.!")) if choice.strip()]
+        argstr = " ".join(args).rstrip(" ?.!")
+        if "," in argstr:
+            pick_regex = pick_regexes['has_commas']
+        else:
+            pick_regex = pick_regexes['no_commas']
+        choices = [choice.strip() for choice in pick_regex.split(argstr) if choice.strip()]
         if len(choices) == 1:
             choices = args
         try:
