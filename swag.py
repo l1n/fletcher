@@ -263,6 +263,9 @@ async def roll_function(message, client, args):
         exc_type, exc_obj, exc_tb = exc_info()
         logger.error("RDF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
 
+def ping_function(message, client, args):
+    return "Pong!"
+
 def fling_function(message, client, args):
     return "(ﾉ◕ヮ◕)ﾉ*:･ﾟ✧ "+" ".join(args)
 
@@ -504,6 +507,15 @@ def autoload(ch):
         'args_num': 1,
         'args_name': ['keyword'],
         'description': 'Get from quote database by keyword'
+        })
+    ch.add_command({
+        'trigger': ['!ping'],
+        'function': ping_function,
+        'async': False,
+        'args_num': 0,
+        'long_run': False,
+        'args_name': [],
+        'description': 'Pong in response to ping'
         })
     ch.add_command({
         'trigger': ['!fling'],
