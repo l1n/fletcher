@@ -607,6 +607,28 @@ async def copy_permissions_function(message, client, args):
         logger.error(f'CPF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
 
 
+async def clear_outbound_sync_function(message, client, args):
+    global config
+    try:
+        [await webhook.delete() for webhook in message.channel.webhooks() if webhook.name.startswith(config.get('discord', dict()).get('botNavel', 'botNavel')+' (')]
+    except Exception as e:
+        exc_type, exc_obj, exc_tb = exc_info()
+        logger.error(f'COSF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
+
+
+async def add_outbound_sync_function(message, client, args):
+    global config
+    try:
+        toChannelName = args[0].strip()
+        toChannel = xchannel(toChannelName, message.guild)
+
+        await message.channel.create_webhook(name=config.get('discord', dict()).get('botNavel', 'botNavel')+' ('+toChannel.guild.name.replace(" ", "_")+':'+toChannel.name.replace(" ", "_")+')', reason=f'On behalf of {message.author.name}')
+
+    except Exception as e:
+        exc_type, exc_obj, exc_tb = exc_info()
+        logger.error(f'AOSF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
+
+
 def autoload(ch):
     ch.add_command({
         'trigger': ['!roleadd', '!addrole'],
@@ -753,6 +775,26 @@ def autoload(ch):
         'args_num': 1,
         'args_name': ['#source-channel', '#target-channel (optional)'],
         'description': 'Copy channel permission overrides from a source channel',
+        })
+    ch.add_command({
+        'trigger': ['!bridge'],
+        'function': add_outbound_sync_function,
+        'async': True,
+        'hidden': False,
+        'admin': 'global',
+        'args_num': 1,
+        'args_name': ['#channel'],
+        'description': 'Add outbound sync bridge from the current channel to the specified server-channel identifer'
+        })
+    ch.add_command({
+        'trigger': ['!demolish'],
+        'function': clear_outbound_sync_function,
+        'async': True,
+        'hidden': False,
+        'admin': 'server',
+        'args_num': 0,
+        'args_name': [],
+        'description': 'Clear all outbound sync bridge(s) from the current channel'
         })
 
     for guild in ch.client.guilds:
