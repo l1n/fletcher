@@ -639,7 +639,7 @@ async def names_sync_aware_function(message, client, args):
             members.extend(toChannel.members)
         members = [member.display_name for member in members]
         members = sorted(set(members))
-        for memeber in members:
+        for member in members:
             message_body += f'•{member}\n'
         message_body = message_body[:-1]
         if len(members) > 100:
