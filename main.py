@@ -269,6 +269,7 @@ async def reload_function(message=None, client=client, args=[]):
             'args_name': [],
             'description': 'Reload config (admin only)'
             })
+        ch.webhook_sync_registry = webhook_sync_registry
         # Utility text manipulators Module
         autoload(text_manipulators, ch)
         await animate_startup('🔧', message)
