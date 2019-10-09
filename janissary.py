@@ -24,7 +24,7 @@ async def set_role_color_function(message, client, args):
                     int(args[1][4:6], 16),
                     ]
             role = await role.edit(
-                    colour = discord.Colour(rgb[0], rgb[1], rgb[2]),
+                    colour = discord.Colour.from_rgb(rgb[0], rgb[1], rgb[2]),
                     reason="Role edited on behalf of "+str(message.author.id))
             if 'snappy' in config['discord'] and config['discord']['snappy']:
                 await message.delete()
