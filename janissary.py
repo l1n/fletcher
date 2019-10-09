@@ -630,12 +630,12 @@ async def add_inbound_sync_function(message, client, args):
 
 
 async def names_sync_aware_function(message, client, args):
-    global webhook_sync_registry
+    global ch
     try:
         message_body = "**Users currently in this channel**:\n"
         members = message.channel.members
-        if message.guild.name+':'+message.channel.name in webhook_sync_registry.keys():
-            toChannel = webhook_sync_registry[message.guild.name+':'+message.channel.name]['toChannelObject']
+        if message.guild.name+':'+message.channel.name in ch.webhook_sync_registry.keys():
+            toChannel = ch.webhook_sync_registry[message.guild.name+':'+message.channel.name]['toChannelObject']
             members.extend(toChannel.members)
         members = [member.display_name for member in members]
         members = sorted(set(members))
