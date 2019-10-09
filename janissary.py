@@ -17,7 +17,7 @@ async def set_role_color_function(message, client, args):
         role = discord.utils.get(role_list, name=args[0].replace("_", " "))
         if role is not None:
             if args[1].startswith('#'):
-                args[1] = args[1:]
+                args[1] = str(args[1:])
             rgb = [
                     int(args[1][0:2], 16),
                     int(args[1][2:4], 16),
