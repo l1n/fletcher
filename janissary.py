@@ -10,6 +10,23 @@ import text_manipulators
 
 logger = logging.getLogger('fletcher')
 
+async def set_role_color_function(message, client, args):
+    global config
+    try:
+        role_list = message.channel.guild.roles
+        role = discord.utils.get(role_list, name=args[0].replace("_", " "))
+        if role is not None:
+            if args[1].startswith('#'):
+                args[1] = args[1:]
+            role = await role.edit(
+                    colour = discord.Colour(args[1][0:1], args[1][2:3], args[1][4:5]),
+                    reason="Role edited on behalf of "+str(message.author.id))
+            if 'snappy' in config['discord'] and config['discord']['snappy']:
+                await message.delete()
+    except Exception as e:
+        exc_type, exc_obj, exc_tb = exc_info()
+        logger.error(f'SRCF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
+
 async def addrole_function(message, client, args):
     global config
     try:
@@ -653,6 +670,15 @@ async def names_sync_aware_function(message, client, args):
 
 
 def autoload(ch):
+    ch.add_command({
+        'trigger': ['!rolecolor'],
+        'function': set_role_color_function,
+        'async': True,
+        'admin': 'server',
+        'args_num': 2,
+        'args_name': ['Role_Name', 'rrggbb'],
+        'description': 'Set Role Color'
+        })
     ch.add_command({
         'trigger': ['!roleadd', '!addrole'],
         'function': addrole_function,
