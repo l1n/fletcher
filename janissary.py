@@ -629,6 +629,29 @@ async def add_inbound_sync_function(message, client, args):
         logger.error(f'AOSF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
 
 
+async def names_sync_aware_function(message, client, args):
+    global webhook_sync_registry
+    try:
+        message_body = "**Users currently in this channel**:\n"
+        members = message.channel.members
+        if message.guild.name+':'+message.channel.name in webhook_sync_registry.keys():
+            toChannel = webhook_sync_registry[message.guild.name+':'+message.channel.name]['toChannelObject']
+            members.extend(toChannel.members)
+        members = [member.display_name for member in members]
+        members = sorted(set(members))
+        for memeber in members:
+            message_body += f'•{member}\n'
+        message_body = message_body[:-1]
+        if len(members) > 100:
+            target = message.author
+        else:
+            target = message.channel
+        await messagefuncs.sendWrappedMessage(message_body, target)
+    except Exception as e:
+        exc_type, exc_obj, exc_tb = exc_info()
+        logger.error(f'NSAF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
+
+
 def autoload(ch):
     ch.add_command({
         'trigger': ['!roleadd', '!addrole'],
@@ -795,6 +818,15 @@ def autoload(ch):
         'args_num': 0,
         'args_name': [],
         'description': 'Clear all inbound sync bridge(s) from the current channel'
+        })
+    ch.add_command({
+        'trigger': ['!names'],
+        'function': names_sync_aware_function,
+        'async': True,
+        'hidden': False,
+        'args_num': 0,
+        'args_name': [],
+        'description': 'List all users that have access to this channel, including synced users. Equivalent to IRC "NAMES" command'
         })
 
     for guild in ch.client.guilds:
