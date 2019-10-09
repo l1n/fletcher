@@ -620,7 +620,7 @@ async def add_outbound_sync_function(message, client, args):
     global config
     try:
         toChannelName = args[0].strip()
-        toChannel = xchannel(toChannelName, message.guild)
+        toChannel = messagefuncs.xchannel(toChannelName, message.guild)
 
         await message.channel.create_webhook(name=config.get('discord', dict()).get('botNavel', 'botNavel')+' ('+toChannel.guild.name.replace(" ", "_")+':'+toChannel.name.replace(" ", "_")+')', reason=f'On behalf of {message.author.name}')
 
