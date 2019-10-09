@@ -607,7 +607,7 @@ async def copy_permissions_function(message, client, args):
         logger.error(f'CPF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
 
 
-async def clear_outbound_sync_function(message, client, args):
+async def clear_inbound_sync_function(message, client, args):
     global config
     try:
         [await webhook.delete() for webhook in message.channel.webhooks() if webhook.name.startswith(config.get('discord', dict()).get('botNavel', 'botNavel')+' (')]
@@ -616,7 +616,7 @@ async def clear_outbound_sync_function(message, client, args):
         logger.error(f'COSF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
 
 
-async def add_outbound_sync_function(message, client, args):
+async def add_inbound_sync_function(message, client, args):
     global config
     try:
         toChannelName = args[0].strip()
@@ -778,23 +778,23 @@ def autoload(ch):
         })
     ch.add_command({
         'trigger': ['!bridge'],
-        'function': add_outbound_sync_function,
+        'function': add_inbound_sync_function,
         'async': True,
         'hidden': False,
         'admin': 'global',
         'args_num': 1,
         'args_name': ['#channel'],
-        'description': 'Add outbound sync bridge from the current channel to the specified server-channel identifer'
+        'description': 'Add inbound sync bridge from the current channel to the specified server-channel identifer'
         })
     ch.add_command({
         'trigger': ['!demolish'],
-        'function': clear_outbound_sync_function,
+        'function': clear_inbound_sync_function,
         'async': True,
         'hidden': False,
         'admin': 'server',
         'args_num': 0,
         'args_name': [],
-        'description': 'Clear all outbound sync bridge(s) from the current channel'
+        'description': 'Clear all inbound sync bridge(s) from the current channel'
         })
 
     for guild in ch.client.guilds:
