@@ -456,7 +456,10 @@ async def part_channel_function(message, client, args):
         if len(message.channel_mentions) > 0:
             channel = message.channel_mentions[0]
         else:
-            channel = messagefuncs.xchannel(args[0].strip(), message.guild)
+            try:
+                channel = messagefuncs.xchannel(args[0].strip(), message.guild)
+            except exceptions.DirectMessageException:
+                return await message.author.send("Parting a channel via DM requires server to be specified (e.g. `!part server:channel`)")
             if channel is None:
                 channel = message.channel
         await channel.set_permissions(message.author, read_messages=False, read_message_history=False, send_messages=False, reason="User requested part "+message.author.name)
@@ -483,7 +486,10 @@ async def snooze_channel_function(message, client, args):
             guild = discord.utils.get(client.guilds, name=messagefuncs.expand_guild_name(args[0]).strip()[:-2].replace("_", " "))
             channels = guild.text_channels
         else:
-            channel = messagefuncs.xchannel(args[0].strip(), message.guild)
+            try:
+                channel = messagefuncs.xchannel(args[0].strip(), message.guild)
+            except exceptions.DirectMessageException:
+                return await message.author.send("Snoozing a channel via DM requires server to be specified (e.g. `!snooze server:channel [hours]`)")
             if channel is None:
                 channel = message.channel
             channels = [channel]

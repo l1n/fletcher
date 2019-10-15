@@ -1,0 +1,2 @@
+class DirectMessageException(BaseException):
+    pass

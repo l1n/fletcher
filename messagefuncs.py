@@ -1,5 +1,6 @@
 from sys import exc_info
 import discord
+import exceptions
 import io
 import logging
 import re
@@ -18,6 +19,8 @@ def expand_guild_name(guild, prefix='', suffix=':', global_replace=False, case_s
             logger.debug(f'Replacement found {k} -> {v}')
             return new_guild.replace('_', ' ')
     return new_guild.replace('_', ' ')
+
+
 
 def xchannel(targetChannel, currentGuild):
     global ch
@@ -38,6 +41,8 @@ def xchannel(targetChannel, currentGuild):
             targetChannel = expand_guild_name(targetChannel)
             toTuple = targetChannel.split(':')
             toGuild = discord.utils.get(ch.client.guilds, name=toTuple[0])
+            if not toGuild:
+                raise exceptions.DirectMessageException("Can't disambiguate channel name if in DM")
             toChannel = discord.utils.get(toGuild.text_channels, name=toTuple[1])
     elif channelLookupBy == 'ID':
         toChannel = ch.client.get_channel(int(targetChannel))
