@@ -455,6 +455,10 @@ async def part_channel_function(message, client, args):
     try:
         if len(message.channel_mentions) > 0:
             channel = message.channel_mentions[0]
+        elif len(args) == 0 and message.guild is None:
+            return await message.author.send("Parting a channel requires server and channel to be specified (e.g. `!part server:channel`)")
+        elif len(args) == 0:
+            channel = message.channel
         else:
             try:
                 channel = messagefuncs.xchannel(args[0].strip(), message.guild)
@@ -482,6 +486,10 @@ async def snooze_channel_function(message, client, args):
         global conn
         if len(message.channel_mentions) > 0:
             channels = message.channel_mentions
+        elif len(args) == 0 and message.guild is None:
+            return await message.author.send("Snoozing a channel requires server and channel to be specified (e.g. `!snooze server:channel [hours]`)")
+        elif len(args) == 0:
+            channel = message.channel
         elif args[0].strip()[-2:] == ':*':
             guild = discord.utils.get(client.guilds, name=messagefuncs.expand_guild_name(args[0]).strip()[:-2].replace("_", " "))
             channels = guild.text_channels
