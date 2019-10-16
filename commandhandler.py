@@ -123,6 +123,19 @@ class CommandHandler:
                         return await command['function'](message, self.client, [reaction, user])
                     else:
                         return await message.channel.send(str(command['function'](message, self.client, [reaction, user])))
+            if message.guild is not None and (message.guild.name+':'+message.channel.name in self.webhook_sync_registry.keys()):
+                cur = conn.cursor()
+                cur.execute("SELECT toguild, tochannel, tomessage FROM messagemap WHERE fromguild = %s AND fromchannel = %s AND frommessage = %s LIMIT 1;", [int(message['guild_id']), int(message['channel_id']), message_id])
+                metuple = cur.fetchone()
+                conn.commit()
+                if metuple is not None:
+                    toGuild = client.get_guild(metuple[0])
+                    toChannel = toGuild.get_channel(metuple[1])
+                    toMessage = await toChannel.fetch_message(metuple[2])
+                    syncReaction = await toMessage.add_reaction(reaction.emoji)
+                    cur = conn.cursor()
+                    cur.execute("UPDATE messagemap SET reactions = reactions || %s WHERE fromguild = %s AND fromchannel = %s AND frommessage = %s;", [syncMessage.guild.id, syncMessage.channel.id, syncMessage.id, int(message['guild_id']), int(message['channel_id']), message_id])
+                    conn.commit()
         except Exception as e:
             exc_type, exc_obj, exc_tb = exc_info()
             logger.error(f'RXH[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
@@ -344,7 +357,6 @@ async def help_function(message, client, args):
         target = message.channel
         if (not hasattr(message.author, 'guild_permissions')) or (not message.author.guild_permissions.manage_webhooks) or (message.author.guild_permissions.manage_webhooks and not public):
             target = message.author
-            await message.add_reaction('✅')
         if len(args) == 0:
             arg = None
         if hasattr(message.author, 'guild_permissions') and message.author.guild_permissions.manage_webhooks and len(args) > 0 and verbose:
@@ -370,13 +382,20 @@ async def help_function(message, client, args):
                     if keyword in c['description'].lower():
                         return True
                     return False
-            accessible_commands = list(filter(query_filter, accessible_commands))
+            try:
+                accessible_commands = list(filter(query_filter, accessible_commands))
+            except IndexError:
+                accessible_commands = []
             # Set verbose if filtered list
             if len(accessible_commands) < 5:
                 verbose = True
                 public = True
+        if target == message.author and len(accessible_commands):
+            await message.add_reaction('✅')
         if len(args) > 0 and verbose:
             helpMessageBody = "\n".join([f'`{"` or `".join(command["trigger"])}`: {command["description"]}\nArguments ({command["args_num"]}): {" ".join(command["args_name"])}' for command in accessible_commands])
+        elif not len(accessible_commands):
+            helpMessageBody = 'No commands accessible, check your input'
         else:
             helpMessageBody = "\n".join([f'`{"` or `".join(command["trigger"][:2])}`: {command["description"]}' for command in accessible_commands])
         await messagefuncs.sendWrappedMessage(helpMessageBody, target)
@@ -388,6 +407,34 @@ def dumpconfig_function(message, client, args):
     logger.debug("Channels Loaded:")
     for channel in client.get_all_channels():
         logger.debug(str(channel.guild)+" "+str(channel))
+
+def load_hotwords(ch):
+    try:
+        for guild in client.guilds:
+            guild_config = self.scope_config(guild=guild)
+            if guild_config.get('hotwords'):
+                hotwords = ujson.loads(guild_config.get('hotwords'))
+                for word in hotwords.keys():
+                    target_emoji = hotwords[word]['target_emoji']
+                    if len(target_emoji) > 1:
+                        target_emoji = discord.utils.get(guild.emojis, name=target_emoji)
+                    flags = None
+                    if hotwords[word]['insensitive']:
+                        flags = re.IGNORECASE
+                    hotwords[word] = {
+                            'target_eomji': target_emoji,
+                            'regex': hotwords[word]['regex'],
+                            'compiled_regex': re.compile(hotwords[word]['regex'], flags)
+                            }
+                regex_cache['guild_id'] = hotwords.values()
+    except NameError:
+        pass
+
+def load_user_config(ch):
+    cur = conn.cursor()
+    cur.execute("SELECT toguild, tochannel, tomessage FROM messagemap WHERE fromguild = %s AND fromchannel = %s AND frommessage = %s LIMIT 1;", [int(message['guild_id']), int(message['channel_id']), message_id])
+    metuple = cur.fetchone()
+    conn.commit()
 
 def autoload(ch):
     global tag_id_as_command
@@ -409,23 +456,6 @@ def autoload(ch):
         'args_name': [],
         'description': 'List commands and arguments'
         })
-    try:
-        for guild in client.guilds:
-            guild_config = self.scope_config(guild=guild)
-            if guild_config.get('hotwords'):
-                hotwords = ujson.loads(guild_config.get('hotwords'))
-                for word in hotwords.keys():
-                    target_emoji = hotwords[word]['target_emoji']
-                    if len(target_emoji) > 1:
-                        target_emoji = discord.utils.get(guild.emojis, name=target_emoji)
-                    flags = None
-                    if hotwords[word]['insensitive']:
-                        flags = re.IGNORECASE
-                    hotwords[word] = {
-                            'target_eomji': target_emoji,
-                            'regex': hotwords[word]['regex'],
-                            'compiled_regex': re.compile(hotwords[word]['regex'], flags)
-                            }
-                regex_cache['guild_id'] = hotwords.values()
-    except NameError:
-        pass
+    load_user_config(ch)
+    load_hotwords(ch)
+    load_react_notifications(ch)
