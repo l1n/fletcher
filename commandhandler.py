@@ -444,18 +444,20 @@ Indexes:
 '''
 
 def load_user_config(ch):
-    cur = conn.cursor()
-    cur.execute("SELECT user_id, guild_id, key, value FROM user_preferences WHERE key = 'subscribe';")
-    subtuple = cur.fetchone()
-    while subtuple:
-        guild_config = self.scope_config(guild=client.get_guild(cur[1]))
-        if not guild_config.get('subscribe'):
-            guild_config['subscribe'] = {}
-        if not guild_config['subscribe'][cur[3]]:
-            guild_config['subscribe'][cur[3]] = []
-        guild_config['subscribe'][cur[3]].append(cur[0])
+    def load_react_notifications(ch):
+        cur = conn.cursor()
+        cur.execute("SELECT user_id, guild_id, key, value FROM user_preferences WHERE key = 'subscribe';")
         subtuple = cur.fetchone()
-    conn.commit()
+        while subtuple:
+            guild_config = ch.scope_config(guild=client.get_guild(int(cur[1])))
+            if not guild_config.get('subscribe'):
+                guild_config['subscribe'] = {}
+            if not guild_config['subscribe'][int(cur[3])]:
+                guild_config['subscribe'][int(cur[3])] = []
+            guild_config['subscribe'][int(cur[3])].append(int(cur[0]))
+            subtuple = cur.fetchone()
+        conn.commit()
+    load_react_notifications(ch)
 
 def autoload(ch):
     global tag_id_as_command
@@ -479,4 +481,3 @@ def autoload(ch):
         })
     load_user_config(ch)
     load_hotwords(ch)
-    load_react_notifications(ch)
