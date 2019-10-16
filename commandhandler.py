@@ -125,7 +125,7 @@ class CommandHandler:
                         return await message.channel.send(str(command['function'](message, self.client, [reaction, user])))
             if message.guild is not None and (message.guild.name+':'+message.channel.name in self.webhook_sync_registry.keys()):
                 cur = conn.cursor()
-                cur.execute("SELECT toguild, tochannel, tomessage FROM messagemap WHERE fromguild = %s AND fromchannel = %s AND frommessage = %s LIMIT 1;", [int(message['guild_id']), int(message['channel_id']), message_id])
+                cur.execute("SELECT toguild, tochannel, tomessage FROM messagemap WHERE fromguild = %s AND fromchannel = %s AND frommessage = %s LIMIT 1;", [message.guild.id, message.channel.id, message.id])
                 metuple = cur.fetchone()
                 conn.commit()
                 if metuple is not None:
@@ -134,7 +134,7 @@ class CommandHandler:
                     toMessage = await toChannel.fetch_message(metuple[2])
                     syncReaction = await toMessage.add_reaction(reaction.emoji)
                     cur = conn.cursor()
-                    cur.execute("UPDATE messagemap SET reactions = reactions || %s WHERE fromguild = %s AND fromchannel = %s AND frommessage = %s;", [message.guild.id, message.channel.id, message.id, int(message['guild_id']), int(message['channel_id']), message_id])
+                    cur.execute("UPDATE messagemap SET reactions = reactions || %s WHERE fromguild = %s AND fromchannel = %s AND frommessage = %s;", [reaction.emoji, message.guild.id, message.channel.id, message.id])
                     conn.commit()
         except Exception as e:
             exc_type, exc_obj, exc_tb = exc_info()
