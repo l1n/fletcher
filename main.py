@@ -50,14 +50,16 @@ Indexes:
 
 fletcher=# \d messagemap
                Table "public.messagemap"
-   Column    |  Type  | Collation | Nullable | Default 
--------------+--------+-----------+----------+---------
- fromguild   | bigint |           |          | 
- toguild     | bigint |           |          | 
- fromchannel | bigint |           |          | 
- tochannel   | bigint |           |          | 
- frommessage | bigint |           |          | 
- tomessage   | bigint |           |          | 
+   Column    |   Type   | Collation | Nullable | Default 
+-------------+----------+-----------+----------+---------
+ fromguild   | bigint   |           |          | 
+ toguild     | bigint   |           |          | 
+ fromchannel | bigint   |           |          | 
+ tochannel   | bigint   |           |          | 
+ frommessage | bigint   |           |          | 
+ tomessage   | bigint   |           |          | 
+ reactions   | bigint[] |           |          | 
+
 Indexes:
     "messagemap_idx" btree (fromguild, fromchannel, frommessage)
 
@@ -411,6 +413,8 @@ async def on_message(message):
 async def on_raw_message_edit(payload):
     global webhook_sync_registry
     try:
+        while ch is None:
+            await asyncio.sleep(1)
         # This is tricky with self-modifying bot message synchronization, TODO
         message_id = payload.message_id
         message = payload.data
@@ -430,7 +434,7 @@ async def on_raw_message_edit(payload):
         else:
             # Currently, we don't log empty or image-only messages
             pass
-        if fromGuild.name+':'+fromChannel.name in webhook_sync_registry.keys():
+        if message.guild is not None and (fromGuild.name+':'+fromChannel.name in webhook_sync_registry.keys()):
             cur = conn.cursor()
             cur.execute("SELECT toguild, tochannel, tomessage FROM messagemap WHERE fromguild = %s AND fromchannel = %s AND frommessage = %s LIMIT 1;", [int(message['guild_id']), int(message['channel_id']), message_id])
             metuple = cur.fetchone()
@@ -484,9 +488,11 @@ async def on_raw_message_edit(payload):
 async def on_raw_message_delete(message):
     global webhook_sync_registry
     try:
+        while ch is None:
+            await asyncio.sleep(1)
         fromGuild = client.get_guild(message.guild_id)
         fromChannel = fromGuild.get_channel(message.channel_id)
-        if fromGuild.name+':'+fromChannel.name in webhook_sync_registry.keys():
+        if message.guild is not None and (fromGuild.name+':'+fromChannel.name in webhook_sync_registry.keys()):
             cur = conn.cursor()
             cur.execute("SELECT toguild, tochannel, tomessage FROM messagemap WHERE fromguild = %s AND fromchannel = %s AND frommessage = %s LIMIT 1;", [message.guild_id, message.channel_id, message.message_id])
             metuple = cur.fetchone()
@@ -582,11 +588,15 @@ async def on_voice_state_update(member, before, after):
 # on new member
 @client.event
 async def on_member_join(member):
+    while ch is None:
+        await asyncio.sleep(1)
     await ch.join_handler(member)
 
 # on departing member
 @client.event
 async def on_member_remove(member):
+    while ch is None:
+        await asyncio.sleep(1)
     await ch.remove_handler(member)
 
 async def doissetep_omega_autoconnect():
