@@ -155,7 +155,7 @@ async def roll_function(message, client, args):
                     args[0] = args[0].lower().split('d')
                 elif args[0].startswith('coin'):
                     args[0] = [0, 2]
-                elif isnumeric(args[0]):
+                elif args[0].isnumeric():
                     args[0] = [args[0], 0]
                 else:
                     args = [[0, 0]]
