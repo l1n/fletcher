@@ -302,11 +302,7 @@ async def reload_function(message=None, client=client, args=[]):
         autoload(github, ch)
         await animate_startup('🐙', message)
         # Play it again, Sam
-        await doissetep_omega_autoconnect()
-        if not doissetep_omega.is_playing():
-            doissetep_omega.play(discord.FFmpegPCMAudio(config['audio']['instreamurl']))
-        # Reset canticum_message when reloaded [workaround for https://todo.sr.ht/~nova/fletcher/6]
-        canticum_message = None
+        asyncio.create_task(doissetep_omega_autoconnect)
         # Trigger reload handlers
         await ch.reload_handler()
         await animate_startup('🔁', message)
@@ -339,7 +335,6 @@ async def on_ready():
         # print bot information
         await client.change_presence(activity=discord.Game(name='Reloading: The Game'))
         logger.info(f'Discord.py Version {discord.__version__}, connected as {client.user.name} ({client.user.id})')
-        await doissetep_omega_autoconnect()
         loop = asyncio.get_running_loop()
         loop.remove_signal_handler(signal.SIGHUP)
         await reload_function()
@@ -413,8 +408,6 @@ async def on_message(message):
 async def on_raw_message_edit(payload):
     global webhook_sync_registry
     try:
-        while ch is None:
-            await asyncio.sleep(1)
         # This is tricky with self-modifying bot message synchronization, TODO
         message_id = payload.message_id
         message = payload.data
@@ -434,7 +427,7 @@ async def on_raw_message_edit(payload):
         else:
             # Currently, we don't log empty or image-only messages
             pass
-        if message.guild is not None and (fromGuild.name+':'+fromChannel.name in webhook_sync_registry.keys()):
+        if message['guild_id'] is not None and (fromGuild.name+':'+fromChannel.name in webhook_sync_registry.keys()):
             cur = conn.cursor()
             cur.execute("SELECT toguild, tochannel, tomessage FROM messagemap WHERE fromguild = %s AND fromchannel = %s AND frommessage = %s LIMIT 1;", [int(message['guild_id']), int(message['channel_id']), message_id])
             metuple = cur.fetchone()
@@ -601,10 +594,19 @@ async def on_member_remove(member):
 
 async def doissetep_omega_autoconnect():
     global doissetep_omega
+    global config
     if doissetep_omega:
+        if not doissetep_omega.is_playing():
+            doissetep_omega.play(discord.FFmpegPCMAudio(config['audio']['instreamurl']))
+        # Reset canticum_message when reloaded [workaround for https://todo.sr.ht/~nova/fletcher/6]
+        canticum_message = None
         return doissetep_omega
     try:
         doissetep_omega = await client.get_guild(int(config['audio']['guild'])).get_channel(int(config['audio']['channel'])).connect();
+        if not doissetep_omega.is_playing():
+            doissetep_omega.play(discord.FFmpegPCMAudio(config['audio']['instreamurl']))
+        # Reset canticum_message when reloaded [workaround for https://todo.sr.ht/~nova/fletcher/6]
+        canticum_message = None
         return doissetep_omega
     except AttributeError as e:
         logger.exception(e)
