@@ -134,7 +134,7 @@ class CommandHandler:
                     toMessage = await toChannel.fetch_message(metuple[2])
                     syncReaction = await toMessage.add_reaction(reaction.emoji)
                     cur = conn.cursor()
-                    cur.execute("UPDATE messagemap SET reactions = reactions || %s WHERE fromguild = %s AND fromchannel = %s AND frommessage = %s;", [syncMessage.guild.id, syncMessage.channel.id, syncMessage.id, int(message['guild_id']), int(message['channel_id']), message_id])
+                    cur.execute("UPDATE messagemap SET reactions = reactions || %s WHERE fromguild = %s AND fromchannel = %s AND frommessage = %s;", [message.guild.id, message.channel.id, message.id, int(message['guild_id']), int(message['channel_id']), message_id])
                     conn.commit()
         except Exception as e:
             exc_type, exc_obj, exc_tb = exc_info()
@@ -422,7 +422,7 @@ def load_hotwords(ch):
                     if hotwords[word]['insensitive']:
                         flags = re.IGNORECASE
                     hotwords[word] = {
-                            'target_eomji': target_emoji,
+                            'target_emoji': target_emoji,
                             'regex': hotwords[word]['regex'],
                             'compiled_regex': re.compile(hotwords[word]['regex'], flags)
                             }
@@ -430,10 +430,31 @@ def load_hotwords(ch):
     except NameError:
         pass
 
+'''
+fletcher=# \d user_preferences
+          Table "public.user_preferences"
+  Column  |  Type  | Collation | Nullable | Default
+----------+--------+-----------+----------+---------
+ user_id  | bigint |           | not null |
+ guild_id | bigint |           | not null |
+ key      | text   |           | not null |
+ value    | text   |           |          |
+Indexes:
+    "user_prefs_idx" btree (user_id, guild_id, key)
+'''
+
 def load_user_config(ch):
     cur = conn.cursor()
-    cur.execute("SELECT toguild, tochannel, tomessage FROM messagemap WHERE fromguild = %s AND fromchannel = %s AND frommessage = %s LIMIT 1;", [int(message['guild_id']), int(message['channel_id']), message_id])
-    metuple = cur.fetchone()
+    cur.execute("SELECT user_id, guild_id, key, value FROM user_preferences WHERE key = 'subscribe';")
+    subtuple = cur.fetchone()
+    while subtuple:
+        guild_config = self.scope_config(guild=client.get_guild(cur[1]))
+        if not guild_config.get('subscribe'):
+            guild_config['subscribe'] = {}
+        if not guild_config['subscribe'][cur[3]]:
+            guild_config['subscribe'][cur[3]] = []
+        guild_config['subscribe'][cur[3]].append(cur[0])
+        subtuple = cur.fetchone()
     conn.commit()
 
 def autoload(ch):
