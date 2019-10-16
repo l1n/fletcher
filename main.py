@@ -402,6 +402,7 @@ async def on_message(message):
             conn.rollback()
         exc_type, exc_obj, exc_tb = exc_info()
         logger.error(f'ORMR[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
+        logger.debug(traceback.format_exc())
 
 # on message update (for webhooks only for now)
 @client.event
