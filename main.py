@@ -302,7 +302,7 @@ async def reload_function(message=None, client=client, args=[]):
         autoload(github, ch)
         await animate_startup('🐙', message)
         # Play it again, Sam
-        asyncio.create_task(doissetep_omega_autoconnect)
+        await doissetep_omega_autoconnect()
         # Trigger reload handlers
         await ch.reload_handler()
         await animate_startup('🔁', message)
