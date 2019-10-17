@@ -4,6 +4,7 @@ import discord
 import logging
 import messagefuncs
 from sys import exc_info
+import random
 import textwrap
 import text_manipulators
 # global conn set by reload_function
@@ -16,7 +17,9 @@ async def set_role_color_function(message, client, args):
         role_list = message.channel.guild.roles
         role = discord.utils.get(role_list, name=args[0].replace("_", " "))
         if role is not None:
-            if args[1].startswith('#'):
+            if len(args) == 1 or args.get(1, '') == 'random':
+                args[1] = "#%06x" % random.randint(0, 0xFFFFFF)
+            if args.get(1, '').startswith('#'):
                 args[1] = args[1][1:]
             rgb = [
                     int(args[1][0:2], 16),
@@ -685,6 +688,14 @@ async def names_sync_aware_function(message, client, args):
 
 
 def autoload(ch):
+    ch.add_command({
+        'trigger': ['!mycolor'],
+        'function': lambda message, client, args: "Your color is #%06x" % message.author.colour,
+        'async': False,
+        'args_num': 0,
+        'args_name': [],
+        'description': 'Get CUrrent Color'
+        })
     ch.add_command({
         'trigger': ['!rolecolor'],
         'function': set_role_color_function,
