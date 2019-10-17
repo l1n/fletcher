@@ -235,6 +235,9 @@ async def modreport_function(message, client, args):
         report_content = None
         plaintext = None
         automod = None
+        scoped_config = ch.scope_config(guild=message.guild)
+        if scoped_config.get("moderation") != "On":
+            raise Exception("Moderation disabled on guild "+str(message.guild))
         if len(args) == 2 and type(args[1]) is discord.User:
             try:
                 await message.remove_reaction('👁‍🗨', args[1])
@@ -252,26 +255,19 @@ async def modreport_function(message, client, args):
             report_content = report_content + await text_manipulators.rot13_function(message, client, [plaintext, 'INTPROC'])
         else:
             report_content = report_content + plaintext
-        if "Guild "+str(message.guild.id) in config:
-            scoped_config = config["Guild "+str(message.guild.id)]
+        if "mod-message-prefix" in scoped_config:
+            report_content = scoped_config["mod-message-prefix"] + "\n" + report_content
+        if "mod-message-suffix" in scoped_config:
+            report_content = report_content + "\n" + scoped_config["mod-message-suffix"]
+        if automod:
+            users = scoped_config['mod-users'].split(',')
         else:
-            raise Exception("No guild-specific configuration for moderation on guild "+str(message.guild))
-        if "moderation" in scoped_config and scoped_config["moderation"] == "On":
-            if "mod-message-prefix" in scoped_config:
-                report_content = scoped_config["mod-message-prefix"] + "\n" + report_content
-            if "mod-message-suffix" in scoped_config:
-                report_content = report_content + "\n" + scoped_config["mod-message-suffix"]
-            if automod:
-                users = scoped_config['mod-users'].split(',')
-            else:
-                users = scoped_config['manual-mod-users'].split(',')
-            users = list(expand_target_list(users, message.guild))
-            for target in users:
-                modmail = await messagefuncs.sendWrappedMessage(report_content, target)
-                if message.channel.is_nsfw():
-                    await modmail.add_reaction('🕜')
-        else:
-            raise Exception("Moderation disabled on guild "+str(message.guild))
+            users = scoped_config['manual-mod-users'].split(',')
+        users = list(expand_target_list(users, message.guild))
+        for target in users:
+            modmail = await messagefuncs.sendWrappedMessage(report_content, target)
+            if message.channel.is_nsfw():
+                await modmail.add_reaction('🕜')
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
         logger.error(f'MRF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
