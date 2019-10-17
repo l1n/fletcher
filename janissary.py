@@ -690,7 +690,7 @@ async def names_sync_aware_function(message, client, args):
 def autoload(ch):
     ch.add_command({
         'trigger': ['!mycolor'],
-        'function': lambda message, client, args: "Your color is #%06x" % message.author.colour,
+        'function': lambda message, client, args: "Your color is #%06x" % message.author.colour.value,
         'async': False,
         'args_num': 0,
         'args_name': [],
