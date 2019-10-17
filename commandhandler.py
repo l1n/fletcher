@@ -299,7 +299,7 @@ class CommandHandler:
                         await message.channel.send(f'command "{command["trigger"][0]}" requires {command["args_num"]} argument(s) "{", ".join(command["args_name"])}"')
                         break
         if guild_config.get('hotwords'):
-            for hotword in regex_cache[message.guild.id]:
+            for hotword in regex_cache.get(message.guild.id, []):
                 if hotword['compiled_regex'].search(message.content):
                     await message.add_reaction(hotword['target_emoji'])
         if channel_config.get('regex') == 'post-command' and not message.channel.permissions_for(message.author).manage_messages:
@@ -426,7 +426,7 @@ def load_hotwords(ch):
                             'regex': hotwords[word]['regex'],
                             'compiled_regex': re.compile(hotwords[word]['regex'], flags)
                             }
-                regex_cache['guild_id'] = hotwords.values()
+                regex_cache[guild.id] = hotwords.values()
     except NameError:
         pass
 
