@@ -390,6 +390,11 @@ async def help_function(message, client, args):
             if len(accessible_commands) < 5:
                 verbose = True
                 public = True
+        else:
+            try:
+                accessible_commands = list(accessible_commands)
+            except IndexError:
+                accessible_commands = []
         if target == message.author and len(accessible_commands):
             await message.add_reaction('✅')
         if len(args) > 0 and verbose:
