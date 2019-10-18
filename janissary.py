@@ -691,7 +691,7 @@ async def names_sync_aware_function(message, client, args):
 
 def autoload(ch):
     ch.add_command({
-        'trigger': ['!mycolor'],
+        'trigger': ['!mycolor', '!mycolour'],
         'function': lambda message, client, args: "Your color is #%06x" % message.author.colour.value,
         'async': False,
         'args_num': 0,
@@ -699,7 +699,7 @@ def autoload(ch):
         'description': 'Get CUrrent Color'
         })
     ch.add_command({
-        'trigger': ['!rolecolor'],
+        'trigger': ['!rolecolor', '!rolecolour'],
         'function': set_role_color_function,
         'async': True,
         'admin': 'server',
