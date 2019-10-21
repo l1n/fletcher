@@ -84,6 +84,7 @@ class CommandHandler:
             channel = self.client.get_channel(reaction.channel_id)
             user = channel.guild.get_member(reaction.user_id)
             message = await channel.fetch_message(reaction.message_id)
+            args = [reaction, user, 'add']
             try:
                 guild_config = self.scope_config(guild=message.guild)
                 channel_config = self.scope_config(guild=message.guild, channel=message.channel)
@@ -108,7 +109,6 @@ class CommandHandler:
             if self.message_reaction_handlers.get(message.id):
                 command = self.message_reaction_handlers[message.id]
                 logger.debug(command)
-                args = [reaction, user, 'add']
                 logger.debug(args)
                 if messageContent.startswith(tuple(command['trigger'])) and allowCommand(command, message) and command['args_num'] == 0:
                     if str(user.id) in config['moderation']['blacklist-user-usage'].split(','):
@@ -154,6 +154,7 @@ class CommandHandler:
             user = self.client.get_user(reaction.user_id)
             channel = self.client.get_channel(reaction.channel_id)
             message = await channel.fetch_message(reaction.message_id)
+            args = [reaction, user, 'remove']
             try:
                 guild_config = self.scope_config(guild=message.guild)
                 channel_config = self.scope_config(guild=message.guild, channel=message.channel)
@@ -165,7 +166,6 @@ class CommandHandler:
             if self.message_reaction_remove_handlers.get(message.id):
                 command = self.message_reaction_remove_handlers[message.id]
                 logger.debug(command)
-                args = [reaction, user, 'remove']
                 logger.debug(args)
                 if messageContent.startswith(tuple(command['trigger'])) and allowCommand(command, message) and command['args_num'] == 0:
                     if str(user.id) in config['moderation']['blacklist-user-usage'].split(','):
