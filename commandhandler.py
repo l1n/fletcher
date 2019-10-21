@@ -108,12 +108,14 @@ class CommandHandler:
             if self.message_reaction_handlers.get(message.id):
                 command = self.message_reaction_handlers[message.id]
                 logger.debug(command)
+                args = [reaction, user, 'add']
+                logger.debug(args)
                 if messageContent.startswith(tuple(command['trigger'])) and allowCommand(command, message) and command['args_num'] == 0:
                     if str(user.id) in config['moderation']['blacklist-user-usage'].split(','):
                         raise Exception('Blacklisted command attempt by user')
                     logger.debug(command['function'])
                     if command['async']:
-                        return await command['function'](message, self.client, [reaction, user, 'add'])
+                        return await command['function'](message, self.client, args)
                     else:
                         return await message.channel.send(str(command['function'](message, self.client, [reaction, user, 'add'])))
             for command in self.commands:
@@ -123,9 +125,9 @@ class CommandHandler:
                         raise Exception('Blacklisted command attempt by user')
                     logger.debug(command['function'])
                     if command['async']:
-                        return await command['function'](message, self.client, [reaction, user, 'add'])
+                        return await command['function'](message, self.client, args)
                     else:
-                        return await message.channel.send(str(command['function'](message, self.client, [reaction, user, 'add'])))
+                        return await message.channel.send(str(command['function'](message, self.client, args)))
             if message.guild is not None and (message.guild.name+':'+message.channel.name in self.webhook_sync_registry.keys()):
                 cur = conn.cursor()
                 cur.execute("SELECT toguild, tochannel, tomessage FROM messagemap WHERE fromguild = %s AND fromchannel = %s AND frommessage = %s LIMIT 1;", [message.guild.id, message.channel.id, message.id])
@@ -163,14 +165,16 @@ class CommandHandler:
             if self.message_reaction_remove_handlers.get(message.id):
                 command = self.message_reaction_remove_handlers[message.id]
                 logger.debug(command)
+                args = [reaction, user, 'remove']
+                logger.debug(args)
                 if messageContent.startswith(tuple(command['trigger'])) and allowCommand(command, message) and command['args_num'] == 0:
                     if str(user.id) in config['moderation']['blacklist-user-usage'].split(','):
                         raise Exception('Blacklisted command attempt by user')
                     logger.debug(command['function'])
                     if command['async']:
-                        return await command['function'](message, self.client, [reaction, user, 'remove'])
+                        return await command['function'](message, self.client, args)
                     else:
-                        return await message.channel.send(str(command['function'](message, self.client, [reaction, user, 'remove'])))
+                        return await message.channel.send(str(command['function'](message, self.client, args)))
             for command in self.commands:
                 if messageContent.startswith(tuple(command['trigger'])) and allowCommand(command, message) and command['args_num'] == 0 and command.get('remove'):
                     logger.debug(command)
@@ -178,9 +182,9 @@ class CommandHandler:
                         raise Exception('Blacklisted command attempt by user')
                     logger.debug(command['function'])
                     if command['async']:
-                        return await command['function'](message, self.client, [reaction, user, 'remove'])
+                        return await command['function'](message, self.client, args)
                     else:
-                        return await message.channel.send(str(command['function'](message, self.client, [reaction, user, 'remove'])))
+                        return await message.channel.send(str(command['function'](message, self.client, args)))
         except Exception as e:
             exc_type, exc_obj, exc_tb = exc_info()
             logger.error(f'RXH[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
