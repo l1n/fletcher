@@ -457,12 +457,12 @@ def load_user_config(ch):
         cur.execute("SELECT user_id, guild_id, key, value FROM user_preferences WHERE key = 'subscribe';")
         subtuple = cur.fetchone()
         while subtuple:
-            guild_config = ch.scope_config(guild=int(cur[1]))
+            guild_config = ch.scope_config(guild=int(subtuple[1]))
             if not guild_config.get('subscribe'):
                 guild_config['subscribe'] = {}
-            if not guild_config['subscribe'][int(cur[3])]:
-                guild_config['subscribe'][int(cur[3])] = []
-            guild_config['subscribe'][int(cur[3])].append(int(cur[0]))
+            if not guild_config['subscribe'][int(subtuple[3])]:
+                guild_config['subscribe'][int(subtuple[3])] = []
+            guild_config['subscribe'][int(subtuple[3])].append(int(subtuple[0]))
             subtuple = cur.fetchone()
         conn.commit()
     load_react_notifications(ch)
