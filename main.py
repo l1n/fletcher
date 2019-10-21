@@ -163,6 +163,7 @@ async def load_webhooks():
                         fromTuple[0] = messagefuncs.expand_guild_name(fromTuple[0]).replace(":", "")
                         fromGuild = discord.utils.get(client.guilds, name=fromTuple[0].replace("_", " "))
                         fromChannelName = fromTuple[0].replace("_", " ")+":"+fromTuple[1]
+                        webhook_sync_registry[guild.id+':'+webhook.id] = fromChannelName
                         webhook_sync_registry[fromChannelName] = {
                                 'toChannelObject': guild.get_channel(webhook.channel_id),
                                 'toWebhook': webhook,
@@ -360,7 +361,7 @@ async def on_message(message):
     global conn
     try:
         # if the message is from the bot itself or sent via webhook, which is usually done by a bot, ignore it other than sync processing
-        if message.webhook_id:
+        if message.webhook_id and webhook_sync_registry.get(message.guild.id+":"+message.webhook_id):
             return
         if message.guild is not None and (message.guild.name+':'+message.channel.name in webhook_sync_registry.keys()):
             content = message.clean_content
