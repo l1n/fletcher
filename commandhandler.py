@@ -457,7 +457,7 @@ def load_user_config(ch):
         cur.execute("SELECT user_id, guild_id, key, value FROM user_preferences WHERE key = 'subscribe';")
         subtuple = cur.fetchone()
         while subtuple:
-            guild_config = ch.scope_config(guild=client.get_guild(int(cur[1])))
+            guild_config = ch.scope_config(guild=int(cur[1]))
             if not guild_config.get('subscribe'):
                 guild_config['subscribe'] = {}
             if not guild_config['subscribe'][int(cur[3])]:
