@@ -460,7 +460,7 @@ def load_user_config(ch):
             guild_config = ch.scope_config(guild=int(subtuple[1]))
             if not guild_config.get('subscribe'):
                 guild_config['subscribe'] = {}
-            if not guild_config['subscribe'][int(subtuple[3])]:
+            if not guild_config['subscribe'].get(int(subtuple[3])):
                 guild_config['subscribe'][int(subtuple[3])] = []
             guild_config['subscribe'][int(subtuple[3])].append(int(subtuple[0]))
             subtuple = cur.fetchone()
