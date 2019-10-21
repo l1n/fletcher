@@ -250,14 +250,16 @@ async def subscribe_function(message, client, args):
         if len(args) == 3 and type(args[1]) is discord.User:
             cur = conn.cursor()
             if args[2] != 'remove':
-                cur.execute("INSERT INTO user_preferences (user_id, guild_id, key, value) VALUES (%s, %s, 'subscribe', %s);", [args[1].id, message.guild.id, message.id])
+                cur.execute("INSERT INTO user_preferences (user_id, guild_id, key, value) VALUES (%s, %s, 'subscribe', %s) ON CONFLICT DO NOTHING;", [args[1].id, message.guild.id, message.id])
                 conn.commit()
-                guild_config['subscribe'][message.id].append(args[1].id)
+                if args[1].id not in guild_config['subscribe'][message.id]:
+                    guild_config['subscribe'][message.id].append(args[1].id)
                 await args[1].send(f'Subscribed to notifications from https://discordapp.com/channels/{message.guild.id}/{message.channel.id}/{message.id}')
             else:
                 cur.execute("DELETE FROM user_preferences WHERE user_id = %s AND guild_id = %s AND key = 'subscribe' AND value = %s;", [args[1].id, message.guild.id, str(message.id)])
                 conn.commit()
-                guild_config['subscribe'][message.id].remove(args[1].id)
+                if args[1].id in guild_config['subscribe'][message.id]:
+                    guild_config['subscribe'][message.id].remove(args[1].id)
                 await args[1].send(f'Unsubscribed from notifications for https://discordapp.com/channels/{message.guild.id}/{message.channel.id}/{message.id}')
     except Exception as e:
         if "cur" in locals() and "conn" in locals():
