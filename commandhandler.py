@@ -163,6 +163,9 @@ class CommandHandler:
                     # DM configuration, default to none
                     guild_config = dict()
                     channel_config = dict()
+            if guild_config.get('subscribe', dict()).get(message.id):
+                for user_id in guild_config.get('subscribe', dict()).get(message.id):
+                    await message.guild.get_member(user_id).send(f'{user.display_name} ({user.name}#{user.discriminator}) removed reaction of {messageContent} from https://discordapp.com/channels/{message.guild.id}/{message.channel.id}/{message.id}')
             if self.message_reaction_remove_handlers.get(message.id):
                 command = self.message_reaction_remove_handlers[message.id]
                 logger.debug(command)
