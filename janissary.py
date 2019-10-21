@@ -40,7 +40,7 @@ async def set_role_color_function(message, client, args):
 async def addrole_function(message, client, args):
     global config
     try:
-        if len(args) == 3 and type(args[1]) is discord.User:
+        if len(args) == 3 and type(args[1]) is discord.Member:
             pass # Reaction
         else:
             role_list = message.channel.guild.roles
@@ -93,7 +93,7 @@ async def addrole_function(message, client, args):
 async def assignrole_function(message, client, args):
     global config
     try:
-        if len(args) == 3 and type(args[1]) is discord.User:
+        if len(args) == 3 and type(args[1]) is discord.Member:
             pass # Reaction
         else:
             role_list = message.channel.guild.roles
@@ -134,7 +134,7 @@ async def assignrole_function(message, client, args):
 async def revokerole_function(message, client, args):
     global config
     try:
-        if len(args) == 3 and type(args[1]) is discord.User:
+        if len(args) == 3 and type(args[1]) is discord.Member:
             pass # Reaction
         else:
             role_list = message.channel.guild.roles
@@ -175,7 +175,7 @@ async def revokerole_function(message, client, args):
 async def delrole_function(message, client, args):
     global config
     try:
-        if len(args) == 3 and type(args[1]) is discord.User:
+        if len(args) == 3 and type(args[1]) is discord.Member:
             pass # Reaction
         else:
             role_list = message.channel.guild.roles
@@ -208,7 +208,7 @@ async def delrole_function(message, client, args):
 async def modping_function(message, client, args):
     global config
     try:
-        if len(args) == 3 and type(args[1]) is discord.User:
+        if len(args) == 3 and type(args[1]) is discord.Member:
             pass # Reaction
         else:
             if not message.channel.permissions_for(message.author).manage_messages:
@@ -243,7 +243,7 @@ async def modreport_function(message, client, args):
         scoped_config = ch.scope_config(guild=message.guild)
         if scoped_config.get("moderation") != "On":
             raise Exception("Moderation disabled on guild "+str(message.guild))
-        if len(args) == 3 and type(args[1]) is discord.User:
+        if len(args) == 3 and type(args[1]) is discord.Member:
             try:
                 await message.remove_reaction('👁‍🗨', args[1])
             except discord.Forbidden as e:

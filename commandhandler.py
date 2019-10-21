@@ -151,8 +151,8 @@ class CommandHandler:
         try:
             global config
             messageContent = str(reaction.emoji)
-            user = self.client.get_user(reaction.user_id)
             channel = self.client.get_channel(reaction.channel_id)
+            user = channel.guild.get_member(reaction.user_id)
             message = await channel.fetch_message(reaction.message_id)
             args = [reaction, user, 'remove']
             try:

@@ -207,7 +207,7 @@ async def messagelink_function(message, client, args):
 
 async def bookmark_function(message, client, args):
     try:
-        if len(args) == 3 and type(args[1]) is discord.User:
+        if len(args) == 3 and type(args[1]) is discord.Member:
             if str(args[0].emoji) == "🔖":
                 return await sendWrappedMessage("Bookmark to conversation in #{} ({}) https://discordapp.com/channels/{}/{}/{} via reaction to {}".format(message.channel.name, message.channel.guild.name, message.channel.guild.id, message.channel.id, message.id, message.content), args[1])
             elif str(args[0].emoji) == "🔗":
@@ -247,7 +247,7 @@ async def subscribe_function(message, client, args):
             guild_config['subscribe'] = {}
         if not guild_config['subscribe'].get(message.id):
             guild_config['subscribe'][message.id] = []
-        if len(args) == 3 and type(args[1]) is discord.User:
+        if len(args) == 3 and type(args[1]) is discord.Member:
             cur = conn.cursor()
             if args[2] != 'remove':
                 cur.execute("INSERT INTO user_preferences (user_id, guild_id, key, value) VALUES (%s, %s, 'subscribe', %s) ON CONFLICT DO NOTHING;", [args[1].id, message.guild.id, str(message.id)])

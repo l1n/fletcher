@@ -95,7 +95,7 @@ async def table_exec_function():
 
 async def table_function(message, client, args):
     try:
-        if len(args) == 3 and type(args[1]) is discord.User:
+        if len(args) == 3 and type(args[1]) is discord.Member:
             if str(args[0].emoji) == "🏓":
                 global conn
                 cur = conn.cursor()
