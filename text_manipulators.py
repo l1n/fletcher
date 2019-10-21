@@ -59,9 +59,9 @@ async def ocr_function(message, client, args):
         target_url = f'http://{config["ocr"]["host"]}:{config["ocr"]["port"]}/file'
         image_to_text = ujson.loads(await netcode.simple_post_image(target_url, input_image_blob, url.split("/")[-1], Image.MIME[input_image.format]))['result']
         output_message = f'>>> {image_to_text}'
-        if len(args) == 2 and type(args[1]) is discord.User and args[1] == message.author:
+        if len(args) == 3 and type(args[1]) is discord.User and args[1] == message.author:
             await messagefuncs.sendWrappedMessage(output_message, message.channel)
-        elif len(args) == 2 and type(args[1]) is discord.User:
+        elif len(args) == 3 and type(args[1]) is discord.User:
             await messagefuncs.sendWrappedMessage(output_message, args[1])
         else:
             await messagefuncs.sendWrappedMessage(output_message, message.author)
@@ -73,13 +73,13 @@ async def mobilespoil_function(message, client, args):
     try:
         input_image_blob = io.BytesIO()
         await message.attachments[0].save(input_image_blob)
-        if len(args) != 2 or type(args[1]) is not discord.User or (type(message.channel) == discord.DMChannel and message.author.id == client.user.id):
+        if len(args) != 3 or type(args[1]) is not discord.User or (type(message.channel) == discord.DMChannel and message.author.id == client.user.id):
             try:
                 await message.delete()
             except discord.Forbidden as e:
                 logger.error("Forbidden to delete message in "+str(message.channel))
                 pass
-        if len(args) == 2 and type(args[1]) is discord.User:
+        if len(args) == 3 and type(args[1]) is discord.User:
             channel = args[1]
             content = ''
         else:
@@ -96,13 +96,13 @@ async def scramble_function(message, client, args):
     try:
         input_image_blob = io.BytesIO()
         await message.attachments[0].save(input_image_blob)
-        if len(args) != 2 or type(args[1]) is not discord.User or (type(message.channel) == discord.DMChannel and message.author.id == client.user.id):
+        if len(args) != 3 or type(args[1]) is not discord.User or (type(message.channel) == discord.DMChannel and message.author.id == client.user.id):
             try:
                 await message.delete()
             except discord.Forbidden as e:
                 logger.error("Forbidden to delete message in "+str(message.channel))
                 pass
-        if len(args) == 2 and type(args[1]) is discord.User:
+        if len(args) == 3 and type(args[1]) is discord.User:
             output_message = await args[1].send(content='Scrambling image... ('+str(input_image_blob.getbuffer().nbytes)+' bytes loaded)')
         else:
             output_message = await message.channel.send(content='Scrambling image...('+str(input_image_blob.getbuffer().nbytes)+' bytes loaded)')
@@ -259,7 +259,7 @@ def pretty_date(time=False):
 async def rot13_function(message, client, args):
     global config
     try:
-        if len(args) == 2 and type(args[1]) is discord.User:
+        if len(args) == 3 and type(args[1]) is discord.User:
             if message.author.id == 429368441577930753:
                 if message.content.startswith("Mod Report"):
                     return await args[1].send(codecs.encode(message.content.split("\n", 1)[1], 'rot_13'))
@@ -291,7 +291,7 @@ async def spoiler_function(message, client, args):
         else:
             if len(message.clean_content) != len(message.clean_content.encode()):
                 rotate_function = rot32768
-        if len(args) == 2 and type(args[1]) is discord.User:
+        if len(args) == 3 and type(args[1]) is discord.User:
             if message.author.id == 429368441577930753:
                 if type(message.channel) == discord.DMChannel:
                     return await args[1].send("Spoiler from DM {}**: {}".format(message.clean_content.split('**: ', 1)[0], rotate_function(swapcasealpha(message.clean_content.split('**: ', 1)[1])).replace("\n"," ")))

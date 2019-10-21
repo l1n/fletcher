@@ -40,7 +40,7 @@ uwu_responses = {
 
 async def uwu_function(message, client, args, responses=uwu_responses):
     try:
-        if len(args) == 2 and type(args[1]) is discord.User and message.author.id == client.user.id:
+        if len(args) == 3 and type(args[1]) is discord.User and message.author.id == client.user.id:
             return await args[1].send(random.choice(responses['private']))
         elif len(args) == 0 or 'fletch' in message.clean_content.lower() or message.content[0] == "!" or "good bot" in message.content.lower():
             if random.randint(0, 100) < 20:
@@ -59,7 +59,7 @@ async def retrowave_function(message, client, args):
             text_parts = message.content
             text_parts = messagefuncs.sanitize_font.sub('', text_parts)
             if '/' in text_parts:
-                if len(args) == 2 and type(args[1]) is discord.User:
+                if len(args) == 3 and type(args[1]) is discord.User:
                     pass
                 else:
                     text_parts = text_parts[10:].strip()
@@ -72,7 +72,7 @@ async def retrowave_function(message, client, args):
                     text_parts += ['']
             else:
                 text_parts = text_parts.split()
-                if len(args) == 2 and type(args[1]) is discord.User:
+                if len(args) == 3 and type(args[1]) is discord.User:
                     pass
                 else:
                     text_parts = text_parts[1:]
@@ -97,7 +97,7 @@ async def retrowave_function(message, client, args):
 
 async def shindan_function(message, client, args):
     try:
-        if len(args) == 2 and type(args[1]) is discord.User:
+        if len(args) == 3 and type(args[1]) is discord.User:
             if message.author.id != 429368441577930753:
                 logger.debug("SDF: Backing out, not my message.")
                 return
@@ -363,7 +363,7 @@ async def scp_function(message, client, args):
 async def qdb_add_function(message, client, args):
     try:
         global conn
-        if len(args) == 2 and type(args[1]) is discord.User:
+        if len(args) == 3 and type(args[1]) is discord.User:
             if str(args[0].emoji) == "🗨":
                 content = f'[{message.created_at}] #{message.channel.name} <{message.author.display_name}>: {message.content}\n<https://discordapp.com/channels/{message.guild.id}/{message.channel.id}/{message.id}>'
                 cur = conn.cursor()
