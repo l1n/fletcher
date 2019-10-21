@@ -498,7 +498,7 @@ async def on_raw_message_delete(message):
             pass
         if message.guild is not None and (fromGuild.name+':'+fromChannel.name in webhook_sync_registry.keys()):
             # Give messages time to be added to the database
-            await asyncio.sleep(0.1)
+            await asyncio.sleep(1)
             cur = conn.cursor()
             cur.execute("SELECT toguild, tochannel, tomessage FROM messagemap WHERE fromguild = %s AND fromchannel = %s AND frommessage = %s LIMIT 1;", [message.guild_id, message.channel_id, message.message_id])
             metuple = cur.fetchone()
