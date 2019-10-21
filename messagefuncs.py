@@ -253,12 +253,12 @@ async def subscribe_function(message, client, args):
                 cur.execute("INSERT INTO user_preferences (user_id, guild_id, key, value) VALUES (%s, %s, 'subscribe', %s);", [args[1].id, message.guild.id, message.id])
                 conn.commit()
                 guild_config['subscribe'][message.id].append(args[1].id)
-                args[1].send(f'Subscribed to notifications from https://discordapp.com/channels/{message.guild.id}/{message.channel.id}/{message.id}')
+                await args[1].send(f'Subscribed to notifications from https://discordapp.com/channels/{message.guild.id}/{message.channel.id}/{message.id}')
             else:
                 cur.execute("DELETE FROM user_preferences WHERE user_id = %s AND guild_id = %s AND key = 'subscribe' AND value = %s;", [args[1].id, message.guild.id, str(message.id)])
                 conn.commit()
                 guild_config['subscribe'][message.id].remove(args[1].id)
-                args[1].send(f'Unsubscribed from notifications for https://discordapp.com/channels/{message.guild.id}/{message.channel.id}/{message.id}')
+                await args[1].send(f'Unsubscribed from notifications for https://discordapp.com/channels/{message.guild.id}/{message.channel.id}/{message.id}')
     except Exception as e:
         if "cur" in locals() and "conn" in locals():
             conn.rollback()
