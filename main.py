@@ -363,7 +363,7 @@ async def on_message(message):
         # if the message is from the bot itself or sent via webhook, which is usually done by a bot, ignore it other than sync processing
         if message.webhook_id:
             webhook = await client.fetch_webhook(message.webhook_id)
-            if webhook.name not in config.get("sync", dict()).get("whitelist-webhooks", "").split(',').append('Tupperhook'):
+            if webhook.name not in config.get("sync", dict()).get("whitelist-webhooks", "").split(','):
                 return
         if message.guild is not None and (message.guild.name+':'+message.channel.name in webhook_sync_registry.keys()):
             content = message.clean_content
