@@ -125,7 +125,7 @@ class CommandHandler:
                     if command['async']:
                         return await command['function'](message, self.client, [reaction, user, 'add'])
                     else:
-                        return await message.channel.send(str(command['function'](message, self.client, [reaction, user, 'remove'])))
+                        return await message.channel.send(str(command['function'](message, self.client, [reaction, user, 'add'])))
             if message.guild is not None and (message.guild.name+':'+message.channel.name in self.webhook_sync_registry.keys()):
                 cur = conn.cursor()
                 cur.execute("SELECT toguild, tochannel, tomessage FROM messagemap WHERE fromguild = %s AND fromchannel = %s AND frommessage = %s LIMIT 1;", [message.guild.id, message.channel.id, message.id])
