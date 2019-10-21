@@ -239,6 +239,30 @@ async def paste_function(message, client, args):
         logger.error("PF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
 
 
+async def subscribe_function(message, client, args):
+    try:
+        guild_config = client.scope_config(guild=message.guild, mutable=True)
+        if not guild_config.get('subscribe'):
+            guild_config['subscribe'] = {}
+        if not guild_config['subscribe'].get(message.id):
+            guild_config['subscribe'][message.id] = []
+        if len(args) == 2 and type(args[1]) is discord.User:
+            cur = conn.cursor()
+            if args[2] != 'remove':
+                cur.execute("INSERT INTO user_preferences (user_id, guild_id, key, value) VALUES (%s, %s, 'subscribe', %s);", [args[1].id, message.guild.id, message.id])
+                conn.commit()
+                guild_config['subscribe'][message.id].append(args[1].id)
+                args[1].send(f'Subscribed to notifications from https://discordapp.com/channels/{message.guild.id}/{message.channel.id}/{message.id}')
+            else:
+                cur.execute("DELETE FROM user_preferences WHERE user_id = %s AND guild_id = %s AND key = 'subscribe' AND value = %s;", [args[1].id, message.guild.id, message.id])
+                conn.commit()
+                guild_config['subscribe'][message.id].remove(args[1].id)
+                args[1].send(f'Unsubscribed from notifications for https://discordapp.com/channels/{message.guild.id}/{message.channel.id}/{message.id}')
+    except Exception as e:
+        exc_type, exc_obj, exc_tb = exc_info()
+        logger.error("SUBF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+
+
 def localizeName(user, guild):
     localized = guild.get_member(user.id)
     if localized is None:
@@ -291,4 +315,13 @@ def autoload(ch):
         'args_num': 0,
         'args_name': [],
         'description': 'Paste last copied link',
+        })
+    ch.add_command({
+        'trigger': ['📡'],
+        'function': subscribe_function,
+        'async': True,
+        'remove': True,
+        'args_num': 0,
+        'args_name': [],
+        'description': 'Subscribe to reaction notifications on this message',
         })

@@ -81,8 +81,8 @@ class CommandHandler:
         try:
             global config
             messageContent = str(reaction.emoji)
-            user = self.client.get_user(reaction.user_id)
             channel = self.client.get_channel(reaction.channel_id)
+            user = channel.guild.get_member(reaction.user_id)
             message = await channel.fetch_message(reaction.message_id)
             try:
                 guild_config = self.scope_config(guild=message.guild)
@@ -104,7 +104,7 @@ class CommandHandler:
                 return await message.remove_reaction(messageContent, user)
             if guild_config.get('subscribe', dict()).get(message.id):
                 for user_id in guild_config.get('subscribe', dict()).get(message.id):
-                    await self.client.get_user(user_id).send(f'<{user.name}:{user.id}> reacting with {messageContent} to {message.id}')
+                    await message.guild.get_member(user_id).send(f'{user.display_name} ({user.name}#{user.discriminator}) reacting with {messageContent} to https://discordapp.com/channels/{message.guild.id}/{message.channel.id}/{message.id}')
             if self.message_reaction_handlers.get(message.id):
                 command = self.message_reaction_handlers[message.id]
                 logger.debug(command)
@@ -113,9 +113,9 @@ class CommandHandler:
                         raise Exception('Blacklisted command attempt by user')
                     logger.debug(command['function'])
                     if command['async']:
-                        return await command['function'](message, self.client, [reaction, user])
+                        return await command['function'](message, self.client, [reaction, user, 'add'])
                     else:
-                        return await message.channel.send(str(command['function'](message, self.client, [reaction, user])))
+                        return await message.channel.send(str(command['function'](message, self.client, [reaction, user, 'add'])))
             for command in self.commands:
                 if messageContent.startswith(tuple(command['trigger'])) and allowCommand(command, message) and command['args_num'] == 0:
                     logger.debug(command)
@@ -123,16 +123,16 @@ class CommandHandler:
                         raise Exception('Blacklisted command attempt by user')
                     logger.debug(command['function'])
                     if command['async']:
-                        return await command['function'](message, self.client, [reaction, user])
+                        return await command['function'](message, self.client, [reaction, user, 'add'])
                     else:
-                        return await message.channel.send(str(command['function'](message, self.client, [reaction, user])))
+                        return await message.channel.send(str(command['function'](message, self.client, [reaction, user, 'remove'])))
             if message.guild is not None and (message.guild.name+':'+message.channel.name in self.webhook_sync_registry.keys()):
                 cur = conn.cursor()
                 cur.execute("SELECT toguild, tochannel, tomessage FROM messagemap WHERE fromguild = %s AND fromchannel = %s AND frommessage = %s LIMIT 1;", [message.guild.id, message.channel.id, message.id])
                 metuple = cur.fetchone()
                 conn.commit()
                 if metuple is not None:
-                    toGuild = client.get_guild(metuple[0])
+                    toGuild = self.client.get_guild(metuple[0])
                     toChannel = toGuild.get_channel(metuple[1])
                     toMessage = await toChannel.fetch_message(metuple[2])
                     syncReaction = await toMessage.add_reaction(reaction.emoji)
@@ -166,9 +166,19 @@ class CommandHandler:
                         raise Exception('Blacklisted command attempt by user')
                     logger.debug(command['function'])
                     if command['async']:
-                        return await command['function'](message, self.client, [reaction, user])
+                        return await command['function'](message, self.client, [reaction, user, 'remove'])
                     else:
-                        return await message.channel.send(str(command['function'](message, self.client, [reaction, user])))
+                        return await message.channel.send(str(command['function'](message, self.client, [reaction, user, 'remove'])))
+            for command in self.commands:
+                if messageContent.startswith(tuple(command['trigger'])) and allowCommand(command, message) and command['args_num'] == 0 and command.get('remove'):
+                    logger.debug(command)
+                    if str(user.id) in config['moderation']['blacklist-user-usage'].split(','):
+                        raise Exception('Blacklisted command attempt by user')
+                    logger.debug(command['function'])
+                    if command['async']:
+                        return await command['function'](message, self.client, [reaction, user, 'remove'])
+                    else:
+                        return await message.channel.send(str(command['function'](message, self.client, [reaction, user, 'remove'])))
         except Exception as e:
             exc_type, exc_obj, exc_tb = exc_info()
             logger.error(f'RXH[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
