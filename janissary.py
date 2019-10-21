@@ -522,7 +522,7 @@ async def snooze_channel_function(message, client, args):
         channel_names = ""
         for channel in channels:
             await channel.set_permissions(message.author, read_messages=False, read_message_history=False, send_messages=False, embed_links=False, reason="User requested snooze "+message.author.name)
-            channel_names += f'{guild.name}:{channel.name}, '
+            channel_names += f'{channel.guild.name}:{channel.name}, '
         channel_names = channel_names[:-2]
         if args[0].strip()[-2:] == ':*':
             channel_names = channels[0].guild.name
