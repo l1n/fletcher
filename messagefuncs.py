@@ -240,8 +240,9 @@ async def paste_function(message, client, args):
 
 
 async def subscribe_function(message, client, args):
+    global ch
     try:
-        guild_config = client.scope_config(guild=message.guild, mutable=True)
+        guild_config = ch.scope_config(guild=message.guild, mutable=True)
         if not guild_config.get('subscribe'):
             guild_config['subscribe'] = {}
         if not guild_config['subscribe'].get(message.id):
