@@ -489,6 +489,13 @@ async def on_raw_message_delete(message):
             await asyncio.sleep(1)
         fromGuild = client.get_guild(message.guild_id)
         fromChannel = fromGuild.get_channel(message.channel_id)
+        if type(fromChannel) is discord.TextChannel:
+            logger.info(str(message.message_id)+" #"+fromGuild.name+":"+fromChannel.name+" [Deleted]", extra={'GUILD_IDENTIFIER': fromGuild.name, 'CHANNEL_IDENTIFIER': fromChannel.name, 'MESSAGE_ID': str(message.message_id)})
+        elif type(fromChannel) is discord.DMChannel:
+            logger.info(str(message.message_id)+" @"+fromChannel.recipient.name+" [Deleted]", extra={'GUILD_IDENTIFIER': '@', 'CHANNEL_IDENTIFIER': fromChannel.name, 'MESSAGE_ID': str(message.message_id)})
+        else:
+            # Group Channels don't support bots so neither will we
+            pass
         if message.guild is not None and (fromGuild.name+':'+fromChannel.name in webhook_sync_registry.keys()):
             # Give messages time to be added to the database
             await asyncio.sleep(0.1)
