@@ -179,9 +179,9 @@ async def load_webhooks():
             logger.warning(f'Couldn\'t load webhooks for {guild.name} ({guild.id}), ask an admin to grant additional permissions (https://novalinium.com/go/4/fletcher)')
         except AttributeError:
             pass
-    logger.debug("Webhooks loaded:")
-    logger.debug("\n".join([f'{key} to {webhook_sync_registry[key]["toChannelName"]} (Guild {webhook_sync_registry[key]["toChannelObject"].guild.id})' for key in list(webhook_sync_registry)]))
     globals()['webhook_sync_registry'] = webhook_sync_registry
+    logger.debug("Webhooks loaded:")
+    logger.debug("\n".join([f'{key} to {webhook_sync_registry[key]["toChannelName"]} (Guild {webhook_sync_registry[key]["toChannelObject"].guild.id})' for key in list(webhook_sync_registry) if type(webhook_sync_registry[key]) is not str]))
 canticum_message = None
 doissetep_omega =  None
 def autoload(module, choverride):
