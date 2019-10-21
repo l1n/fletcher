@@ -310,7 +310,7 @@ class CommandHandler:
             if not continue_flag:
                 return
 
-    def scope_config(self, message=None, channel=None, guild=None):
+    def scope_config(self, message=None, channel=None, guild=None, mutable=False):
         global config
         if guild is None:
             if channel:
@@ -331,7 +331,10 @@ class CommandHandler:
         else:
             channel = ''
         try:
-            return dict(config.get(f'Guild {guild}{channel}'))
+            if mutable:
+                return config.get(f'Guild {guild}{channel}')
+            else:
+                return dict(config.get(f'Guild {guild}{channel}'))
         except TypeError:
             return dict()
 
@@ -457,7 +460,7 @@ def load_user_config(ch):
         cur.execute("SELECT user_id, guild_id, key, value FROM user_preferences WHERE key = 'subscribe';")
         subtuple = cur.fetchone()
         while subtuple:
-            guild_config = ch.scope_config(guild=int(subtuple[1]))
+            guild_config = ch.scope_config(guild=int(subtuple[1]), mutable=True)
             if not guild_config.get('subscribe'):
                 guild_config['subscribe'] = {}
             if not guild_config['subscribe'].get(int(subtuple[3])):
