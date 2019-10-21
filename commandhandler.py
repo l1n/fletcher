@@ -102,6 +102,9 @@ class CommandHandler:
             if channel_config.get('blacklist-emoji') and not message.channel.permissions_for(message.author).manage_messages and messageContent in channel_config.get('blacklist-emoji'):
                 logger.info('Emoji removed by blacklist')
                 return await message.remove_reaction(messageContent, user)
+            if guild_config.get('subscribe', dict()).get(message.id):
+                for user_id in guild_config.get('subscribe', dict()).get(message.id):
+                    await self.client.get_user(user_id).send(f'<{user.name}:{user.id}> reacting with {messageContent} to {message.id}')
             if self.message_reaction_handlers.get(message.id):
                 command = self.message_reaction_handlers[message.id]
                 logger.debug(command)
