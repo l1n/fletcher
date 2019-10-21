@@ -140,6 +140,8 @@ class CommandHandler:
                     cur.execute("UPDATE messagemap SET reactions = reactions || %s WHERE fromguild = %s AND fromchannel = %s AND frommessage = %s;", [reaction.emoji, message.guild.id, message.channel.id, message.id])
                     conn.commit()
         except Exception as e:
+            if "cur" in locals() and "conn" in locals():
+                conn.rollback()
             exc_type, exc_obj, exc_tb = exc_info()
             logger.error(f'RXH[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
 
