@@ -443,7 +443,7 @@ def join_rank_function(message, client, args):
         if isinstance(member, str):
             element = getattr(periodictable, member.lower())
             if element:
-                member_rank = element.number
+                member_rank = element.number - 1
                 try:
                     member = sorted_member_list[member_rank]
                 except IndexError:
@@ -451,7 +451,7 @@ def join_rank_function(message, client, args):
             else:
                 return f'No element with name {member}'
         if isinstance(member, int):
-            member_rank = member
+            member_rank = member - 1
             try:
                 member = sorted_member_list[member_rank]
             except IndexError:
