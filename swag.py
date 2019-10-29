@@ -441,14 +441,13 @@ def join_rank_function(message, client, args):
             member = message.author
         sorted_member_list = sorted(message.guild.members, key=lambda member: member.joined_at)
         if isinstance(member, str):
-            element = getattr(periodictable, member.lower())
-            if element:
+            try:
+                element = getattr(periodictable, member.lower())
                 member_rank = element.number - 1
-                try:
-                    member = sorted_member_list[member_rank]
-                except IndexError:
-                    return f'No member with join number {element.number}'
-            else:
+                member = sorted_member_list[member_rank]
+            except IndexError:
+                return f'No member with join number {element.number}'
+            except AttributeError:
                 return f'No element with name {member}'
         if isinstance(member, int):
             member_rank = member
