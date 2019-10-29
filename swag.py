@@ -550,7 +550,7 @@ def autoload(ch):
         'description': 'Fling sparkles!'
         })
     ch.add_command({
-        'trigger': ['!join_rank'],
+        'trigger': ['!rank'],
         'function': join_rank_function,
         'async': False,
         'args_num': 0,
