@@ -440,7 +440,7 @@ def join_rank_function(message, client, args):
         else:
             member = message.author
         sorted_member_list = sorted(message.guild.members, key=lambda member: member.joined_at)
-        if isinstance(member, str):
+        if isinstance(member, str) and len(message.mentions) == 0:
             try:
                 if len(member) > 3:
                     key = member.lower()
@@ -453,7 +453,7 @@ def join_rank_function(message, client, args):
                 return f'No member with join number {element.number}'
             except AttributeError:
                 return f'No element with name {member}'
-        if isinstance(member, int):
+        if isinstance(member, int) and len(message.mentions) == 0:
             member_rank = member
             try:
                 member = sorted_member_list[member_rank-1]
