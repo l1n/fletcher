@@ -436,7 +436,7 @@ def join_rank_function(message, client, args):
         member_rank = sorted(message.guild.members, key=lambda member: member.joined_at).index(member)+1
         # Gareth on codegolf
         ordinal = lambda n: "%d%s" % (n,"tsnrhtdd"[(n/10%10!=1)*(n%10<4)*n%10::4])
-        if member_rank < len(periodictable.elements):
+        if member_rank < 118: # len(periodictable.elements):
             member_element = f'Your element is {periodictable.elements[member_rank].name.title()}.'
         else:
             member_element = 'Your element has yet to be discovered!'
