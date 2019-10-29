@@ -431,7 +431,7 @@ def join_rank_function(message, client, args):
     try:
         if len(message.mentions):
             member = message.mentions[0]
-        if len(args):
+        elif len(args):
             member = args[0]
             try:
                 member = int(member)
