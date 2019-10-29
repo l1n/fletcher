@@ -428,10 +428,14 @@ async def qdb_search_function(message, client, args):
 
 def join_rank_function(message, client, args):
     try:
-        member_rank = sorted(message.guild.members, key=lambda member: member.joined_at).index(message.author)+1
+        if len(message.mentions):
+            member = message.mentions[0]
+        else:
+            member = message.author
+        member_rank = sorted(message.guild.members, key=lambda member: member.joined_at).index(member)+1
         # Gareth on codegolf
         ordinal = lambda n: "%d%s" % (n,"tsnrhtdd"[(n/10%10!=1)*(n%10<4)*n%10::4])
-        return f'{message.author.mention} is the {ordinal(member_rank)} member to join this server'
+        return f'{member.mention} is the {ordinal(member_rank)} member to join this server'
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
         logger.error("JRF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
@@ -555,8 +559,8 @@ def autoload(ch):
         'async': False,
         'args_num': 0,
         'long_run': False,
-        'args_name': [],
-        'description': 'Check what number member you were to join this server.'
+        'args_name': ['@member (optional)'],
+        'description': 'Check what number member you (or mentioned user) were to join this server.'
         })
     if session:
         session.close()
