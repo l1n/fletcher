@@ -453,7 +453,7 @@ def join_rank_function(message, client, args):
                 return f'No member with join number {element.number}'
             except AttributeError:
                 return f'No element with name {member}'
-        if isinstance(member, int) and len(message.mentions) == 0:
+        elif isinstance(member, int) and len(message.mentions) == 0:
             member_rank = member
             try:
                 member = sorted_member_list[member_rank-1]
