@@ -451,9 +451,9 @@ def join_rank_function(message, client, args):
             else:
                 return f'No element with name {member}'
         if isinstance(member, int):
-            member_rank = member - 1
+            member_rank = member
             try:
-                member = sorted_member_list[member_rank]
+                member = sorted_member_list[member_rank-1]
             except IndexError:
                 return f'No member with join number {element.number}'
         else:
