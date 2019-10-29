@@ -11,6 +11,7 @@ from sys import exc_info
 from datetime import datetime, timedelta
 from markdownify import markdownify
 from functools import partial
+import periodictable
 # Super Waifu Animated Girlfriend
 
 logger = logging.getLogger('fletcher')
@@ -435,7 +436,12 @@ def join_rank_function(message, client, args):
         member_rank = sorted(message.guild.members, key=lambda member: member.joined_at).index(member)+1
         # Gareth on codegolf
         ordinal = lambda n: "%d%s" % (n,"tsnrhtdd"[(n/10%10!=1)*(n%10<4)*n%10::4])
-        return f'{member.mention} is the {ordinal(member_rank)} member to join this server'
+        if member_rank < len(periodictable.elements):
+            member_element = f'Your element is {periodictable.elements[member_rank].name.title()}.'
+        else:
+            member_element = 'Your element has yet to be discovered!'
+
+        return f'{member.mention} is the {ordinal(member_rank)} member to join this server.\n{member_element}'
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
         logger.error("JRF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
