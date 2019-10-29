@@ -450,7 +450,7 @@ def join_rank_function(message, client, args):
                 member_rank = element.number
                 member = sorted_member_list[member_rank-1]
             except IndexError:
-                return f'No member with join number {element.number}'
+                return f'Predicted elemental member {element.number} would have an atomic mass of {element.mass} daltons if they existed!'
             except AttributeError:
                 return f'No element with name {member}'
         elif isinstance(member, int) and len(message.mentions) == 0:
