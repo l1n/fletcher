@@ -446,7 +446,7 @@ def join_rank_function(message, client, args):
                     key = member.lower()
                 else:
                     key = member
-                element = getattr(periodictable, member.lower())
+                element = getattr(periodictable, key)
                 member_rank = element.number - 1
                 member = sorted_member_list[member_rank]
             except IndexError:
