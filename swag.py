@@ -442,6 +442,10 @@ def join_rank_function(message, client, args):
         sorted_member_list = sorted(message.guild.members, key=lambda member: member.joined_at)
         if isinstance(member, str):
             try:
+                if len(member) > 3:
+                    key = member.lower()
+                else:
+                    key = member
                 element = getattr(periodictable, member.lower())
                 member_rank = element.number - 1
                 member = sorted_member_list[member_rank]
