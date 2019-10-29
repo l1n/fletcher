@@ -447,8 +447,8 @@ def join_rank_function(message, client, args):
                 else:
                     key = member
                 element = getattr(periodictable, key)
-                member_rank = element.number - 1
-                member = sorted_member_list[member_rank]
+                member_rank = element.number
+                member = sorted_member_list[member_rank-1]
             except IndexError:
                 return f'No member with join number {element.number}'
             except AttributeError:
