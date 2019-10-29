@@ -10,7 +10,7 @@ cffi==1.13.0
 chardet==3.0.4
 colorclass==2.2.0
 cycler==0.10.0
-discord.py==1.2.3
+discord.py==1.2.4
 Django==2.2.6
 docopt==0.6.2
 gitdb2==2.0.6
