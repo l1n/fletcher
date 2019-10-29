@@ -431,9 +431,33 @@ def join_rank_function(message, client, args):
     try:
         if len(message.mentions):
             member = message.mentions[0]
+        if len(args):
+            member = args[0]
+            try:
+                member = int(member)
+            except ValueError:
+                pass
         else:
             member = message.author
-        member_rank = sorted(message.guild.members, key=lambda member: member.joined_at).index(member)+1
+        sorted_member_list = sorted(message.guild.members, key=lambda member: member.joined_at)
+        if isinstance(member, str):
+            element = getattr(periodictable.elements, member.lower())
+            if element:
+                member_rank = element.number
+                try:
+                    member = sorted_member_list[member_rank]
+                except IndexError:
+                    return f'No member with join number {element.number}'
+            else:
+                return f'No element with name {member}'
+        if isinstance(member, int):
+            member_rank = member
+            try:
+                member = sorted_member_list[member_rank]
+            except IndexError:
+                return f'No member with join number {element.number}'
+        else:
+            member_rank = sorted_member_list.index(member)+1
         # Gareth on codegolf
         ordinal = lambda n: "%d%s" % (n,"tsnrhtdd"[(n/10%10!=1)*(n%10<4)*n%10::4])
         if member_rank < 118: # len(periodictable.elements):
