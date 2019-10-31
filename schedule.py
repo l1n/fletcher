@@ -55,7 +55,7 @@ async def table_exec_function():
                 else:
                     args = content.split()[1:]
                 if target_message and len(target_message.channel_mentions) > 0:
-                    channels = [target_message.channel_mentions]
+                    channels = target_message.channel_mentions
                 elif args[0].strip()[-2:] == ':*':
                     guild = discord.utils.get(client.guilds, name=messagefuncs.expand_guild_name(args[0]).strip()[:-2].replace("_", " "))
                     channels = guild.text_channels
