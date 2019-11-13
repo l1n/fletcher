@@ -34,12 +34,15 @@ def xchannel(targetChannel, currentGuild):
         targetChannel = targetChannel[1:].strip()
     logger.debug(f'XC: Channel Identifier {channelLookupBy}:{targetChannel}')
     if channelLookupBy == 'Name':
-        if ':' not in targetChannel:
+        if ':' not in targetChannel and '#' not in targetChannel:
             toChannel = discord.utils.get(currentGuild.text_channels, name=targetChannel)
             toGuild = currentGuild
         else:
             targetChannel = expand_guild_name(targetChannel)
-            toTuple = targetChannel.split(':')
+            if ':' in targetChannel:
+                toTuple = targetChannel.split(':')
+            elif '#' in targetChannel:
+                toTuple = targetChannel.split('#')
             toGuild = discord.utils.get(ch.client.guilds, name=toTuple[0])
             if not toGuild:
                 raise exceptions.DirectMessageException("Can't disambiguate channel name if in DM")
