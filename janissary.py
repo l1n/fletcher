@@ -7,6 +7,7 @@ from sys import exc_info
 import random
 import textwrap
 import text_manipulators
+import ujson
 # global conn set by reload_function
 
 logger = logging.getLogger('fletcher')
@@ -518,7 +519,10 @@ async def snooze_channel_function(message, client, args):
             interval = float(args[1])
         else:
             interval = 24
-        cur.execute("INSERT INTO reminders (userid, guild, channel, message, content, scheduled, trigger_type) VALUES (%s, %s, %s, %s, %s, NOW() + INTERVAL '"+str(interval)+" hours', 'unban');", [message.author.id, guild.id, message.channel.id, message.id, message.content])
+        overwrites = "unban"
+        if len(channels) == 1:
+            overwrites = "overwrite "+ujson.dumps(channels[0].overwrites_for(messaage.author))
+        cur.execute(f"INSERT INTO reminders (userid, guild, channel, message, content, scheduled, trigger_type) VALUES (%s, %s, %s, %s, %s, NOW() + INTERVAL '{interval} hours', '{overwrites}');", [message.author.id, guild.id, message.channel.id, message.id, message.content])
         channel_names = ""
         for channel in channels:
             await channel.set_permissions(message.author, read_messages=False, read_message_history=False, send_messages=False, embed_links=False, reason="User requested snooze "+message.author.name)

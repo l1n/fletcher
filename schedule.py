@@ -5,6 +5,7 @@ import messagefuncs
 import re
 from sys import exc_info
 import textwrap
+import ujson
 # global conn set by reload_function
 
 logger = logging.getLogger('fletcher')
@@ -23,6 +24,7 @@ async def table_exec_function():
         modes = {
                 "table": "tabled a discussion",
                 "unban": "snoozed a channel",
+                "overwrite": "snoozed a single channel and kept the overwrite intact",
                 }
         while tabtuple:
             user = client.get_user(tabtuple[0])
@@ -32,7 +34,12 @@ async def table_exec_function():
             created = tabtuple[5]
             created_at = created.strftime("%B %d, %Y %I:%M%p UTC")
             content = tabtuple[4]
-            mode = tabtuple[6]
+            mode = tabtuple[6].split(" ", 1)
+            if len(mode) == 1:
+                mode = mode[0]
+            else:
+                mode_args = mode[1]
+                mode = mode[0]
             mode_desc = modes[mode]
             guild = client.get_guild(guild_id)
             if guild is None:
@@ -76,6 +83,33 @@ async def table_exec_function():
                 if args[0].strip()[-2:] == ':*':
                     channel_names = channels[0].guild.name
                 await user.send(f'Unban triggered by schedule for {channel_names} (`!part` to leave channel permanently)')
+            elif mode == "overwrite":
+                if target_message:
+                    args = target_message.content.split()[1:]
+                else:
+                    args = content.split()[1:]
+                if target_message and len(target_message.channel_mentions) > 0:
+                    channels = target_message.channel_mentions
+                elif args[0].strip()[-2:] == ':*':
+                    guild = discord.utils.get(client.guilds, name=messagefuncs.expand_guild_name(args[0]).strip()[:-2].replace("_", " "))
+                    channels = guild.text_channels
+                else:
+                    channel = messagefuncs.xchannel(args[0].strip(), guild)
+                    if channel is None and target_message:
+                        channel = target_message.channel
+                    elif channel is None:
+                        channel = from_channel
+                    channels = [channel]
+                channel_names = ""
+                for channel in channels:
+                    permissions = channel.overwrites_for(user)
+                    if permissions.read_messages == False and permissions.send_messages == False and permissions.embed_links == False:
+                        await channel.set_permissions(user, overwrite=discord.PermissionOverWrite(ujson.loads(mode_args)), reason="Permission overwrite triggered by schedule obo "+user.name)
+                        channel_names += f'{guild.name}:{channel.name}, '
+                channel_names = channel_names[:-2]
+                if args[0].strip()[-2:] == ':*':
+                    channel_names = channels[0].guild.name
+                await user.send(f'Permission overwrite triggered by schedule for {channel_names} (`!part` to leave channel permanently)')
             elif mode == "table":
                 await messagefuncs.sendWrappedMessage(f"You tabled a discussion at {created_at}: want to pick that back up?\nDiscussion link: https://discordapp.com/channels/{guild_id}/{channel_id}/{message_id}\nContent: {content}", user)
             tabtuple = cur.fetchone()
