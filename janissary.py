@@ -521,7 +521,7 @@ async def snooze_channel_function(message, client, args):
             interval = 24
         overwrites = "unban"
         if len(channels) == 1:
-            overwrites = "overwrite "+ujson.dumps(channels[0].overwrites_for(messaage.author))
+            overwrites = "overwrite "+ujson.dumps(channels[0].overwrites_for(message.author))
         cur.execute(f"INSERT INTO reminders (userid, guild, channel, message, content, scheduled, trigger_type) VALUES (%s, %s, %s, %s, %s, NOW() + INTERVAL '{interval} hours', '{overwrites}');", [message.author.id, guild.id, message.channel.id, message.id, message.content])
         channel_names = ""
         for channel in channels:
