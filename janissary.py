@@ -517,10 +517,11 @@ async def snooze_channel_function(message, client, args):
         cur = conn.cursor()
         if len(args) > 1:
             interval = float(args[1])
-        elif len(args) == 1 and isinstance(args[0], float):
-            interval = float(args[0])
         else:
-            interval = 24
+            try:
+                interval = float(args[0])
+            except (ValueError, IndexError):
+                interval = 24
         overwrites = "unban"
         if len(channels) == 1:
             overwrites = "overwrite "+ujson.dumps(channels[0].overwrites_for(message.author))
