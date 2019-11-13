@@ -43,6 +43,8 @@ def xchannel(targetChannel, currentGuild):
                 toTuple = targetChannel.split(':')
             elif '#' in targetChannel:
                 toTuple = targetChannel.split('#')
+            else:
+                return None
             toGuild = discord.utils.get(ch.client.guilds, name=toTuple[0])
             if not toGuild:
                 raise exceptions.DirectMessageException("Can't disambiguate channel name if in DM")
@@ -72,7 +74,10 @@ async def teleport_function(message, client, args):
             await fromChannel.send('Portals out of this channel have been disabled.', delete_after=60)
             raise Exception('Forbidden teleport')
         toChannelName = args[0].strip()
-        toChannel = xchannel(toChannelName, fromGuild)
+        try:
+            toChannel = xchannel(toChannelName, fromGuild)
+        except exceptions.DirectMessageException as e:
+            raise Exception(e.text)
         if toChannel is None:
             await fromChannel.send('Could not find channel {}, please check for typos.'.format(toChannelName))
             raise Exception('Attempt to open portal to nowhere')
