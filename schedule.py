@@ -104,7 +104,7 @@ async def table_exec_function():
                 for channel in channels:
                     permissions = channel.overwrites_for(user)
                     if permissions.read_messages == False and permissions.send_messages == False and permissions.embed_links == False:
-                        await channel.set_permissions(user, overwrite=discord.PermissionOverWrite(ujson.loads(mode_args)), reason="Permission overwrite triggered by schedule obo "+user.name)
+                        await channel.set_permissions(user, overwrite=discord.PermissionOverwrite(ujson.loads(mode_args)), reason="Permission overwrite triggered by schedule obo "+user.name)
                         channel_names += f'{guild.name}:{channel.name}, '
                 channel_names = channel_names[:-2]
                 if args[0].strip()[-2:] == ':*':
