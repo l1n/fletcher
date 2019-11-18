@@ -137,9 +137,12 @@ class CommandHandler:
                     toGuild = self.client.get_guild(metuple[0])
                     toChannel = toGuild.get_channel(metuple[1])
                     toMessage = await toChannel.fetch_message(metuple[2])
-                    syncReaction = await toMessage.add_reaction(reaction.emoji)
+                    reactionStr = reaction.emoji.name
+                    if reactionStr.startswith(':'):
+                        reactionStr = reactionStr.split(':')[1]
+                    syncReaction = await toMessage.add_reaction(reactionStr)
                     cur = conn.cursor()
-                    cur.execute("UPDATE messagemap SET reactions = reactions || %s WHERE fromguild = %s AND fromchannel = %s AND frommessage = %s;", [reaction.emoji, message.guild.id, message.channel.id, message.id])
+                    cur.execute("UPDATE messagemap SET reactions = reactions || %s WHERE fromguild = %s AND fromchannel = %s AND frommessage = %s;", [reaction.emoji.name, message.guild.id, message.channel.id, message.id])
                     conn.commit()
         except Exception as e:
             if "cur" in locals() and "conn" in locals():
