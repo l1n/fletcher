@@ -696,6 +696,15 @@ async def names_sync_aware_function(message, client, args):
         logger.error(f'NSAF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
 
 
+async def delete_all_invites(message, client, args):
+    try:
+        invites = await message.guild.invites()
+        for invite in invites:
+            await invite.delete(reason=f'Obo {message.author.id}')
+    except Exception as e:
+        exc_type, exc_bj, exc_tb = exc_info()
+        logger.error(f'DAI[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
+
 def autoload(ch):
     ch.add_command({
         'trigger': ['!mycolor', '!mycolour'],
@@ -849,6 +858,16 @@ def autoload(ch):
         'args_num': 0,
         'args_name': [],
         'description': 'Dump channel logs to a pastebin',
+        })
+    ch.add_command({
+        'trigger': ['!delete_all_invites'],
+        'function': delete_all_invites,
+        'async': True,
+        'admin': 'server',
+        'long_run': 'channel',
+        'args_num': 0,
+        'args_name': [],
+        'description': 'Delete all invites for this server',
         })
     ch.add_command({
         'trigger': ['!copy_permissions_from'],
