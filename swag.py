@@ -459,11 +459,11 @@ def join_rank_function(message, client, args):
                 member = sorted_member_list[member_rank-1]
             except IndexError:
                 element = periodictable.elements[member_rank]
-                return f'Predicted elemental member {element.number} would have an atomic mass of {element.mass} daltons if they existed!'
+                return f'Predicted elemental member {element.name} would have an atomic mass of {element.mass} daltons if they existed!'
         else:
             member_rank = sorted_member_list.index(member)+1
-        # Gareth on codegolf
-        ordinal = lambda n: "%d%s" % (n,"tsnrhtdd"[(n/10%10!=1)*(n%10<4)*n%10::4])
+        # Thanks to Celer for this~!
+        ordinal = lambda n: str(n)+("th" if (n%10>3 or 10<n%100<20) else {1:"st",2:"nd",3:"rd"}[n%10])
         if member_rank < 118: # len(periodictable.elements):
             member_element = f'Your element is {periodictable.elements[member_rank].name.title()}.'
         else:
