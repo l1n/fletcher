@@ -181,7 +181,7 @@ async def load_webhooks():
             pass
     globals()['webhook_sync_registry'] = webhook_sync_registry
     logger.debug("Webhooks loaded:")
-    logger.debug("\n".join([f'{key} to {webhook_sync_registry[key]["toChannelName"]} (Guild {webhook_sync_registry[key]["toChannelObject"].guild.id}) -> (Guild {webhook_sync_registry[key]["fromChannelObject"].guild.id})' for key in list(webhook_sync_registry) if type(webhook_sync_registry[key]) is not str]))
+    logger.debug("\n".join([f'{key} to {webhook_sync_registry[key]["toChannelName"]} (Guild {webhook_sync_registry[key]["toChannelObject"].guild.id})' for key in list(webhook_sync_registry) if type(webhook_sync_registry[key]) is not str]))
 canticum_message = None
 doissetep_omega =  None
 def autoload(module, choverride):
