@@ -28,10 +28,10 @@ def xchannel(targetChannel, currentGuild):
     toChannel = None
     toGuild = None
     if targetChannel.startswith('<#'):
-        targetChannel = targetChannel[2:-1].strip()
+        targetChannel = targetChannel.strip()[2:-1]
         channelLookupBy = 'ID'
     elif targetChannel.startswith('#'):
-        targetChannel = targetChannel[1:].strip()
+        targetChannel = targetChannel.strip()[1:]
     logger.debug(f'XC: Channel Identifier {channelLookupBy}:{targetChannel}')
     if channelLookupBy == 'Name':
         if ':' not in targetChannel and '#' not in targetChannel:
