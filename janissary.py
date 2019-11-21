@@ -8,6 +8,7 @@ import random
 import textwrap
 import text_manipulators
 import ujson
+import exceptions
 # global conn set by reload_function
 
 logger = logging.getLogger('fletcher')
