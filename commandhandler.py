@@ -141,7 +141,7 @@ class CommandHandler:
                     if reactionStr.startswith(':'):
                         reactionStr = reactionStr.split(':')[1]
                     if reaction.emoji.is_custom_emoji():
-                        processed_emoji = client.get_emoji(reaction.emoji.id)
+                        processed_emoji = self.client.get_emoji(reaction.emoji.id)
                     else:
                         processed_emoji = reaction.emoji.name;
                     syncReaction = await toMessage.add_reaction(processed_emoji)
