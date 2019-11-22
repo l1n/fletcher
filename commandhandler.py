@@ -140,7 +140,7 @@ class CommandHandler:
                     reactionStr = reaction.emoji.name
                     if reactionStr.startswith(':'):
                         reactionStr = reactionStr.split(':')[1]
-                    syncReaction = await toMessage.add_reaction(reactionStr)
+                    syncReaction = await toMessage.add_reaction(reaction)
                     cur = conn.cursor()
                     cur.execute("UPDATE messagemap SET reactions = reactions || %s WHERE fromguild = %s AND fromchannel = %s AND frommessage = %s;", ['{"'+reaction.emoji.name+'"}', message.guild.id, message.channel.id, message.id])
                     conn.commit()
