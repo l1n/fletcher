@@ -667,8 +667,10 @@ async def add_inbound_sync_function(message, client, args):
         toChannelName = args[0].strip()
         toChannel = messagefuncs.xchannel(toChannelName, message.guild)
 
+        await message.add_reaction('🔜')
         await message.channel.create_webhook(name=config.get('discord', dict()).get('botNavel', 'botNavel')+' ('+toChannel.guild.name.replace(" ", "_")+':'+toChannel.name.replace(" ", "_")+')', reason=f'On behalf of {message.author.name}')
-
+        await message.remove_reaction('🔜', client.user)
+        await message.add_reaction('✅')
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
         logger.error(f'AOSF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
@@ -692,6 +694,7 @@ async def names_sync_aware_function(message, client, args):
         else:
             target = message.channel
         await messagefuncs.sendWrappedMessage(message_body, target)
+        await message.add_reaction('✅')
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
         logger.error(f'NSAF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
@@ -716,6 +719,7 @@ async def voice_opt_out(message, client, args):
         for voice_channel in filter(lambda channel: isinstance(channel, discord.VoiceChannel), guild.channels):
             logger.debug(f'{voice_channel}')
             await voice_channel.set_permissions(message.author, connect=False, read_messages=False)
+        await message.add_reaction('✅')
     except Exception as e:
         exc_type, exc_bj, exc_tb = exc_info()
         logger.error(f'VOO[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
