@@ -712,8 +712,10 @@ async def voice_opt_out(message, client, args):
             guild = discord.utils.get(client.guilds, name=messagefuncs.expand_guild_name(args[0], suffix='').strip().replace("_", " "))
         else:
             guild = message.guild
+        logger.debug(f'Leaving voice channels in {guild}')
         for voice_channel in filter(lambda channel: isinstance(channel, discord.VoiceChannel), guild.channels):
-            await voice_channel.set_permissions(message.author, connect=False)
+            logger.debug(f'{voice_channel}')
+            await voice_channel.set_permissions(message.author, connect=False, read_messages=False)
     except Exception as e:
         exc_type, exc_bj, exc_tb = exc_info()
         logger.error(f'VOO[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
