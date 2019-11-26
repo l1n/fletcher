@@ -709,7 +709,7 @@ async def delete_all_invites(message, client, args):
 async def voice_opt_out(message, client, args):
     try:
         if message.guild is None:
-            guild = messagefuncs.expand_guild_name(args[0], suffix='')
+            guild = discord.utils.get(client.guilds, name=messagefuncs.expand_guild_name(args[0], suffix='').strip().replace("_", " "))
         else:
             guild = message.guild
         for voice_channel in filter(lambda channel: isinstance(channel, discord.VoiceChannel), guild.channels):
