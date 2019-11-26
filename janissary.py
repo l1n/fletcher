@@ -706,6 +706,18 @@ async def delete_all_invites(message, client, args):
         exc_type, exc_bj, exc_tb = exc_info()
         logger.error(f'DAI[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
 
+async def voice_opt_out(message, client, args):
+    try:
+        if isinstance(message.channel, discord.DMChannel):
+            guild = messagefuncs.expand_guild_name(args[0], suffix='')
+        else:
+            guild = message.guild
+        for voice_channel in filter(lambda channel: isinstance(channel, discord.VoiceChannel), guild.channels):
+            await voice_channel.set_permissions(message.author, connect=False)
+    except Exception as e:
+        exc_type, exc_bj, exc_tb = exc_info()
+        logger.error(f'VOO[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
+
 def autoload(ch):
     ch.add_command({
         'trigger': ['!mycolor', '!mycolour'],
@@ -824,6 +836,14 @@ def autoload(ch):
         'args_num': 0,
         'args_name': ['#channel'],
         'description': 'Join a channel, no arguments to list available channels.'
+        })
+    ch.add_command({
+        'trigger': ['!voiceoptout'],
+        'function': voice_opt_out,
+        'async': True,
+        'args_num': 0,
+        'args_name': [''],
+        'description': 'Leave all voice channels for current guild. Cannot be reversed except by admin.'
         })
     ch.add_command({
         'trigger': ['!part', '!optout'],
