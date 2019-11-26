@@ -1,6 +1,7 @@
 import aiohttp
 from collections import Counter
 import discord
+import ephem
 import io
 import logging
 import messagefuncs
@@ -595,6 +596,24 @@ def autoload(ch):
         'long_run': False,
         'args_name': ['@member (optional)'],
         'description': 'Check what number member you (or mentioned user) were to join this server.'
+        })
+    ch.add_command({
+        'trigger': ['!nextfullmoon'],
+        'function': lambda message, client, args: ephem.next_full_moon(datetime.now()),
+        'async': False,
+        'args_num': 0,
+        'long_run': False,
+        'args_name': [],
+        'description': 'Next full moon time',
+        })
+    ch.add_command({
+        'trigger': ['!nextnewmoon'],
+        'function': lambda message, client, args: ephem.next_new_moon(datetime.now()),
+        'async': False,
+        'args_num': 0,
+        'long_run': False,
+        'args_name': [],
+        'description': 'Next new moon time',
         })
     if session:
         session.close()
