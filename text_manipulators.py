@@ -265,13 +265,17 @@ async def rot13_function(message, client, args):
                     return await args[1].send(codecs.encode(message.content.split("\n", 1)[1], 'rot_13'))
                 else:
                     return await args[1].send("Spoiler from conversation in <#{}> ({}) <https://discordapp.com/channels/{}/{}/{}>\n{}: {}".format(message.channel.id, message.channel.guild.name, message.channel.guild.id, message.channel.id, message.id, message.content.split(': ', 1)[0], codecs.encode(message.content.split(': ', 1)[1], 'rot_13')))
-            else:
+            elif not args[1].bot:
                 return await args[1].send("Spoiler from conversation in <#{}> ({}) <https://discordapp.com/channels/{}/{}/{}>\n{}: {}".format(message.channel.id, message.channel.guild.name, message.channel.guild.id, message.channel.id, message.id, message.author.display_name, codecs.encode(message.content, 'rot_13')))
+            else:
+                return logger.debug('Ignoring bot trigger')
         elif len(args) == 2 and args[1] == 'INTPROC':
             return codecs.encode(args[0], 'rot_13')
         else:
             if len(args) == 3 and type(args[1]) is discord.Member and args[1].bot:
                 return logger.debug('Ignoring bot reaction')
+            elif len(args) == 3 and type(args[1]) is discord.Member and not args[1].bot:
+                logger.debug(args[1])
             messageContent = "**"+message.author.display_name+"**: "+codecs.encode(" ".join(args), 'rot_13')
             botMessage = await message.channel.send(messageContent)
             await botMessage.add_reaction(client.get_emoji(int(config['discord']['rot13'])))
