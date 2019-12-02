@@ -270,6 +270,8 @@ async def rot13_function(message, client, args):
         elif len(args) == 2 and args[1] == 'INTPROC':
             return codecs.encode(args[0], 'rot_13')
         else:
+            if len(args) == 3 and type(args[1]) is discord.Member and args[1].bot:
+                return logger.debug('Ignoring bot reaction')
             messageContent = "**"+message.author.display_name+"**: "+codecs.encode(" ".join(args), 'rot_13')
             botMessage = await message.channel.send(messageContent)
             await botMessage.add_reaction(client.get_emoji(int(config['discord']['rot13'])))
