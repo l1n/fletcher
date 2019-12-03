@@ -367,7 +367,7 @@ async def on_message(message):
             webhook = await client.fetch_webhook(message.webhook_id)
             if webhook.name not in config.get("sync", dict()).get("whitelist-webhooks", "").split(','):
                 return
-        if message.guild is not None and (message.guild.name+':'+message.channel.name in webhook_sync_registry.keys()) and not message.content.startswith(tuple(config.get('sync', {}).get(f'tupper-ignore-{message.author.id}', '').split(','))):
+        if message.guild is not None and (message.guild.name+':'+message.channel.name in webhook_sync_registry.keys()) and not (config.get('sync', {}).get(f'tupper-ignore-{message.author.id}', '') and message.content.startswith(tuple(config.get('sync', {}).get(f'tupper-ignore-{message.author.id}', '').split(',')))):
             content = message.clean_content
             attachments = []
             if len(message.attachments) > 0:
