@@ -25,7 +25,7 @@ def whereami_function(message, client, args):
     scoped_config = None
     if "Guild "+str(message.guild.id) in config:
         scoped_config = config["Guild "+str(message.guild.id)]
-    return scoped_config["whereami"]
+    return scoped_config.get("whereami", f'{message.guild.name} ({message.guild.id})')
 
 def status_function(message, client, args):
     global versioninfo

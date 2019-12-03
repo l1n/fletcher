@@ -449,12 +449,12 @@ async def on_raw_message_edit(payload):
             if metuple is not None:
                 toGuild = client.get_guild(metuple[0])
                 to_guild_config = ch.scope_config(guild=toGuild)
-                if to_guild_config.get('sync', {}).get('edits', 'on') != 'on':
+                if to_guild_config.get('sync-edits', 'on') != 'on':
                     logger.debug(f'ORMU: Demurring to edit message at client guild request')
                     return
                 toChannel = toGuild.get_channel(metuple[1])
                 toMessage = await toChannel.fetch_message(metuple[2])
-                if to_guild_config.get('sync', {}).get('deletions', 'on') != 'on':
+                if to_guild_config.get('sync-deletions', 'on') != 'on':
                     logger.debug(f'ORMU: Demurring to delete edited message at client guild request')
                 else:
                     await toMessage.delete()
@@ -526,7 +526,7 @@ async def on_raw_message_delete(message):
             if metuple is not None:
                 toGuild = client.get_guild(metuple[0])
                 to_guild_config = ch.scope_config(guild=toGuild)
-                if to_guild_config.get('sync', {}).get('deletions', 'on') != 'on':
+                if to_guild_config.get('sync-deletions', 'on') != 'on':
                     logger.debug(f'ORMD: Demurring to delete message at client guild request')
                     return
                 toChannel = toGuild.get_channel(metuple[1])
