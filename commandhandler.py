@@ -142,7 +142,7 @@ class CommandHandler:
                     else:
                         processed_emoji = reaction.emoji.name;
                     logger.debug(f'RXH: Syncing {processed_emoji} to {fromMessage}')
-                    syncReaction = await toMessage.add_reaction(processed_emoji)
+                    syncReaction = await fromMessage.add_reaction(processed_emoji)
                     cur = conn.cursor()
                     cur.execute("UPDATE messagemap SET reactions = reactions || %s WHERE toguild = %s AND tochannel = %s AND tomessage = %s;", ['{"'+reaction.emoji.name+'"}', message.guild.id, message.channel.id, message.id])
                     conn.commit()
