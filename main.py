@@ -417,11 +417,19 @@ async def on_raw_message_edit(payload):
         # This is tricky with self-modifying bot message synchronization, TODO
         message_id = payload.message_id
         message = payload.data
-        if 'guild_id' not in message:
-            return # No DM processing pls
-        fromGuild = client.get_guild(int(message['guild_id']))
-        fromChannel = fromGuild.get_channel(int(message['channel_id']))
-        fromMessage = await fromChannel.fetch_message(message_id)
+        if 'guild_id' in message:
+            fromGuild = client.get_guild(int(message['guild_id']))
+            fromChannel = fromGuild.get_channel(int(message['channel_id']))
+        else:
+            fromChannel = client.get_channel(int(message['channel_id']))
+        try:
+            fromMessage = await fromChannel.fetch_message(message_id)
+        except discord.NotFound as e:
+            exc_type, exc_obj, exc_tb = exc_info()
+            extra = {'CHANNEL_IDENTIFIER': fromChannel.name, 'MESSAGE_ID': str(message_id), 'payload': str(payload)}
+            if fromGuild:
+                extra['GUILD_IDENTIFIER'] = fromGuild.name
+            logger.error(f'ORMU[{exc_tb.tb_lineno}]: {type(e).__name__} {e}', extra=extra)
         if len(fromMessage.content) > 0:
             if type(fromChannel) is discord.TextChannel:
                 logger.info(str(message_id)+" #"+fromGuild.name+":"+fromChannel.name+" <"+fromMessage.author.name+":"+str(fromMessage.author.id)+"> [Edit] "+fromMessage.content, extra={'GUILD_IDENTIFIER': fromGuild.name, 'CHANNEL_IDENTIFIER': fromChannel.name, 'SENDER_NAME': fromMessage.author.name, 'SENDER_ID': fromMessage.author.id, 'MESSAGE_ID': str(fromMessage.id)})
