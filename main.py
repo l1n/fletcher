@@ -448,9 +448,16 @@ async def on_raw_message_edit(payload):
             conn.commit()
             if metuple is not None:
                 toGuild = client.get_guild(metuple[0])
+                to_guild_config = client.scope_config(guild=toGuild)
+                if to_guild_config.get('sync', {}).get('edits', 'on') != 'on':
+                    logger.debug(f'ORMU: Demurring to edit message at client guild request')
+                    return
                 toChannel = toGuild.get_channel(metuple[1])
                 toMessage = await toChannel.fetch_message(metuple[2])
-                await toMessage.delete()
+                if to_guild_config.get('sync', {}).get('deletions', 'on') != 'on':
+                    logger.debug(f'ORMU: Demurring to delete edited message at client guild request')
+                else:
+                    await toMessage.delete()
                 content = fromMessage.clean_content
                 attachments = []
                 if len(fromMessage.attachments) > 0:
@@ -506,6 +513,7 @@ async def on_raw_message_delete(message):
         else:
             # Group Channels don't support bots so neither will we
             pass
+        guild_config = client.scope_config(guild=message.guild)
         if type(fromChannel) is discord.TextChannel and (fromGuild.name+':'+fromChannel.name in webhook_sync_registry.keys()):
             # Give messages time to be added to the database
             await asyncio.sleep(1)
@@ -517,6 +525,10 @@ async def on_raw_message_delete(message):
             conn.commit()
             if metuple is not None:
                 toGuild = client.get_guild(metuple[0])
+                to_guild_config = client.scope_config(guild=toGuild)
+                if to_guild_config.get('sync', {}).get('deletions', 'on') != 'on':
+                    logger.debug(f'ORMD: Demurring to delete message at client guild request')
+                    return
                 toChannel = toGuild.get_channel(metuple[1])
                 toMessage = None
                 while not toMessage:
