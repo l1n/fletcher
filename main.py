@@ -14,6 +14,8 @@ import math
 import os
 import psycopg2
 import re
+import sentry_sdk
+sentry_sdk.init("https://7654ff657b6447d78c3eee40151c9414@sentry.io/1842241")
 import signal
 import traceback
 
@@ -365,7 +367,7 @@ async def on_message(message):
             webhook = await client.fetch_webhook(message.webhook_id)
             if webhook.name not in config.get("sync", dict()).get("whitelist-webhooks", "").split(','):
                 return
-        if message.guild is not None and (message.guild.name+':'+message.channel.name in webhook_sync_registry.keys()):
+        if message.guild is not None and (message.guild.name+':'+message.channel.name in webhook_sync_registry.keys()) and not message.content.startswith(config.get('sync', {}).get(f'tupper-ignore-{message.author.id}', '').split(',')):
             content = message.clean_content
             attachments = []
             if len(message.attachments) > 0:
