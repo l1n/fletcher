@@ -506,7 +506,7 @@ async def on_raw_message_delete(message):
         else:
             # Group Channels don't support bots so neither will we
             pass
-        if message.guild is not None and (fromGuild.name+':'+fromChannel.name in webhook_sync_registry.keys()):
+        if type(fromChannel) is discord.TextChannel and (fromGuild.name+':'+fromChannel.name in webhook_sync_registry.keys()):
             # Give messages time to be added to the database
             await asyncio.sleep(1)
             cur = conn.cursor()
