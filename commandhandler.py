@@ -130,6 +130,23 @@ class CommandHandler:
                         return await message.channel.send(str(command['function'](message, self.client, args)))
             if message.guild is not None and (message.guild.name+':'+message.channel.name in self.webhook_sync_registry.keys()):
                 cur = conn.cursor()
+                cur.execute("SELECT fromguild, fromchannel, frommessage FROM messagemap WHERE toguild = %s AND tochannel = %s AND tomessage = %s LIMIT 1;", [message.guild.id, message.channel.id, message.id])
+                metuple = cur.fetchone()
+                conn.commit()
+                if metuple is not None:
+                    fromGuild = self.client.get_guild(metuple[0])
+                    fromChannel = fromGuild.get_channel(metuple[1])
+                    fromMessage = await fromChannel.fetch_message(metuple[2])
+                    if reaction.emoji.is_custom_emoji():
+                        processed_emoji = self.client.get_emoji(reaction.emoji.id)
+                    else:
+                        processed_emoji = reaction.emoji.name;
+                    logger.debug(f'RXH: Syncing {processed_emoji} to {fromMessage}')
+                    syncReaction = await toMessage.add_reaction(processed_emoji)
+                    cur = conn.cursor()
+                    cur.execute("UPDATE messagemap SET reactions = reactions || %s WHERE toguild = %s AND tochannel = %s AND tomessage = %s;", ['{"'+reaction.emoji.name+'"}', message.guild.id, message.channel.id, message.id])
+                    conn.commit()
+                cur = conn.cursor()
                 cur.execute("SELECT toguild, tochannel, tomessage FROM messagemap WHERE fromguild = %s AND fromchannel = %s AND frommessage = %s LIMIT 1;", [message.guild.id, message.channel.id, message.id])
                 metuple = cur.fetchone()
                 conn.commit()
@@ -137,13 +154,11 @@ class CommandHandler:
                     toGuild = self.client.get_guild(metuple[0])
                     toChannel = toGuild.get_channel(metuple[1])
                     toMessage = await toChannel.fetch_message(metuple[2])
-                    reactionStr = reaction.emoji.name
-                    if reactionStr.startswith(':'):
-                        reactionStr = reactionStr.split(':')[1]
                     if reaction.emoji.is_custom_emoji():
                         processed_emoji = self.client.get_emoji(reaction.emoji.id)
                     else:
                         processed_emoji = reaction.emoji.name;
+                    logger.debug(f'RXH: Syncing {processed_emoji} to {toMessage}')
                     syncReaction = await toMessage.add_reaction(processed_emoji)
                     cur = conn.cursor()
                     cur.execute("UPDATE messagemap SET reactions = reactions || %s WHERE fromguild = %s AND fromchannel = %s AND frommessage = %s;", ['{"'+reaction.emoji.name+'"}', message.guild.id, message.channel.id, message.id])
@@ -481,6 +496,19 @@ Indexes:
 '''
 
 def load_user_config(ch):
+    def load_tuppers(ch):
+        cur = conn.cursor()
+        cur.execute("SELECT user_id, guild_id, key, value FROM user_preferences WHERE key = 'tupper';")
+        tuptuple = cur.fetchone()
+        while tuptuple:
+            if not ch.config.get('sync'):
+                ch.config['sync'] = {}
+            ignorekey = f'tupper-ignore-{tuptuple[0]}'
+            if not ch.config['sync'].get(ignorekey, ''):
+                ch.config['sync'][ignorekey] = ''
+            ch.config['sync'][ignorekey] += f'{ch.config["sync"][ignorekey]},{tuptuple[3]}'.strip(',')
+            tuptuple = cur.fetchone()
+        conn.commit()
     def load_react_notifications(ch):
         cur = conn.cursor()
         cur.execute("SELECT user_id, guild_id, key, value FROM user_preferences WHERE key = 'subscribe';")
@@ -495,6 +523,7 @@ def load_user_config(ch):
             subtuple = cur.fetchone()
         conn.commit()
     load_react_notifications(ch)
+    load_tuppers(ch)
 
 def autoload(ch):
     global tag_id_as_command
