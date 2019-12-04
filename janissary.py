@@ -660,13 +660,13 @@ async def copy_emoji_function(message, client, args):
         else:
             emoji = emoji[0]
         if emoji:
-            target = await message.channel.send('Add reaction {emoji}?')
+            target = await message.channel.send(f'Add reaction {emoji}?')
             await target.add_reaction('✅')
             try:
                 reaction, user = await client.wait_for('reaction_add', timeout=6000.0, check=lambda reaction, user: (str(reaction.emoji) == str('✅')) and (user == message.author))
             except asyncio.TimeoutError:
                 pass
-            custom_emoji = await message.guild.create_custom_emoji(emoji.name, await emoji.url.read(), reason=f'Synced from {emoji.guild} for {message.author.name}')
+            custom_emoji = await message.guild.create_custom_emoji(name=emoji.name, image=(await emoji.url.read()), reason=f'Synced from {emoji.guild} for {message.author.name}')
             await message.channel.send(custom_emoji)
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
