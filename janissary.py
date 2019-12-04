@@ -670,6 +670,10 @@ async def copy_emoji_function(message, client, args):
                 pass
             custom_emoji = await message.guild.create_custom_emoji(name=emoji.name, image=(await emoji.url.read()), reason=f'Synced from {emoji.guild} for {message.author.name}')
             await message.channel.send(custom_emoji)
+    except discord.Forbidden as e:
+        await message.author.send('There was a permissions error when executing this command, please grant me the Manage Emojis permission and try again!')
+        exc_type, exc_obj, exc_tb = exc_info()
+        logger.info(f'CEF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
         logger.error(f'CEF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
