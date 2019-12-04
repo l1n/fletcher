@@ -651,6 +651,26 @@ async def copy_permissions_function(message, client, args):
         exc_type, exc_obj, exc_tb = exc_info()
         logger.error(f'CPF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
 
+async def copy_emoji_function(message, client, args):
+    try:
+        emoji_query = args[0].strip(':')
+        emoji = list(filter(lambda m: m.name == emoji_query, client.emojis))
+        if len(args) >= 2:
+            emoji = emoji[int(args[1])]
+        else:
+            emoji = emoji[0]
+        if emoji:
+            target = await message.channel.send('Add reaction {emoji}?')
+            await target.add_reaction('✅')
+            try:
+                reaction, user = await client.wait_for('reaction_add', timeout=6000.0, check=lambda reaction, user: (str(reaction.emoji) == str('✅')) and (user == message.author))
+            except asyncio.TimeoutError:
+                pass
+            custom_emoji = await message.guild.create_custom_emoji(emoji.name, await emoji.url.read(), reason=f'Synced from {emoji.guild} for {message.author.name}')
+            await message.channel.send(custom_emoji)
+    except Exception as e:
+        exc_type, exc_obj, exc_tb = exc_info()
+        logger.error(f'CEF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
 
 async def clear_inbound_sync_function(message, client, args):
     global config
@@ -895,6 +915,15 @@ def autoload(ch):
         'args_num': 0,
         'args_name': [],
         'description': 'Delete all invites for this server',
+        })
+    ch.add_command({
+        'trigger': ['!copy_emoji'],
+        'function': copy_emoji_function,
+        'async': True,
+        'admin': 'server',
+        'args_num': 1,
+        'args_name': ['reaction name', 'offset (optional)'],
+        'description': 'Copy emoji to this server',
         })
     ch.add_command({
         'trigger': ['!copy_permissions_from'],
