@@ -42,7 +42,9 @@ async def fetch(client, url):
 
 async def buglist_function(message, client, args):
     try:
-        source_url = 'https://todo.sr.ht/~nova/fletcher/'+args[0]
+        if len(args) == 0:
+            return await message.channel.send('Tracker available at https://todo.sr.ht/~nova/fletcher/, specify issue number for details.')
+        source_url = f'https://todo.sr.ht/~nova/fletcher/{args[0]}'
         async with aiohttp.ClientSession() as session:
             request_body = await fetch(session, source_url)
             # The HTML on this page does not lend itself to parsing :( Might be worth contributing a patch to upstream, if for no other reason than to get OpenGraph tags working (https://git.sr.ht/~sircmpwn/todo.sr.ht)
@@ -59,9 +61,9 @@ async def buglist_function(message, client, args):
 
 def autoload(ch):
     ch.add_command({
-        'trigger': ['!issue'],
+        'trigger': ['!issue', '!todo'],
         'function': buglist_function,
-        'async': True, 'args_num': 1, 'args_name': [], 'description': 'Show Fletcher issue information'
+        'async': True, 'args_num': 0, 'args_name': ['Issue # from the tracker'], 'description': 'Show Fletcher issue and tot information'
         })
     ch.add_command({
         'trigger': ['!whereami'],
