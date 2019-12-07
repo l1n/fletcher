@@ -374,9 +374,8 @@ async def on_message(message):
                 plural = ""
                 if len(message.attachments) > 1:
                     plural = "s"
-                content = content + "\n "+str(len(message.attachments))+" file"+plural+" attached"
                 if message.channel.is_nsfw() and not webhook_sync_registry[message.guild.name+':'+message.channel.name]['toChannelObject'].is_nsfw():
-                    content = content + " from an R18 channel."
+                    content = f'{content}\n {len(message.attachments)} file{plural} attached from an R18 channel.'
                     for attachment in message.attachments:
                         content = content + "\n• <"+attachment.url+">"
                 else:
@@ -464,9 +463,8 @@ async def on_raw_message_edit(payload):
                     plural = ""
                     if len(fromMessage.attachments) > 1:
                         plural = "s"
-                    content = content + "\n "+str(len(fromMessage.attachments))+" file"+plural+" attached"
                     if fromMessage.channel.is_nsfw() and not webhook_sync_registry[fromMessage.guild.name+':'+fromMessage.channel.name]['toChannelObject'].is_nsfw():
-                        content = content + " from an R18 channel."
+                        content = f'{content}\n {len(message.attachments)} file{plural} attached from an R18 channel.'
                         for attachment in fromMessage.attachments:
                             content = content + "\n• <"+attachment.url+">"
                     else:
