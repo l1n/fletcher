@@ -601,7 +601,15 @@ async def chanlog_function(message, client, args):
     try:
         await message.add_reaction('🔜')
         content = f'Log for {message.guild.name}:{message.channel.name} as of {datetime.utcnow()}\n'
-        async for historical_message in message.channel.history(limit=None, oldest_first=True):
+        if len(args) > 0:
+            before = int(args[0])
+        else:
+            before = None
+        if len(args) > 1:
+            after = int(args[1])
+        else:
+            after = None
+        async for historical_message in message.channel.history(limit=None, oldest_first=True, before=before, after=after):
             content += f'{historical_message.id} {historical_message.created_at} <{historical_message.author.display_name}:{historical_message.author.id}> {historical_message.system_content}\n'
             for attachment in historical_message.attachments:
                 content += f'{historical_message.id} {historical_message.created_at} <{historical_message.author.display_name}:{historical_message.author.id}> {attachment.url}\n'
