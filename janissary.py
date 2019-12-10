@@ -600,22 +600,34 @@ async def role_message_function(message, client, args, remove=False):
 async def chanlog_function(message, client, args):
     try:
         await message.add_reaction('🔜')
-        content = f'Log for {message.guild.name}:{message.channel.name} as of {datetime.utcnow()}\n'
+        content = f'Log for {message.guild.name}:{message.channel.name}'
+        async def log_message(message):
+            content = f'{message.id} {message.created_at} <{message.author.display_name}:{message.author.id}> {message.system_content}\n'
+            for attachment in message.attachments:
+                content += f'{message.id} {message.created_at} <{message.author.display_name}:{message.author.id}> {attachment.url}\n'
+            for reaction in message.reactions:
+                async for user in reaction.users():
+                    content += f'Reaction to {message.id}: {reaction.emoji} from {user.display_name} ({user.id})\n'
+            return content
         if len(args) > 0:
+            content += f' before {args[0]}'
             before = await message.channel.fetch_message(id=args[0])
         else:
             before = None
         if len(args) > 1:
+            content += f' after {args[1]}'
             after = await message.channel.fetch_message(id=args[1])
         else:
             after = None
+
+        content += f' as of {datetime.utcnow()}\n'
+
+        if before:
+            content += await log_message(before)
         async for historical_message in message.channel.history(limit=None, oldest_first=True, before=before, after=after):
-            content += f'{historical_message.id} {historical_message.created_at} <{historical_message.author.display_name}:{historical_message.author.id}> {historical_message.system_content}\n'
-            for attachment in historical_message.attachments:
-                content += f'{historical_message.id} {historical_message.created_at} <{historical_message.author.display_name}:{historical_message.author.id}> {attachment.url}\n'
-            for reaction in historical_message.reactions:
-                async for user in reaction.users():
-                    content += f'Reaction to {historical_message.id}: {reaction.emoji} from {user.display_name} ({user.id})\n'
+            content += await log_message(historical_message)
+        if after:
+            content += await log_message(before)
         link = text_manipulators.fiche_function(content, message.id)
         await message.author.send(link)
         await message.remove_reaction('🔜', client.user)
