@@ -602,11 +602,11 @@ async def chanlog_function(message, client, args):
         await message.add_reaction('🔜')
         content = f'Log for {message.guild.name}:{message.channel.name} as of {datetime.utcnow()}\n'
         if len(args) > 0:
-            before = int(args[0])
+            before = await message.channel.fetch_message(id=args[0])
         else:
             before = None
         if len(args) > 1:
-            after = int(args[1])
+            after = await message.channel.fetch_message(id=args[1])
         else:
             after = None
         async for historical_message in message.channel.history(limit=None, oldest_first=True, before=before, after=after):
