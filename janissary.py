@@ -601,14 +601,24 @@ async def chanlog_function(message, client, args):
     try:
         await message.add_reaction('🔜')
         content = f'Log for {message.guild.name}:{message.channel.name}'
-        async def log_message(message):
-            content = f'{message.id} {message.created_at} <{message.author.display_name}:{message.author.id}> {message.system_content}\n'
-            for attachment in message.attachments:
-                content += f'{message.id} {message.created_at} <{message.author.display_name}:{message.author.id}> {attachment.url}\n'
-            for reaction in message.reactions:
-                async for user in reaction.users():
-                    content += f'Reaction to {message.id}: {reaction.emoji} from {user.display_name} ({user.id})\n'
-            return content
+        if 'short' in args:
+            async def log_message(message):
+                content = f'{message.created_at.strftime("%b %d %Y %H:%M:%S")} <{message.author.display_name}> {message.system_content}\n'
+                for attachment in message.attachments:
+                    content += f'{message.created_at.strftime("%b %d %Y %H:%M:%S")} <{message.author.display_name}> {attachment.url}\n'
+                for reaction in message.reactions:
+                    async for user in reaction.users():
+                        content += f'{user.display_name} reacted with {reaction.emoji}\n'
+                return content
+        else:
+            async def log_message(message):
+                content = f'{message.id} {message.created_at.strftime("%b %d %Y %H:%M:%S")} <{message.author.display_name}:{message.author.id}> {message.system_content}\n'
+                for attachment in message.attachments:
+                    content += f'{message.id} {message.created_at.strftime("%b %d %Y %H:%M:%S")} <{message.author.display_name}:{message.author.id}> {attachment.url}\n'
+                for reaction in message.reactions:
+                    async for user in reaction.users():
+                        content += f'Reaction to {message.id}: {reaction.emoji} from {user.display_name} ({user.id})\n'
+                return content
         if len(args) > 0:
             content += f' before {args[0]}'
             before = await message.channel.fetch_message(id=args[0])
