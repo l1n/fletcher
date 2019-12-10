@@ -617,7 +617,7 @@ async def chanlog_function(message, client, args):
                         content += f'{user.display_name} reacted with {reaction.emoji}\n'
                 return content
         else:
-            async def log_message(message):
+            async def log_message(message, last_created_at=None, last_author_name=None):
                 content = f'{message.id} {message.created_at.strftime("%b %d %Y %H:%M:%S")} <{message.author.display_name}:{message.author.id}> {message.system_content}\n'
                 for attachment in message.attachments:
                     content += f'{message.id} {message.created_at.strftime("%b %d %Y %H:%M:%S")} <{message.author.display_name}:{message.author.id}> {attachment.url}\n'
