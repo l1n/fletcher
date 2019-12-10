@@ -613,7 +613,7 @@ async def chanlog_function(message, client, args):
                 for attachment in message.attachments:
                     content += f'{message_created_at} {author_name}{attachment.url}\n'
                 for reaction in message.reactions:
-                    users = list(await reaction.users())
+                    users = list(reaction.users())
                     users = [user.display_name for user in users]
                     content += f'{",".join(users)} reacted with {reaction.emoji}\n'
                 return content
