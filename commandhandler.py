@@ -29,7 +29,7 @@ def allowCommand(command, message):
             elif str(command['admin']).startswith('channel:') and message.channel.id in [int(channel.strip()) for channel in command['admin'].split(':')[1].split(',')] and message.author.permissions_in(message.channel).manage_webhooks:
                 return True
             # Any server
-            elif command['admin'] in ['server', True] and message.author.guild_permissions.manage_webhooks:
+            elif command['admin'] in ['server', True] and (message.author.guild_permissions.manage_webhooks or (config['discord'].get('globalAdminIsServerAdmin') and message.author.id in [int(admin.strip()) for admin in config['discord']['globalAdmin'].split(',')])):
                 return True
             # Any channel
             elif command['admin'] == 'channel' and message.author.permissions_in(message.channel).manage_webhooks:
