@@ -627,7 +627,7 @@ async def chanlog_function(message, client, args):
         async for historical_message in message.channel.history(limit=None, oldest_first=True, before=before, after=after):
             content += await log_message(historical_message)
         if after:
-            content += await log_message(before)
+            content += await log_message(after)
         link = text_manipulators.fiche_function(content, message.id)
         await message.author.send(link)
         await message.remove_reaction('🔜', client.user)
