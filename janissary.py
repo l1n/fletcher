@@ -622,12 +622,20 @@ async def chanlog_function(message, client, args):
 
         content += f' as of {datetime.utcnow()}\n'
 
-        if before:
-            content += await log_message(before)
-        async for historical_message in message.channel.history(limit=None, oldest_first=True, before=before, after=after):
-            content += await log_message(historical_message)
-        if after:
-            content += await log_message(after)
+        if len(args) > 2 and args[2] == "reverse":
+            if before:
+                content += await log_message(before)
+            async for historical_message in message.channel.history(limit=None, oldest_first=False, before=before, after=after):
+                content += await log_message(historical_message)
+            if after:
+                content += await log_message(after)
+        else:
+            if after:
+                content += await log_message(after)
+            async for historical_message in message.channel.history(limit=None, oldest_first=True, before=before, after=after):
+                content += await log_message(historical_message)
+            if before:
+                content += await log_message(before)
         link = text_manipulators.fiche_function(content, message.id)
         await message.author.send(link)
         await message.remove_reaction('🔜', client.user)
