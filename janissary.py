@@ -602,10 +602,16 @@ async def chanlog_function(message, client, args):
         await message.add_reaction('🔜')
         content = f'Log for {message.guild.name}:{message.channel.name}'
         if 'short' in args:
-            async def log_message(message):
-                content = f'{message.created_at.strftime("%b %d %Y %H:%M:%S")} <{message.author.display_name}> {message.system_content}\n'
+            async def log_message(message, last_created_at=None, last_author_name=None):
+                message_created_at = message.created_at.strftime("%b %d %Y %H:%M:%S")
+                if last_created_at and message.created_at.date() == last_created_at.date():
+                    message_created_at = message_created_at.split(' ')[3]
+                author_name = f'<{message.author.display_name}> '
+                if last_author_name == message.author.display_name:
+                    author_name = ' ' * len(author_name)
+                content = f'{message_created_at} {author_name}{message.system_content}\n'
                 for attachment in message.attachments:
-                    content += f'{message.created_at.strftime("%b %d %Y %H:%M:%S")} <{message.author.display_name}> {attachment.url}\n'
+                    content += f'{message_created_at} {author_name}{attachment.url}\n'
                 for reaction in message.reactions:
                     async for user in reaction.users():
                         content += f'{user.display_name} reacted with {reaction.emoji}\n'
@@ -632,20 +638,30 @@ async def chanlog_function(message, client, args):
 
         content += f' as of {datetime.utcnow()}\n'
 
+        last_created_at = None
+        last_author_name = None
         if len(args) > 2 and args[2] == "reverse":
             if before:
                 content += await log_message(before)
+                last_created_at = before.created_at
+                last_author_name = before.author.display_name
             async for historical_message in message.channel.history(limit=None, oldest_first=False, before=before, after=after):
-                content += await log_message(historical_message)
+                content += await log_message(historical_message, last_created_at=last_created_at, last_author_name=last_author_name)
+                last_created_at = historical_message.created_at
+                last_author_name = historical_message.author.display_name
             if after:
-                content += await log_message(after)
+                content += await log_message(after, last_created_at=last_created_at, last_author_name=last_author_name)
         else:
             if after:
                 content += await log_message(after)
+                last_created_at = after.created_at
+                last_author_name = after.author.display_name
             async for historical_message in message.channel.history(limit=None, oldest_first=True, before=before, after=after):
                 content += await log_message(historical_message)
+                last_created_at = historical_message.created_at
+                last_author_name = historical_message.author.display_name
             if before:
-                content += await log_message(before)
+                content += await log_message(before, last_created_at=last_created_at, last_author_name=last_author_name)
         link = text_manipulators.fiche_function(content, message.id)
         await message.author.send(link)
         await message.remove_reaction('🔜', client.user)
