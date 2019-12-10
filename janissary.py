@@ -646,22 +646,22 @@ async def chanlog_function(message, client, args):
                 last_created_at = before.created_at
                 last_author_name = before.author.display_name
             async for historical_message in message.channel.history(limit=None, oldest_first=False, before=before, after=after):
-                content += await log_message(historical_message, last_created_at=last_created_at, last_author_name=last_author_name)
+                content += await log_message(historical_message, last_created_at, last_author_name)
                 last_created_at = historical_message.created_at
                 last_author_name = historical_message.author.display_name
             if after:
-                content += await log_message(after, last_created_at=last_created_at, last_author_name=last_author_name)
+                content += await log_message(after, last_created_at, last_author_name)
         else:
             if after:
                 content += await log_message(after)
                 last_created_at = after.created_at
                 last_author_name = after.author.display_name
             async for historical_message in message.channel.history(limit=None, oldest_first=True, before=before, after=after):
-                content += await log_message(historical_message)
+                content += await log_message(historical_message, last_created_at, last_author_name)
                 last_created_at = historical_message.created_at
                 last_author_name = historical_message.author.display_name
             if before:
-                content += await log_message(before, last_created_at=last_created_at, last_author_name=last_author_name)
+                content += await log_message(before, last_created_at, last_author_name)
         link = text_manipulators.fiche_function(content, message.id)
         await message.author.send(link)
         await message.remove_reaction('🔜', client.user)
