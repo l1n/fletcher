@@ -428,7 +428,8 @@ async def on_raw_message_edit(payload):
             extra = {'CHANNEL_IDENTIFIER': fromChannel.name, 'MESSAGE_ID': str(message_id), 'payload': str(payload)}
             if fromGuild:
                 extra['GUILD_IDENTIFIER'] = fromGuild.name
-            logger.error(f'ORMU[{exc_tb.tb_lineno}]: {type(e).__name__} {e}', extra=extra)
+            logger.warning(f'ORMU[{exc_tb.tb_lineno}]: {type(e).__name__} {e}', extra=extra)
+            return
         if len(fromMessage.content) > 0:
             if type(fromChannel) is discord.TextChannel:
                 logger.info(str(message_id)+" #"+fromGuild.name+":"+fromChannel.name+" <"+fromMessage.author.name+":"+str(fromMessage.author.id)+"> [Edit] "+fromMessage.content, extra={'GUILD_IDENTIFIER': fromGuild.name, 'CHANNEL_IDENTIFIER': fromChannel.name, 'SENDER_NAME': fromMessage.author.name, 'SENDER_ID': fromMessage.author.id, 'MESSAGE_ID': str(fromMessage.id)})
