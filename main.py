@@ -364,8 +364,13 @@ async def on_message(message):
     try:
         # if the message is from the bot itself or sent via webhook, which is usually done by a bot, ignore it other than sync processing
         if message.webhook_id:
-            webhook = await client.fetch_webhook(message.webhook_id)
-            if webhook.name not in config.get("sync", dict()).get("whitelist-webhooks", "").split(','):
+            try:
+                webhook = await client.fetch_webhook(message.webhook_id)
+            except discord.Forbidden:
+                logger.debug(f'Fetch webhook failed for {message.webhook_id} due to missing permissions on {message.guild} ({message.guild_id})')
+            if webhook and webhook.name in config.get("sync", dict()).get("whitelist-webhooks", "").split(','):
+                pass
+            else:
                 return
         if message.guild is not None and (message.guild.name+':'+message.channel.name in webhook_sync_registry.keys()) and not (config.get('sync', {}).get(f'tupper-ignore-{message.author.id}', '') and message.content.startswith(tuple(config.get('sync', {}).get(f'tupper-ignore-{message.author.id}', '').split(',')))):
             content = message.clean_content
