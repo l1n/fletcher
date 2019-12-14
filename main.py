@@ -440,7 +440,7 @@ async def on_raw_message_edit(payload):
         else:
             # Currently, we don't log empty or image-only messages
             pass
-        if message['guild_id'] is not None and (fromGuild.name+':'+fromChannel.name in webhook_sync_registry.keys()):
+        if 'guild_id' in message and (fromGuild.name+':'+fromChannel.name in webhook_sync_registry.keys()):
             cur = conn.cursor()
             cur.execute("SELECT toguild, tochannel, tomessage FROM messagemap WHERE fromguild = %s AND fromchannel = %s AND frommessage = %s LIMIT 1;", [int(message['guild_id']), int(message['channel_id']), message_id])
             metuple = cur.fetchone()
