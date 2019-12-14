@@ -464,7 +464,7 @@ def join_rank_function(message, client, args):
         else:
             member_rank = sorted_member_list.index(member)+1
         # Thanks to Celer for this~!
-        ordinal = lambda n: str(n)+("th" if (n%10>3 or 10<n%100<20) else {1:"st",2:"nd",3:"rd"}[n%10])
+        ordinal = lambda n: str(n)+("th" if (n%10>3 or 10<n%100<20) else {0:"th",1:"st",2:"nd",3:"rd"}[n%10])
         if member_rank < 118: # len(periodictable.elements):
             member_element = f'Your element is {periodictable.elements[member_rank].name.title()}.'
         else:
