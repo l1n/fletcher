@@ -430,16 +430,21 @@ async def on_raw_message_edit(payload):
             fromMessage = await fromChannel.fetch_message(message_id)
         except discord.NotFound as e:
             exc_type, exc_obj, exc_tb = exc_info()
-            extra = {'CHANNEL_IDENTIFIER': fromChannel.name, 'MESSAGE_ID': str(message_id), 'payload': str(payload)}
+            extra = {'MESSAGE_ID': str(message_id), 'payload': str(payload)}
+            if type(fromChannel) is discord.DMChannel:
+                extra['CHANNEL_IDENTIFIER'] = fromChannel.recipient
+            else:
+                extra['CHANNEL_IDENTIFIER'] = fromChannel.name
             if fromGuild:
                 extra['GUILD_IDENTIFIER'] = fromGuild.name
             logger.warning(f'ORMU[{exc_tb.tb_lineno}]: {type(e).__name__} {e}', extra=extra)
             return
+
         if len(fromMessage.content) > 0:
             if type(fromChannel) is discord.TextChannel:
-                logger.info(str(message_id)+" #"+fromGuild.name+":"+fromChannel.name+" <"+fromMessage.author.name+":"+str(fromMessage.author.id)+"> [Edit] "+fromMessage.content, extra={'GUILD_IDENTIFIER': fromGuild.name, 'CHANNEL_IDENTIFIER': fromChannel.name, 'SENDER_NAME': fromMessage.author.name, 'SENDER_ID': fromMessage.author.id, 'MESSAGE_ID': str(fromMessage.id)})
+                logger.info(f'{message_id} #{fromGuild.name}:{fromChannel.name} <{fromMessage.author.name}:{fromMessage.author.id}> [Edit] {fromMessage.content}', extra={'GUILD_IDENTIFIER': fromGuild.name, 'CHANNEL_IDENTIFIER': fromChannel.name, 'SENDER_NAME': fromMessage.author.name, 'SENDER_ID': fromMessage.author.id, 'MESSAGE_ID': str(fromMessage.id)})
             elif type(fromChannel) is discord.DMChannel:
-                logger.info(str(message_id)+" @"+fromChannel.recipient.name+" <"+fromMessage.author.name+":"+str(fromMessage.author.id)+"> [Edit] "+fromMessage.content, extra={'GUILD_IDENTIFIER': '@', 'CHANNEL_IDENTIFIER': fromChannel.name, 'SENDER_NAME': fromMessage.author.name, 'SENDER_ID': fromMessage.author.id, 'MESSAGE_ID': str(fromMessage.id)})
+                logger.info(f'{message_id} @{fromChannel.recipient.name} <{fromMessage.author.name}:+{fromMessage.author.id}> [Edit] {fromMessage.content}', extra={'GUILD_IDENTIFIER': '@', 'CHANNEL_IDENTIFIER': fromChannel.recipient, 'SENDER_NAME': fromMessage.author.name, 'SENDER_ID': fromMessage.author.id, 'MESSAGE_ID': str(fromMessage.id)})
             else:
                 # Group Channels don't support bots so neither will we
                 pass
