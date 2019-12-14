@@ -94,6 +94,8 @@ async def mobilespoil_function(message, client, args):
 
 async def scramble_function(message, client, args):
     try:
+        if len(message.attachments) == 0:
+            return
         input_image_blob = io.BytesIO()
         await message.attachments[0].save(input_image_blob)
         if len(args) != 3 or type(args[1]) is not discord.Member or (type(message.channel) == discord.DMChannel and message.author.id == client.user.id):
