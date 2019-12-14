@@ -46,7 +46,7 @@ async def uwu_function(message, client, args, responses=uwu_responses):
     try:
         if len(args) == 3 and type(args[1]) is discord.Member and message.author.id == client.user.id:
             return await args[1].send(random.choice(responses['private']))
-        elif len(args) == 0 or 'fletch' in message.clean_content.lower() or message.content[0] == "!" or "good bot" in message.content.lower():
+        elif len(args) == 0 or 'fletch' in message.clean_content.lower() or message.content.startswith('!') or "good bot" in message.content.lower():
             if random.randint(0, 100) < 20:
                 await message.add_reaction(random.choice(responses['reaction']))
             return await message.channel.send(random.choice(responses['public']))
