@@ -1,6 +1,6 @@
 import asyncio
 from datetime import datetime, timedelta
-import dateparser
+import dateparser.search
 import discord
 import logging
 import messagefuncs
