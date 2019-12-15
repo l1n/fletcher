@@ -1,5 +1,6 @@
 import asyncio
 from datetime import datetime, timedelta
+import dateparser
 import discord
 import logging
 import messagefuncs
@@ -244,7 +245,8 @@ async def modreport_function(message, client, args):
         automod = None
         scoped_config = ch.scope_config(guild=message.guild)
         if scoped_config.get("moderation") != "On":
-            raise Exception("Moderation disabled on guild "+str(message.guild))
+            logger.info(f'Moderation disabled on guild {message.guild}')
+            return
         if len(args) == 3 and type(args[1]) is discord.Member:
             try:
                 await message.remove_reaction('👁‍🗨', args[1])
@@ -517,7 +519,13 @@ async def snooze_channel_function(message, client, args):
             return await message.channel.send('Failed to locate channel, please check spelling.')
         cur = conn.cursor()
         if len(args) > 1:
-            interval = float(args[1])
+            try:
+                interval = dateparser.parse(' '.join(args[1:]))
+            except ValueError:
+                try:
+                    interval = float(args[1])
+                except ValueError:
+                    interval = 24
         else:
             try:
                 interval = float(args[0])
@@ -526,7 +534,10 @@ async def snooze_channel_function(message, client, args):
         overwrites = "unban"
         if len(channels) == 1:
             overwrites = "overwrite "+ujson.dumps(channels[0].overwrites_for(message.author))
-        cur.execute(f"INSERT INTO reminders (userid, guild, channel, message, content, scheduled, trigger_type) VALUES (%s, %s, %s, %s, %s, NOW() + INTERVAL '{interval} hours', '{overwrites}');", [message.author.id, guild.id, message.channel.id, message.id, message.content])
+        if type(interval) == float:
+            cur.execute(f"INSERT INTO reminders (userid, guild, channel, message, content, scheduled, trigger_type) VALUES (%s, %s, %s, %s, %s, NOW() + INTERVAL '{interval} hours', '{overwrites}');", [message.author.id, guild.id, message.channel.id, message.id, message.content])
+        else:
+            cur.execute(f"INSERT INTO reminders (userid, guild, channel, message, content, scheduled, trigger_type) VALUES (%s, %s, %s, %s, %s, %s, '{overwrites}');", [message.author.id, guild.id, message.channel.id, message.id, message.content, interval])
         channel_names = ""
         for channel in channels:
             await channel.set_permissions(message.author, read_messages=False, read_message_history=False, send_messages=False, embed_links=False, reason="User requested snooze "+message.author.name)
