@@ -446,7 +446,7 @@ async def help_function(message, client, args):
             await message.add_reaction('✅')
         if len(args) > 0 and verbose:
             helpMessageBody = "\n".join([f'`{"` or `".join(command["trigger"])}`: {command["description"]}\nArguments ({command["args_num"]}): {" ".join(command["args_name"])}' for command in accessible_commands])
-        elif not len(accessible_commands):
+        elif len(accessible_commands) == 0:
             helpMessageBody = 'No commands accessible, check your input'
         else:
             helpMessageBody = "\n".join([f'`{"` or `".join(command["trigger"][:2])}`: {command["description"]}' for command in accessible_commands])
