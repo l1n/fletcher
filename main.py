@@ -639,21 +639,22 @@ async def on_member_remove(member):
 async def doissetep_omega_autoconnect():
     global doissetep_omega
     global config
-    if doissetep_omega:
+    if doissetep_omega and doissetep_omega.is_connected():
         if not doissetep_omega.is_playing():
             doissetep_omega.play(discord.FFmpegPCMAudio(config['audio']['instreamurl']))
         # Reset canticum_message when reloaded [workaround for https://todo.sr.ht/~nova/fletcher/6]
         canticum_message = None
         return doissetep_omega
-    try:
-        doissetep_omega = await client.get_guild(int(config['audio']['guild'])).get_channel(int(config['audio']['channel'])).connect();
-        if not doissetep_omega.is_playing():
-            doissetep_omega.play(discord.FFmpegPCMAudio(config['audio']['instreamurl']))
-        # Reset canticum_message when reloaded [workaround for https://todo.sr.ht/~nova/fletcher/6]
-        canticum_message = None
-        return doissetep_omega
-    except AttributeError as e:
-        logger.exception(e)
+    else:
+        try:
+            doissetep_omega = await client.get_guild(int(config['audio']['guild'])).get_channel(int(config['audio']['channel'])).connect();
+            if not doissetep_omega.is_playing():
+                doissetep_omega.play(discord.FFmpegPCMAudio(config['audio']['instreamurl']))
+            # Reset canticum_message when reloaded [workaround for https://todo.sr.ht/~nova/fletcher/6]
+            canticum_message = None
+            return doissetep_omega
+        except AttributeError as e:
+            logger.exception(e)
 
 loop = asyncio.get_event_loop()
 
