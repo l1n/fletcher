@@ -521,7 +521,7 @@ async def snooze_channel_function(message, client, args):
         if len(args) > 1:
             try:
                 interval = dateparser.search.search_dates(message.content, settings={'PREFER_DATES_FROM': 'future', 'PREFER_DAY_OF_MONTH': 'first'})[0][1]
-            except (ValueError, IndexError):
+            except (ValueError, IndexError, TypeError):
                 try:
                     interval = float(args[1])
                 except ValueError:
@@ -547,7 +547,10 @@ async def snooze_channel_function(message, client, args):
             channel_names = channels[0].guild.name
         conn.commit()
         await message.add_reaction('✅')
-        await message.author.send(f'Snoozed {channel_names} for {interval} hours (`!part` to leave channel permanently)')
+        if type(interval) == float:
+            await message.author.send(f'Snoozed {channel_names} for {interval} hours (`!part` to leave channel permanently)')
+        else:
+            await message.author.send(f'Snoozed {channel_names} until {interval} (`!part` to leave channel permanently)')
     except discord.Forbidden as e:
         if "cur" in locals() and "conn" in locals():
             conn.rollback()
