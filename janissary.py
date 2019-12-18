@@ -518,14 +518,16 @@ async def snooze_channel_function(message, client, args):
             await message.add_reaction('🚫')
             return await message.channel.send('Failed to locate channel, please check spelling.')
         cur = conn.cursor()
-        if len(args) > 1:
+        if len(args) == 2:
             try:
                 interval = float(args[1])
             except ValueError:
-                try:
-                    interval = dateparser.search.search_dates(message.content, settings={'PREFER_DATES_FROM': 'future', 'PREFER_DAY_OF_MONTH': 'first'})[0][1]
-                except (ValueError, IndexError, TypeError):
-                    interval = 24
+                interval = 24
+        elif len(args) > 1:
+            try:
+                interval = dateparser.search.search_dates(message.content, settings={'PREFER_DATES_FROM': 'future', 'PREFER_DAY_OF_MONTH': 'first'})[0][1]
+            except (ValueError, IndexError, TypeError):
+                interval = 24
         else:
             try:
                 interval = float(args[0])
