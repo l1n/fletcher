@@ -520,11 +520,11 @@ async def snooze_channel_function(message, client, args):
         cur = conn.cursor()
         if len(args) > 1:
             try:
-                interval = dateparser.search.search_dates(message.content, settings={'PREFER_DATES_FROM': 'future', 'PREFER_DAY_OF_MONTH': 'first'})[0][1]
-            except (ValueError, IndexError, TypeError):
+                interval = float(args[1])
+            except ValueError:
                 try:
-                    interval = float(args[1])
-                except ValueError:
+                    interval = dateparser.search.search_dates(message.content, settings={'PREFER_DATES_FROM': 'future', 'PREFER_DAY_OF_MONTH': 'first'})[0][1]
+                except (ValueError, IndexError, TypeError):
                     interval = 24
         else:
             try:
