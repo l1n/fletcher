@@ -486,10 +486,12 @@ async def part_channel_function(message, client, args):
         else:
             await message.add_reaction('🚫')
             return await message.channel.send('Failed to locate channel, please check spelling.')
+        channel_names = ""
         for channel in channels:
             await channel.set_permissions(message.author, read_messages=False, read_message_history=False, send_messages=False, reason="User requested part "+message.author.name)
+            channel_names += f'{channel.guild.name}:{channel.name}, '
         await message.add_reaction('✅')
-        await message.author.send("Parted from channel #"+channel.name)
+        await message.author.send(f'Parted from {channel_names}')
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
         logger.error(f'PCF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
