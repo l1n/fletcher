@@ -459,19 +459,35 @@ async def lockout_user_function(message, client, args):
 async def part_channel_function(message, client, args):
     try:
         if len(message.channel_mentions) > 0:
-            channel = message.channel_mentions[0]
+            channels = message.channel_mentions
         elif len(args) == 0 and message.guild is None:
-            return await message.author.send("Parting a channel requires server and channel to be specified (e.g. `!part server:channel`)")
+            return await message.author.send("Parting a channel requires server and channel to be specified (e.g. `!part server:channel [hours]`)")
         elif len(args) == 0:
             channel = message.channel
+        elif args[0].strip()[-2:] == ':*':
+            guild = discord.utils.get(client.guilds, name=messagefuncs.expand_guild_name(args[0]).strip()[:-2].replace("_", " "))
+            channels = guild.text_channels
         else:
             try:
                 channel = messagefuncs.xchannel(args[0].strip(), message.guild)
             except exceptions.DirectMessageException:
-                return await message.author.send("Parting a channel via DM requires server to be specified (e.g. `!part server:channel`)")
+                return await message.author.send("Parting a channel via DM requires server to be specified (e.g. `!part server:channel [hours]`)")
             if channel is None:
                 channel = message.channel
-        await channel.set_permissions(message.author, read_messages=False, read_message_history=False, send_messages=False, reason="User requested part "+message.author.name)
+            channels = [channel]
+        if len(channels) > 0:
+            channel = channels[0]
+        else:
+            channel = None
+        if message.guild is not None:
+            guild = message.guild
+        elif hasattr(channel, 'guild'):
+            guild = channel.guild
+        else:
+            await message.add_reaction('🚫')
+            return await message.channel.send('Failed to locate channel, please check spelling.')
+        for channel in channels:
+            await channel.set_permissions(message.author, read_messages=False, read_message_history=False, send_messages=False, reason="User requested part "+message.author.name)
         await message.add_reaction('✅')
         await message.author.send("Parted from channel #"+channel.name)
     except Exception as e:
