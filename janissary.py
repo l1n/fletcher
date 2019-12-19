@@ -839,6 +839,21 @@ async def voice_opt_out(message, client, args):
         exc_type, exc_bj, exc_tb = exc_info()
         logger.error(f'VOO[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
 
+async def delete_my_message_function(message, client, args):
+    global config
+    try:
+        if len(args) == 3 and type(args[1]) is discord.Member:
+            try:
+                if message.author == client.user:
+                    await message.delete()
+            except discord.Forbidden as e:
+                logger.warning("DMMF: Forbidden to delete self-message")
+                pass
+    except Exception as e:
+        exc_type, exc_obj, exc_tb = exc_info()
+        logger.error(f'DMMF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
+
+
 def autoload(ch):
     ch.add_command({
         'trigger': ['!mycolor', '!mycolour'],
@@ -1058,6 +1073,16 @@ def autoload(ch):
         'args_num': 0,
         'args_name': [],
         'description': 'List all users that have access to this channel, including synced users. Equivalent to IRC "NAMES" command'
+        })
+    ch.add_command({
+        'trigger': ['❌'],
+        'function': delete_my_message_function,
+        'async': True,
+        'hidden': False,
+        'admin': 'server',
+        'args_num': 0,
+        'args_name': [],
+        'description': 'Delete a Fletcher message if you\'re responsible for it'
         })
 
     for guild in ch.client.guilds:
