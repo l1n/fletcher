@@ -34,6 +34,9 @@ async def set_role_color_function(message, client, args):
                     reason="Role edited on behalf of "+str(message.author.id))
             if 'snappy' in config['discord'] and config['discord']['snappy']:
                 await message.delete()
+            await message.add_reaction('✅')
+        else:
+            await message.author.send('Unable to find matching role to set color, create this role before trying to set its color.')
     except discord.Forbidden as e:
         await message.author.send('Unable to set role color, am I allowed to edit this role?  My role must be above the target in the heirarchy, and I must have the Manage Roles permission.')
     except Exception as e:
