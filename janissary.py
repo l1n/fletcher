@@ -543,17 +543,17 @@ async def snooze_channel_function(message, client, args):
             try:
                 interval = float(args[1])
             except ValueError:
-                interval = 24
+                interval = float(24)
         elif len(args) > 1:
             try:
                 interval = dateparser.search.search_dates(message.content, settings={'PREFER_DATES_FROM': 'future', 'PREFER_DAY_OF_MONTH': 'first'})[0][1]
             except (ValueError, IndexError, TypeError):
-                interval = 24
+                interval = float(24)
         else:
             try:
                 interval = float(args[0])
             except (ValueError, IndexError):
-                interval = 24
+                interval = float(24)
         overwrites = "unban"
         if len(channels) == 1:
             overwrites = "overwrite "+ujson.dumps(channels[0].overwrites_for(message.author))
