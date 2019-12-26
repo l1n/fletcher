@@ -26,6 +26,7 @@ async def set_role_color_function(message, client, args):
         if role is not None:
             if args[1] == 'random':
                 args[1] = "#%06x" % random.randint(0, 0xFFFFFF)
+                await message.channel.send(f'Setting color of {args[0]} to {args[1]}')
             if args[1].startswith('#'):
                 args[1] = args[1][1:]
             rgb = [
