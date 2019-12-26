@@ -22,7 +22,7 @@ async def set_role_color_function(message, client, args):
         role_list = message.channel.guild.roles
         role = discord.utils.get(role_list, name=args[0].replace("_", " "))
         if role is None and (guild_config.get('color-role-autocreate', config.get('color-role-autocreate', 'On')) == 'On'):
-            role = await message.guild.create_role(name = args[0])
+            role = await message.guild.create_role(name = args[0], reason="Auto-created color role")
         if role is not None:
             if args[1] == 'random':
                 args[1] = "#%06x" % random.randint(0, 0xFFFFFF)
@@ -39,7 +39,7 @@ async def set_role_color_function(message, client, args):
             if 'snappy' in config['discord'] and config['discord']['snappy']:
                 await message.delete()
             if len(message.mentions) == 1:
-                await message.mentions[0].add_role(role)
+                await message.mentions[0].add_roles(role, reason="Color role", atomic=False)
             await message.add_reaction('✅')
         else:
             await message.author.send('Unable to find matching role to set color, create this role before trying to set its color.')
