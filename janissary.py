@@ -39,7 +39,7 @@ async def set_role_color_function(message, client, args):
             if 'snappy' in config['discord'] and config['discord']['snappy']:
                 await message.delete()
             if len(message.mentions) == 1:
-                await message.user_mentions[0].add_role(role)
+                await message.mentions[0].add_role(role)
             await message.add_reaction('✅')
         else:
             await message.author.send('Unable to find matching role to set color, create this role before trying to set its color.')
