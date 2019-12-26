@@ -24,7 +24,7 @@ async def set_role_color_function(message, client, args):
         if role is None and (guild_config.get('color-role-autocreate', config.get('color-role-autocreate', 'On')) == 'On'):
             role = await message.guild.create_role(name = args[0], reason="Auto-created color role")
         if role is not None:
-            if args[1] == 'random':
+            if args[1].startswith('random'):
                 args[1] = "#%06x" % random.randint(0, 0xFFFFFF)
                 await message.channel.send(f'Setting color of {args[0]} to {args[1]}')
             if args[1].startswith('#'):
