@@ -16,11 +16,15 @@ logger = logging.getLogger('fletcher')
 
 async def set_role_color_function(message, client, args):
     global config
+    global ch
+    guild_config = ch.scope_config(guild=message.guild)
     try:
         role_list = message.channel.guild.roles
         role = discord.utils.get(role_list, name=args[0].replace("_", " "))
+        if role is None and (guild_config.get('color-role-autocreate', config.get('color-role-autocreate', 'On')) == 'On'):
+            role = await message.guild.create_role(name = args[0])
         if role is not None:
-            if len(args) == 1 or args[1] == 'random':
+            if args[1] == 'random':
                 args[1] = "#%06x" % random.randint(0, 0xFFFFFF)
             if args[1].startswith('#'):
                 args[1] = args[1][1:]
@@ -34,6 +38,8 @@ async def set_role_color_function(message, client, args):
                     reason="Role edited on behalf of "+str(message.author.id))
             if 'snappy' in config['discord'] and config['discord']['snappy']:
                 await message.delete()
+            if len(message.user_mentions) == 1:
+                await message.user_mentions[0].add_role(role)
             await message.add_reaction('✅')
         else:
             await message.author.send('Unable to find matching role to set color, create this role before trying to set its color.')
