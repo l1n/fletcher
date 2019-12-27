@@ -189,7 +189,9 @@ async def load_webhooks():
             logger.debug(traceback.format_exc())
             logger.warning(f'Couldn\'t load webhooks for {guild.name} ({guild.id}), ask an admin to grant additional permissions (https://novalinium.com/go/4/fletcher)')
             pass
-        except AttributeError:
+        except AttributeError as e:
+            exc_type, exc_obj, exc_tb = exc_info()
+            logger.debug(f'LWH[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
             pass
     globals()['webhook_sync_registry'] = webhook_sync_registry
     logger.debug("Webhooks loaded:")
