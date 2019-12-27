@@ -174,11 +174,21 @@ async def load_webhooks():
                                 'fromWebhook': None
                                 }
                         webhook_sync_registry[fromChannelName]['fromChannelObject'] = discord.utils.get(fromGuild.text_channels, name=fromTuple[1])
-                        webhook_sync_registry[fromChannelName]['fromWebhook'] = discord.utils.get(await fromGuild.webhooks(), channel__name=fromTuple[1])
+                        try:
+                            # webhook_sync_registry[fromChannelName]['fromWebhook'] = discord.utils.get(await fromGuild.webhooks(), channel__name=fromTuple[1])
+                            webhook_sync_registry[fromChannelName]['fromWebhook'] = await webhook_sync_registry[fromChannelName]['fromChannelObject'].webhooks()
+                            webhook_sync_registry[fromChannelName]['fromWebhook'] = webhook_sync_registry[fromChannelName]['fromWebhook'][0] if len(webhook_sync_registry[fromChannelName]['fromWebhook']) else None
+                        except discord.Forbidden as e:
+                            logger.warning(f'Error getting fromWebhook for {webhook_sync_registry[fromChannelName]["fromChannelObject"]}')
+                            pass
             elif "Guild "+str(guild.id) not in config:
                 logger.warning(f'LWH: Failed to find config for {guild.name} ({guild.id})')
         except discord.Forbidden as e:
+            exc_type, exc_obj, exc_tb = exc_info()
+            logger.debug(f'LWH[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
+            logger.debug(traceback.format_exc())
             logger.warning(f'Couldn\'t load webhooks for {guild.name} ({guild.id}), ask an admin to grant additional permissions (https://novalinium.com/go/4/fletcher)')
+            pass
         except AttributeError:
             pass
     globals()['webhook_sync_registry'] = webhook_sync_registry
@@ -367,7 +377,8 @@ async def on_message(message):
             try:
                 webhook = await client.fetch_webhook(message.webhook_id)
             except discord.Forbidden:
-                logger.debug(f'Fetch webhook failed for {message.webhook_id} due to missing permissions on {message.guild} ({message.guild_id})')
+                logger.debug(f'Fetch webhook failed for {message.webhook_id} due to missing permissions on {message.guild} ({message.guild.id})')
+                webhook = discord.Webhook.partial(-1, 'loading-forbidden', adapter=discord.AsyncWebhookAdapter)
             if webhook and webhook.name in config.get("sync", dict()).get("whitelist-webhooks", "").split(','):
                 pass
             else:
