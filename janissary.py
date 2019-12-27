@@ -780,10 +780,10 @@ async def copy_emoji_function(message, client, args):
 async def clear_inbound_sync_function(message, client, args):
     global config
     try:
-        [await webhook.delete() for webhook in message.channel.webhooks() if webhook.name.startswith(config.get('discord', dict()).get('botNavel', 'botNavel')+' (')]
+        [await webhook.delete() for webhook in await message.channel.webhooks() if webhook.name.startswith(config.get('discord', dict()).get('botNavel', 'botNavel')+' (')]
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
-        logger.error(f'COSF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
+        logger.error(f'CISF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
 
 
 async def add_inbound_sync_function(message, client, args):
