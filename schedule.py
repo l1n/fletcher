@@ -108,9 +108,10 @@ async def table_exec_function():
                         overwrite.update(**{o[0]: o[1] for o in ujson.loads(mode_args)})
                         try:
                             await channel.set_permissions(user, overwrite=overwrite, reason="Permission overwrite triggered by schedule obo "+user.name)
+                            channel_names += f'{guild.name}:{channel.name}, '
                         except discord.Forbidden as e:
                             logger.warning(f'TXF: Forbidden to overwrite permissions for {user} in {channel} ({guild})! Bailing out.')
-                        channel_names += f'{guild.name}:{channel.name}, '
+                            channel_names += f'{guild.name}:{channel.name} (failed to overwrite for this channel, Fletcher may not have sufficient permissions), '
                 channel_names = channel_names[:-2]
                 if args[0].strip()[-2:] == ':*':
                     channel_names = channels[0].guild.name
