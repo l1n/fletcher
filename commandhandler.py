@@ -14,25 +14,27 @@ logger = logging.getLogger('fletcher')
 
 regex_cache = dict()
 
-def allowCommand(command, message):
+def allowCommand(command, message, user=None):
     global config
+    if not user:
+        user = message.author
     if 'admin' in command:
         # Global admin commands use builtin global admin list
-        if command['admin'] == 'global' and message.author.id in [int(admin.strip()) for admin in config['discord']['globalAdmin'].split(',')]:
+        if command['admin'] == 'global' and user.id in [int(admin.strip()) for admin in config['discord']['globalAdmin'].split(',')]:
             return True
         # Guild admin commands
         if type(message.channel) == discord.TextChannel:
             # Server-specific
-            if str(command['admin']).startswith('server:')    and message.guild.id   in [int(guild.strip())   for guild   in command['admin'].split(':')[1].split(',')] and message.author.guild_permissions.manage_webhooks:
+            if str(command['admin']).startswith('server:')    and message.guild.id   in [int(guild.strip())   for guild   in command['admin'].split(':')[1].split(',')] and user.guild_permissions.manage_webhooks:
                 return True                                                                                
             # Channel-specific
-            elif str(command['admin']).startswith('channel:') and message.channel.id in [int(channel.strip()) for channel in command['admin'].split(':')[1].split(',')] and message.author.permissions_in(message.channel).manage_webhooks:
+            elif str(command['admin']).startswith('channel:') and message.channel.id in [int(channel.strip()) for channel in command['admin'].split(':')[1].split(',')] and user.permissions_in(message.channel).manage_webhooks:
                 return True
             # Any server
-            elif command['admin'] in ['server', True] and (message.author.guild_permissions.manage_webhooks or (config['discord'].get('globalAdminIsServerAdmin') and message.author.id in [int(admin.strip()) for admin in config['discord']['globalAdmin'].split(',')])):
+            elif command['admin'] in ['server', True] and (message.author.guild_permissions.manage_webhooks or (config['discord'].get('globalAdminIsServerAdmin') and user.id in [int(admin.strip()) for admin in config['discord']['globalAdmin'].split(',')])):
                 return True
             # Any channel
-            elif command['admin'] == 'channel' and message.author.permissions_in(message.channel).manage_webhooks:
+            elif command['admin'] == 'channel' and user.permissions_in(message.channel).manage_webhooks:
                 return True
         # Unprivileged
         if command['admin'] == False:
@@ -110,7 +112,7 @@ class CommandHandler:
                 command = self.message_reaction_handlers[message.id]
                 logger.debug(command)
                 logger.debug(args)
-                if messageContent.startswith(tuple(command['trigger'])) and allowCommand(command, message) and command['args_num'] == 0:
+                if messageContent.startswith(tuple(command['trigger'])) and allowCommand(command, message, user=user) and command['args_num'] == 0:
                     if str(user.id) in config['moderation']['blacklist-user-usage'].split(','):
                         raise Exception('Blacklisted command attempt by user')
                     logger.debug(command['function'])
@@ -119,7 +121,7 @@ class CommandHandler:
                     else:
                         return await message.channel.send(str(command['function'](message, self.client, [reaction, user, 'add'])))
             for command in self.commands:
-                if messageContent.startswith(tuple(command['trigger'])) and allowCommand(command, message) and command['args_num'] == 0:
+                if messageContent.startswith(tuple(command['trigger'])) and allowCommand(command, message, user=user) and command['args_num'] == 0:
                     logger.debug(command)
                     if str(user.id) in config['moderation']['blacklist-user-usage'].split(','):
                         raise Exception('Blacklisted command attempt by user')
@@ -192,7 +194,7 @@ class CommandHandler:
                 command = self.message_reaction_remove_handlers[message.id]
                 logger.debug(command)
                 logger.debug(args)
-                if messageContent.startswith(tuple(command['trigger'])) and allowCommand(command, message) and command['args_num'] == 0:
+                if messageContent.startswith(tuple(command['trigger'])) and allowCommand(command, message, user=user) and command['args_num'] == 0:
                     if str(user.id) in config['moderation']['blacklist-user-usage'].split(','):
                         raise Exception('Blacklisted command attempt by user')
                     logger.debug(command['function'])
@@ -201,7 +203,7 @@ class CommandHandler:
                     else:
                         return await message.channel.send(str(command['function'](message, self.client, args)))
             for command in self.commands:
-                if messageContent.startswith(tuple(command['trigger'])) and allowCommand(command, message) and command['args_num'] == 0 and command.get('remove'):
+                if messageContent.startswith(tuple(command['trigger'])) and allowCommand(command, message, user=user) and command['args_num'] == 0 and command.get('remove'):
                     logger.debug(command)
                     if str(user.id) in config['moderation']['blacklist-user-usage'].split(','):
                         raise Exception('Blacklisted command attempt by user')
