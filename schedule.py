@@ -106,7 +106,10 @@ async def table_exec_function():
                     if permissions.read_messages == False and permissions.send_messages == False and permissions.embed_links == False:
                         overwrite = discord.PermissionOverwrite()
                         overwrite.update(**{o[0]: o[1] for o in ujson.loads(mode_args)})
-                        await channel.set_permissions(user, overwrite=overwrite, reason="Permission overwrite triggered by schedule obo "+user.name)
+                        try:
+                            await channel.set_permissions(user, overwrite=overwrite, reason="Permission overwrite triggered by schedule obo "+user.name)
+                        except discord.Forbidden as e:
+                            logger.warning(f'TXF: Forbidden to overwrite permissions for {user} in {channel} ({guild})! Bailing out.')
                         channel_names += f'{guild.name}:{channel.name}, '
                 channel_names = channel_names[:-2]
                 if args[0].strip()[-2:] == ':*':
