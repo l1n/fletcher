@@ -41,6 +41,9 @@ uwu_responses = {
             '❤', '💛', '💚', '💙', '💜', '💕', '💓', '💗', '💖', '💘', '💘', '💝'
             ]
         }
+pick_lists = {
+        'wizard_rolls': '1 - MAGIC MADE IT WORSE!, 2 - YOUR MAGIC IS IMPOTENT., 3 - YOUR MAGIC SUCKS., 4- THE MAGIC WORKS BUT IS AWFUL!, 5 - EVERYTHING GOES PERFECTLY TO PLAN., 6 - THINGS WORK TOO WELL!',
+        }
 
 async def uwu_function(message, client, args, responses=uwu_responses):
     try:
@@ -277,6 +280,8 @@ def fling_function(message, client, args):
 
 async def pick_function(message, client, args):
     try:
+        if args[0].startswith('list='):
+            args = pick_lists.get(args[0][5:]).split(' ')
         if args[0] in ["between", "among", "in", "of"]:
             args = args[1:]
         many = 1
