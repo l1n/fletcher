@@ -545,6 +545,9 @@ async def snooze_channel_function(message, client, args):
         else:
             await message.add_reaction('🚫')
             return await message.channel.send('Failed to locate channel, please check spelling.')
+        if (channel and not channel.permissions_for(client.user).manage_roles) or not guild.permissions_for(client.user).manage_roles:
+            await message.add_reaction('🚫')
+            return await message.channel.send('Unable to snooze the requested channel(s) - owner has not granted Fletcher Manage Permissions.')
         cur = conn.cursor()
         if len(args) == 2:
             try:
