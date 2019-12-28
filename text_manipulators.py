@@ -77,7 +77,8 @@ async def mobilespoil_function(message, client, args):
             try:
                 await message.delete()
             except discord.Forbidden as e:
-                logger.error("Forbidden to delete message in "+str(message.channel))
+                if type(message.channel) != discord.DMChannel:
+                    logger.error("Forbidden to delete message in "+str(message.channel))
                 pass
         if len(args) == 3 and type(args[1]) is discord.Member:
             channel = args[1]
@@ -102,7 +103,8 @@ async def scramble_function(message, client, args):
             try:
                 await message.delete()
             except discord.Forbidden as e:
-                logger.error("Forbidden to delete message in "+str(message.channel))
+                if type(message.channel) != discord.DMChannel:
+                    logger.error("Forbidden to delete message in "+str(message.channel))
                 pass
         if len(args) == 3 and type(args[1]) is discord.Member:
             output_message = await args[1].send(content='Scrambling image... ('+str(input_image_blob.getbuffer().nbytes)+' bytes loaded)')
@@ -284,7 +286,8 @@ async def rot13_function(message, client, args):
             try: 
                 await message.delete()
             except discord.Forbidden as e:
-                logger.error("Forbidden to delete message in "+str(message.channel))
+                if type(message.channel) != discord.DMChannel:
+                    logger.error("Forbidden to delete message in "+str(message.channel))
                 pass
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
@@ -314,7 +317,8 @@ async def spoiler_function(message, client, args):
             try: 
                 await message.delete()
             except discord.Forbidden as e:
-                logger.error("Forbidden to delete message in "+str(message.channel))
+                if type(message.channel) != discord.DMChannel:
+                    logger.error("Forbidden to delete message in "+str(message.channel))
                 pass
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
