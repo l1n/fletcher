@@ -350,6 +350,9 @@ async def reaction_request_function(message, client, args):
         except discord.Forbidden:
             logger.warning("XRF: Couldn't delete message but snappy mode is on")
             pass
+    except IndexError as e:
+        await message.add_reaction('🚫')
+        await message.author.send(f'XRF: Couldn\'t find reaction with name {emoji_query}, please check spelling or name')
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
         logger.error("XRF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
