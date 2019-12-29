@@ -380,7 +380,7 @@ async def on_message(message):
                 webhook = await client.fetch_webhook(message.webhook_id)
             except discord.Forbidden:
                 logger.debug(f'Fetch webhook failed for {message.webhook_id} due to missing permissions on {message.guild} ({message.guild.id})')
-                webhook = discord.Webhook.partial(-1, 'loading-forbidden', adapter=discord.AsyncWebhookAdapter)
+                webhook = discord.Webhook.partial(-1, 'loading-forbidden', adapter=discord.RequestsWebhookAdapter())
             if webhook and webhook.name in config.get("sync", dict()).get("whitelist-webhooks", "").split(','):
                 pass
             else:
