@@ -376,8 +376,9 @@ async def blockquote_embed_function(message, client, args):
                 message_id = int(urlParts.group(3))
                 guild = client.get_guild(guild_id)
                 if guild is None:
-                    logger.warning("PMF: Fletcher is not in guild ID "+str(guild_id))
-                    return
+                    logger.info("PMF: Fletcher is not in guild ID "+str(guild_id))
+                    await message.add_reaction('🚫')
+                    return await message.author.send('I don\'t have permission to access that message, please check server configuration.')
                 channel = guild.get_channel(channel_id)
                 target_message = await channel.fetch_message(message_id)
                 # created_at is naîve, but specified as UTC by Discord API docs

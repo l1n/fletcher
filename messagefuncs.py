@@ -145,7 +145,8 @@ async def preview_messagelink_function(message, client, args):
             message_id = int(urlParts[2])
             guild = client.get_guild(guild_id)
             if guild is None:
-                logger.warning("PMF: Fletcher is not in guild ID "+str(guild_id))
+                logger.info("PMF: Fletcher is not in guild ID "+str(guild_id))
+                await message.author.send(f'Tried unrolling message link in your message https://discordapp.com/channels/{message.guild.id}/{message.channel.id}/{message.id}, but I do not have permissions for that server. Please wrap links in `<>` if you don\'t want me to try to unroll them, or ask the server owner to grant me Read Message History to unroll links to messages there successfully (https://man.sr.ht/~nova/fletcher/permissions.md for details)')
                 return
             channel = guild.get_channel(channel_id)
             target_message = await channel.fetch_message(message_id)
@@ -183,6 +184,8 @@ async def preview_messagelink_function(message, client, args):
                 content = content + f'\nSource: https://discordapp.com/channels/{guild_id}/{channel_id}/{message_id}'
             # TODO 🔭 to preview?
             return await sendWrappedMessage(content, message.channel, files=attachments)
+    except discord.Forbidden as e:
+        await message.author.send(f'Tried unrolling message link in your message https://discordapp.com/channels/{message.guild.id}/{message.channel.id}/{message.id}, but I do not have permissions for that channel. Please wrap links in `<>` if you don\'t want me to try to unroll them, or ask the channel owner to grant me Read Message History to unroll links to messages there successfully (https://man.sr.ht/~nova/fletcher/permissions.md for details)')
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
         logger.error("PMF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))

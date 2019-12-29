@@ -43,7 +43,7 @@ async def table_exec_function():
             mode_desc = modes[mode]
             guild = client.get_guild(guild_id)
             if guild is None:
-                logger.warning("PMF: Fletcher is not in guild ID "+str(guild_id))
+                logger.info("PMF: Fletcher is not in guild ID "+str(guild_id))
                 await user.send("You {} in a server that Fletcher no longer services, so this request cannot be fulfilled. The content of the command is reproduced below: {}".format(mode_desc, content))
                 completed.append(tabtuple[:3])
                 tabtuple = cur.fetchone()
