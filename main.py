@@ -176,10 +176,13 @@ async def load_webhooks():
                         webhook_sync_registry[fromChannelName]['fromChannelObject'] = discord.utils.get(fromGuild.text_channels, name=fromTuple[1])
                         try:
                             # webhook_sync_registry[fromChannelName]['fromWebhook'] = discord.utils.get(await fromGuild.webhooks(), channel__name=fromTuple[1])
-                            webhook_sync_registry[fromChannelName]['fromWebhook'] = await webhook_sync_registry[fromChannelName]['fromChannelObject'].webhooks()
-                            webhook_sync_registry[fromChannelName]['fromWebhook'] = webhook_sync_registry[fromChannelName]['fromWebhook'][0] if len(webhook_sync_registry[fromChannelName]['fromWebhook']) else None
+                            if webhook_sync_registry[fromChannelName]['fromChannelObject']:
+                                webhook_sync_registry[fromChannelName]['fromWebhook'] = await webhook_sync_registry[fromChannelName]['fromChannelObject'].webhooks()
+                                webhook_sync_registry[fromChannelName]['fromWebhook'] = webhook_sync_registry[fromChannelName]['fromWebhook'][0] if len(webhook_sync_registry[fromChannelName]['fromWebhook']) else None
+                            else:
+                                logger.warning(f'LWH: Could not find fromChannel {fromTuple[1]} in {fromGuild}')
                         except discord.Forbidden as e:
-                            logger.warning(f'Error getting fromWebhook for {webhook_sync_registry[fromChannelName]["fromChannelObject"]}')
+                            logger.warning(f'LWH: Error getting fromWebhook for {webhook_sync_registry[fromChannelName]["fromChannelObject"]}')
                             pass
             elif "Guild "+str(guild.id) not in config:
                 logger.warning(f'LWH: Failed to find config for {guild.name} ({guild.id})')
