@@ -330,6 +330,9 @@ async def scp_function(message, client, args):
             await message.channel.send('Please specify a SCP number from http://www.scp-wiki.net/')
             return
         async with session.get(url) as resp:
+            if resp.status != 200:
+                await message.channel.send(f'Please specify a SCP number from http://www.scp-wiki.net/ (HTTP {resp.status} for {url})')
+                return
             request_body = (await resp.read()).decode('UTF-8')
             root = html.document_fromstring(request_body)
             author = ""
