@@ -339,6 +339,8 @@ async def scp_function(message, client, args):
             title = root.xpath('//div[@id="page-title"]')[0].text_content().strip()
             content = root.xpath('//div[@id="page-content"]/p[strong]')
             add_fields = True
+            for bad in root.xpath('//div[@style="display: none"]'):
+                bad.getparent().remove(bad)
             try:
                 for i in range(0, 4):
                     content[i][0].drop_tree()
