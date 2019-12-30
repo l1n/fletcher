@@ -279,8 +279,11 @@ def fling_function(message, client, args):
     return "(ﾉ◕ヮ◕)ﾉ*:･ﾟ✧ "+" ".join(args)
 
 async def pick_function(message, client, args):
+    global ch
     try:
         if args[0].startswith('list='):
+            if ch.scope_config(guild=guild).get(f'pick-list-{args[0][5:]}'):
+                args = ch.scope_config(guild=guild).get(f'pick-list-{args[0][5:]}').split(' ')
             args = pick_lists.get(args[0][5:]).split(' ')
         if args[0] in ["between", "among", "in", "of"]:
             args = args[1:]
@@ -318,9 +321,11 @@ async def scp_function(message, client, args):
                     request_body = (await resp.read()).decode('UTF-8')
                     args.append(request_body.split('iframe-redirect#')[1].split('"')[0].split('-')[2])
         if args[0][0].isdigit():
-             url = "http://www.scp-wiki.net/scp-"+args[0]
+            url = "http://www.scp-wiki.net/scp-"+args[0]
         elif args[0].startswith("http://www.scp-wiki.net/"):
             url = args[0]
+        elif len(args):
+            url = "http://www.scp-wiki.net/scp-"+"-".join(args).lower()
         else:
             await message.channel.send('Please specify a SCP number from http://www.scp-wiki.net/')
             return
