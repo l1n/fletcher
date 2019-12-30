@@ -325,7 +325,7 @@ async def scp_function(message, client, args):
         elif args[0].startswith("http://www.scp-wiki.net/"):
             url = args[0]
         elif len(args):
-            url = "http://www.scp-wiki.net/scp-"+"-".join(args).lower()
+            url = "http://www.scp-wiki.net/"+"-".join(args).lower()
         else:
             await message.channel.send('Please specify a SCP number from http://www.scp-wiki.net/')
             return
