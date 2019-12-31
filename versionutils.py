@@ -63,7 +63,7 @@ def autoload(ch):
     ch.add_command({
         'trigger': ['!issue', '!todo'],
         'function': buglist_function,
-        'async': True, 'args_num': 0, 'args_name': ['Issue # from the tracker'], 'description': 'Show Fletcher issue and tot information'
+        'async': True, 'args_num': 0, 'args_name': ['Issue # from the tracker'], 'description': 'Show Fletcher issue and todo information'
         })
     ch.add_command({
         'trigger': ['!whereami'],
