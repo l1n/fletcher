@@ -68,10 +68,10 @@ def autoload(ch):
     ch.add_command({
         'trigger': ['!ghreport'],
         'function': github_report_function,
-        'async': True, 'args_num': 1, 'args_name': [], 'description': 'GitHub Issue Reporter', 'long_run': True
+        'async': True, 'args_num': 1, 'args_name': ['Line 1: Title', '[Line 2: Body]'], 'description': 'GitHub Issue Reporter (if server has repository configured)', 'long_run': True
         })
     ch.add_command({
         'trigger': ['!ghsearch'],
         'function': github_search_function,
-        'async': True, 'args_num': 1, 'args_name': [], 'description': 'GitHub Issue Search', 'long_run': True
+        'async': True, 'args_num': 1, 'args_name': ['Query String (https://help.github.com/en/github/searching-for-information-on-github/understanding-the-search-syntax)'], 'description': 'GitHub Issue Search', 'long_run': True
         })

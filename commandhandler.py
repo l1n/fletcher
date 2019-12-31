@@ -443,7 +443,7 @@ async def help_function(message, client, args):
         if target == message.author and len(accessible_commands):
             await message.add_reaction('✅')
         if len(args) > 0 and len(accessible_commands) and verbose:
-            helpMessageBody = "\n".join([f'`{"` or `".join(command["trigger"])}`: {command["description"]}\nArguments ({command["args_num"]}): {" ".join(command["args_name"])}' for command in accessible_commands])
+            helpMessageBody = "\n".join([f'`{"` or `".join(command["trigger"])}`: {command["description"]}\nMinimum Arguments ({command["args_num"]}): {" ".join(command["args_name"])}' for command in accessible_commands])
         elif len(accessible_commands) == 0:
             helpMessageBody = 'No commands accessible, check your input'
         else:
