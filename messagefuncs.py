@@ -139,8 +139,14 @@ async def preview_messagelink_function(message, client, args):
         else:
             in_content = message.content
         # 'https://discordapp.com/channels/{}/{}/{}'.format(message.channel.guild.id, message.channel.id, message.id)
-        urlParts = extract_identifiers_messagelink.search(in_content).groups()
-        previewable_parts = extract_previewable_link.search(in_content).groups()
+        try:
+            urlParts = extract_identifiers_messagelink.search(in_content).groups()
+        except AttributeError:
+            urlParts = []
+        try:
+            previewable_parts = extract_previewable_link.search(in_content).groups()
+        except AttributeERror:
+            previewable_parts = []
         if len(urlParts) == 3:
             guild_id = int(urlParts[0])
             channel_id = int(urlParts[1])
