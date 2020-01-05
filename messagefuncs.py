@@ -191,10 +191,9 @@ async def preview_messagelink_function(message, client, args):
                 if args is not None and len(args) >= 1 and args[0].isdigit():
                     content = content + f'\nSource: https://discordapp.com/channels/{guild_id}/{channel_id}/{message_id}'
         elif len(previewable_parts):
-            logger.debug(previewable_parts)
             if "flightrising" in previewable_parts[0]:
                 import swag
-                attachments = [swag.flightrising_function(message, client, [previewable_parts[0], 'INTPROC'])]
+                attachments = [await swag.flightrising_function(message, client, [previewable_parts[0], 'INTPROC'])]
                 content = 'FlightRising Preview'
         # TODO 🔭 to preview?
         if content:
