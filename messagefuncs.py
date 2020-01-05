@@ -130,6 +130,7 @@ async def teleport_function(message, client, args):
         logger.error("TPF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
 
 extract_links = re.compile('(?<!<)((https?|ftp):\/\/|www\.)(\w.+\w\W?)', re.IGNORECASE)
+extract_previewable_link = re.compile('(?<!<)(https?://www1.flightrising.com/(?:dgen/preview/dragon|scrying/predict)\?[^ ]+)', re.IGNORECASE)
 async def preview_messagelink_function(message, client, args):
     try:
         in_content = None
@@ -139,6 +140,7 @@ async def preview_messagelink_function(message, client, args):
             in_content = message.content
         # 'https://discordapp.com/channels/{}/{}/{}'.format(message.channel.guild.id, message.channel.id, message.id)
         urlParts = extract_identifiers_messagelink.search(in_content).groups()
+        previewable_parts = extract_previewable_link.search(in_content).groups()
         if len(urlParts) == 3:
             guild_id = int(urlParts[0])
             channel_id = int(urlParts[1])
@@ -180,10 +182,15 @@ async def preview_messagelink_function(message, client, args):
                         await attachment.save(attachment_blob)
                         attachments.append(discord.File(attachment_blob, attachment.filename))
 
-            if args is not None and len(args) >= 1 and args[0].isdigit():
-                content = content + f'\nSource: https://discordapp.com/channels/{guild_id}/{channel_id}/{message_id}'
+                if args is not None and len(args) >= 1 and args[0].isdigit():
+                    content = content + f'\nSource: https://discordapp.com/channels/{guild_id}/{channel_id}/{message_id}'
+            elif len(previewable_parts):
+                if "flightrising" in previewable_parts[0]:
+                    import swag
+                    content = swag.flightrising_function(message, client, [previewable_parts[0], 'INTPROC'])
             # TODO 🔭 to preview?
-            return await sendWrappedMessage(content, message.channel, files=attachments)
+            if content:
+                return await sendWrappedMessage(content, message.channel, files=attachments)
     except discord.Forbidden as e:
         await message.author.send(f'Tried unrolling message link in your message https://discordapp.com/channels/{message.guild.id}/{message.channel.id}/{message.id}, but I do not have permissions for that channel. Please wrap links in `<>` if you don\'t want me to try to unroll them, or ask the channel owner to grant me Read Message History to unroll links to messages there successfully (https://man.sr.ht/~nova/fletcher/permissions.md for details)')
     except Exception as e:

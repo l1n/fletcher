@@ -56,6 +56,7 @@ async def uwu_function(message, client, args, responses=uwu_responses):
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
         logger.error("UWU[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+        await message.add_reaction('🚫')
 
 async def retrowave_function(message, client, args):
     global session
@@ -101,6 +102,7 @@ async def retrowave_function(message, client, args):
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
         logger.error("RWF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+        await message.add_reaction('🚫')
 
 async def shindan_function(message, client, args):
     try:
@@ -146,6 +148,7 @@ async def shindan_function(message, client, args):
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
         logger.error("SDF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+        await message.add_reaction('🚫')
 
 pick_regexes = {
         'no_commas':  re.compile(r'[\s]\s*(?:and|or|but|nor|for|so|yet)?\s*'),
@@ -309,6 +312,23 @@ async def pick_function(message, client, args):
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
         logger.error("PF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+        await message.add_reaction('🚫')
+
+async def flightrising_function(message, client, args):
+    try:
+        url = args[0]
+        data = url.split("?")[1]
+        async with session.post('https://www1.flightrising.com/scrying/ajax-predict', data=data) as resp:
+            if resp.status != 200:
+                if not (len(args) == 2 and args[1] == 'INTPROC'):
+                    await message.channel.send(f'Couldn\'t find that FlightRising page ({url})')
+                return
+            request_body = await resp.json()
+            return f'https://www1.flightrising.com{request_body["dragon_url"]}'
+    except Exception as e:
+        exc_type, exc_obj, exc_tb = exc_info()
+        logger.error("FRF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+        await message.add_reaction('🚫')
 
 async def scp_function(message, client, args):
     try:
@@ -411,6 +431,7 @@ async def qdb_add_function(message, client, args):
             conn.rollback()
         exc_type, exc_obj, exc_tb = exc_info()
         logger.error("QAF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+        await message.add_reaction('🚫')
 
 async def qdb_get_function(message, client, args):
     try:
@@ -426,6 +447,7 @@ async def qdb_get_function(message, client, args):
             conn.rollback()
         exc_type, exc_obj, exc_tb = exc_info()
         logger.error("QGF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+        await message.add_reaction('🚫')
 
 async def qdb_search_function(message, client, args):
     try:
@@ -441,6 +463,7 @@ async def qdb_search_function(message, client, args):
             conn.rollback()
         exc_type, exc_obj, exc_tb = exc_info()
         logger.error("QSF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+        await message.add_reaction('🚫')
 
 
 def join_rank_function(message, client, args):
@@ -489,6 +512,7 @@ def join_rank_function(message, client, args):
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
         logger.error("JRF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
+        return message.add_reaction('🚫')
 
 
 def autoload(ch):
