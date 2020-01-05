@@ -145,7 +145,7 @@ async def preview_messagelink_function(message, client, args):
             urlParts = []
         try:
             previewable_parts = extract_previewable_link.search(in_content).groups()
-        except AttributeERror:
+        except AttributeError:
             previewable_parts = []
         if len(urlParts) == 3:
             guild_id = int(urlParts[0])
@@ -190,13 +190,14 @@ async def preview_messagelink_function(message, client, args):
 
                 if args is not None and len(args) >= 1 and args[0].isdigit():
                     content = content + f'\nSource: https://discordapp.com/channels/{guild_id}/{channel_id}/{message_id}'
-            elif len(previewable_parts):
-                if "flightrising" in previewable_parts[0]:
-                    import swag
-                    content = swag.flightrising_function(message, client, [previewable_parts[0], 'INTPROC'])
-            # TODO 🔭 to preview?
-            if content:
-                return await sendWrappedMessage(content, message.channel, files=attachments)
+        elif len(previewable_parts):
+            logger.debug(previewable_parts)
+            if "flightrising" in previewable_parts[0]:
+                import swag
+                attachments = [swag.flightrising_function(message, client, [previewable_parts[0], 'INTPROC'])]
+        # TODO 🔭 to preview?
+        if content:
+            return await sendWrappedMessage(content, message.channel, files=attachments)
     except discord.Forbidden as e:
         await message.author.send(f'Tried unrolling message link in your message https://discordapp.com/channels/{message.guild.id}/{message.channel.id}/{message.id}, but I do not have permissions for that channel. Please wrap links in `<>` if you don\'t want me to try to unroll them, or ask the channel owner to grant me Read Message History to unroll links to messages there successfully (https://man.sr.ht/~nova/fletcher/permissions.md for details)')
     except Exception as e:

@@ -324,7 +324,8 @@ async def flightrising_function(message, client, args):
                     await message.channel.send(f'Couldn\'t find that FlightRising page ({url})')
                 return
             request_body = await resp.json()
-            return f'https://www1.flightrising.com{request_body["dragon_url"]}'
+            input_image_blob = await netcode.simple_get_image(f'https://www1.flightrising.com{request_body["dragon_url"]}')
+            return discord.File(input_image_blob, 'flightrising.png')
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
         logger.error("FRF[{}]: {} {}".format(exc_tb.tb_lineno, type(e).__name__, e))
