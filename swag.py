@@ -5,6 +5,7 @@ import ephem
 import io
 import logging
 import messagefuncs
+import netcode
 import random
 import re
 from lxml import html, etree
