@@ -195,6 +195,7 @@ async def preview_messagelink_function(message, client, args):
             if "flightrising" in previewable_parts[0]:
                 import swag
                 attachments = [swag.flightrising_function(message, client, [previewable_parts[0], 'INTPROC'])]
+                content = 'FlightRising Preview'
         # TODO 🔭 to preview?
         if content:
             return await sendWrappedMessage(content, message.channel, files=attachments)
