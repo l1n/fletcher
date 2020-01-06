@@ -174,6 +174,20 @@ async def regex_filter(message, client, config):
         exc_type, exc_obj, exc_tb = exc_info()
         logger.error(f'MRF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
 
+async def alphabetize_channels(guild, client, config):
+    # In categories, don't order categories themselves
+    try:
+        for category_tuple in guild.by_category():
+            channels = category_tuple[1]
+            az_channels = sorted(channels, key=lambda channel: channel.name)
+            for i in range(len(channels)):
+                if channels[i] != az_channels[i]:
+                    await az_channels[i].edit(position=channels[i].position, reason='Alphabetizing')
+    except Exception as e:
+        exc_type, exc_obj, exc_tb = exc_info()
+        logger.error(f'ACF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
+
+
 # Register functions in client
 def autoload(ch):
     ch.add_remove_handler(
@@ -203,4 +217,8 @@ def autoload(ch):
     ch.add_reload_handler(
             'chanban',
             chanban_reload_function
+            )
+    ch.add_reload_handler(
+            'azsort',
+            alphabetize_channels
             )
