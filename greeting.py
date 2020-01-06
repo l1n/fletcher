@@ -177,13 +177,15 @@ async def regex_filter(message, client, config):
 async def alphabetize_channels(guild, client, config):
     # In categories, don't order categories themselves
     try:
+        position = 0
         for category_tuple in guild.by_category():
             channels = category_tuple[1]
             az_channels = sorted(channels, key=lambda channel: channel.name)
-            for i in range(len(channels)):
-                if channels[i] != az_channels[i]:
-                    logger.info(f'Moving {az_channels[i]} to {channels[i].position} (Former {channels[i]})')
-                    await az_channels[i].edit(position=channels[i].position, reason='Alphabetizing')
+            for channel in az_channels:
+                if channel.position != position:
+                    logger.info(f'Moving {channel} to {position} from {channels[i].position}')
+                    await az_channels[i].edit(position=position, reason='Alphabetizing')
+                position += 1
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
         logger.error(f'ACF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}')
