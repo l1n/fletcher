@@ -183,7 +183,7 @@ async def alphabetize_channels(guild, client, config):
             az_channels = sorted(channels, key=lambda channel: channel.name)
             for channel in az_channels:
                 if channel.position != position:
-                    logger.info(f'Moving {channel} to {position} from {channels[i].position}')
+                    logger.info(f'Moving {channel} to {position} from {channel.position}')
                     await az_channels[i].edit(position=position, reason='Alphabetizing')
                 position += 1
     except Exception as e:
