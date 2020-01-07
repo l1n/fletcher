@@ -319,7 +319,7 @@ async def flightrising_function(message, client, args):
     try:
         url = args[0]
         data = url.split('?')[1]
-        async with session.post('https://www1.flightrising.com/scrying/ajax-predict', data=data, header={
+        async with session.post('https://www1.flightrising.com/scrying/ajax-predict', data=data, headers={
             'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
             }) as resp:
             if resp.status != 200:
