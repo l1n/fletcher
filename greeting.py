@@ -156,7 +156,7 @@ async def regex_filter(message, client, config):
                         timeout = None
                 else:
                     timeout = 60
-                await target.send(config['regex-warn'].format(**vars()), delete_after=timeout)
+                await target.send(config['regex-warn'].replace('\\n', '\n').format(**vars()), delete_after=timeout)
 
             if config.get('regex-kill') == "On":
                 if message.channel.permissions_for(message.author).manage_messages:
