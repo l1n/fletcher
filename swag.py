@@ -318,8 +318,10 @@ async def pick_function(message, client, args):
 async def flightrising_function(message, client, args):
     try:
         url = args[0]
-        data = url.split("?")[1]
-        async with session.post('https://www1.flightrising.com/scrying/ajax-predict', data=data) as resp:
+        data = url.split('?')[1]
+        async with session.post('https://www1.flightrising.com/scrying/ajax-predict', data=data, header={
+            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+            }) as resp:
             if resp.status != 200:
                 if not (len(args) == 2 and args[1] == 'INTPROC'):
                     await message.channel.send(f'Couldn\'t find that FlightRising page ({url})')
