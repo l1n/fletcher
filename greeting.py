@@ -134,7 +134,10 @@ async def regex_filter(message, client, config):
             subject = str(message.author)
         else:
             subject = str(message.content)
-        matching = re.search(config['regex-pattern'], subject)
+        re_flags = 0
+        if config['regex-ignorecase'] == 'On':
+            re_flags = re_flags | re.IGNORECASE
+        matching = re.search(config['regex-pattern'], subject, flags)
         if matching and whitelist_mode:
             allowed = True
         elif not matching and whitelist_mode:
@@ -144,6 +147,14 @@ async def regex_filter(message, client, config):
         elif not matching and not whitelist_mode:
             allowed = True
         if not allowed:
+            if 'regex-warn-reaction' in config:
+                if len(config['regex-warn-reaction']) > 1:
+                    target_emoji = discord.utils.get(guild.emojis, name=config['regex-warn-reaction'])
+                    if target_emoji is None:
+                        target_emoji = discord.utils.get(client.get_all_emojis(), name=config['regex-warn-reaction'])
+                else:
+                    target_emoji = config['regex-warn-reaction']
+                await message.add_reaction(target_emoji)
             if 'regex-warn' in config:
                 if config.get('regex-warn-target') == 'author':
                     target = message.author
