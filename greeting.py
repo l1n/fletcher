@@ -137,7 +137,7 @@ async def regex_filter(message, client, config):
         re_flags = 0
         if config['regex-ignorecase'] == 'On':
             re_flags = re_flags | re.IGNORECASE
-        matching = re.search(config['regex-pattern'], subject, flags)
+        matching = re.search(config['regex-pattern'], subject, re_flags)
         if matching and whitelist_mode:
             allowed = True
         elif not matching and whitelist_mode:
