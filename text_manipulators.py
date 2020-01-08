@@ -331,7 +331,7 @@ async def reaction_request_function(message, client, args):
         emoji_query = args[0].strip(':')
         target = None
         try:
-            urlParts = extract_identifiers_messagelink.search(message.content).groups()
+            urlParts = messagefuncs.extract_identifiers_messagelink.search(message.content).groups()
             if len(urlParts) == 3:
                 guild_id = int(urlParts[0])
                 channel_id = int(urlParts[1])
