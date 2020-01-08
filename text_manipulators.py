@@ -348,10 +348,10 @@ async def reaction_request_function(message, client, args):
             emoji = list(filter(lambda m: m.name == emoji_query, client.emojis))
             emoji = emoji[int(args[1])]
         elif len(args) >= 2 and args[1].isnumeric():
-            emoji = discord.utils.get(client.emoji, name=emoji_query)
+            emoji = discord.utils.get(client.emojis, name=emoji_query)
             target = await message.channel.fetch_message(int(args[1]))
         else:
-            emoji = discord.utils.get(client.emoji, name=emoji_query)
+            emoji = discord.utils.get(client.emojis, name=emoji_query)
         if emoji:
             if target is None:
                 async for historical_message in message.channel.history(before=message, oldest_first=False):
