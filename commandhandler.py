@@ -302,7 +302,7 @@ class CommandHandler:
                 searchString = "!"+searchString[:-1]
             searchString = self.bang_remover.sub('!', searchString)
         searchString = searchString.rstrip()
-        if channel_config.get('regex') == 'pre-command' and not message.channel.permissions_for(message.author).manage_messages:
+        if channel_config.get('regex') == 'pre-command' and (channel_config.get('regex-tyranny', "On") == "Off" or not message.channel.permissions_for(message.author).manage_messages):
             continue_flag = await greeting.regex_filter(message, self.client, channel_config)
             if not continue_flag:
                 return
@@ -344,7 +344,7 @@ class CommandHandler:
             for hotword in regex_cache.get(message.guild.id, []):
                 if hotword['compiled_regex'].search(message.content):
                     await message.add_reaction(hotword['target_emoji'])
-        if channel_config.get('regex') == 'post-command' and not message.channel.permissions_for(message.author).manage_messages:
+        if channel_config.get('regex') == 'post-command' and (channel_config.get('regex-tyranny', "On") == "Off" or not message.channel.permissions_for(message.author).manage_messages):
             continue_flag = await greeting.regex_filter(message, self.client, channel_config)
             if not continue_flag:
                 return
