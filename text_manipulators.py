@@ -329,18 +329,35 @@ async def reaction_request_function(message, client, args):
         if not message.channel.permissions_for(message.author).external_emojis:
             return False
         emoji_query = args[0].strip(':')
-        emoji = list(filter(lambda m: m.name == emoji_query, client.emojis))
-        if len(args) >= 2:
+        target = None
+        try:
+            urlParts = extract_identifiers_messagelink.search(message.content).groups()
+            if len(urlParts) == 3:
+                guild_id = int(urlParts[0])
+                channel_id = int(urlParts[1])
+                message_id = int(urlParts[2])
+                guild = client.get_guild(guild_id)
+                if guild is None:
+                    logger.warning("QAF: Fletcher is not in guild ID "+str(guild_id))
+                    return
+                channel = guild.get_channel(channel_id)
+                target = await channel.fetch_message(message_id)
+        except AttributeError:
+            pass
+        if len(args) >= 2 and args[1].isnumeric() and int(args[1]) < 1000000:
+            emoji = list(filter(lambda m: m.name == emoji_query, client.emojis))
             emoji = emoji[int(args[1])]
+        elif len(args) >= 2 and args[1].isnumeric():
+            emoji = discord.utils.get(client.emoji, name=emoji_query)
+            target = await message.channel.fetch_message(int(args[1]))
         else:
-            emoji = emoji[0]
-        # FIXME if used in empty channel this breaks
+            emoji = discord.utils.get(client.emoji, name=emoji_query)
         if emoji:
-            target = None
-            async for historical_message in message.channel.history(before=message, oldest_first=False):
-                if historical_message.author != message.author:
-                    target = historical_message
-                    break
+            if target is None:
+                async for historical_message in message.channel.history(before=message, oldest_first=False):
+                    if historical_message.author != message.author:
+                        target = historical_message
+                        break
             await target.add_reaction(emoji)
             await asyncio.sleep(1)
             try:
