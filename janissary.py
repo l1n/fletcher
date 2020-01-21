@@ -1247,11 +1247,19 @@ async def delete_my_message_function(message, client, args):
 async def set_slowmode_function(message, client, args):
     global config
     try:
-        await message.channel.edit(slowmode_delay=int(args[0]))
+        if len(message.channel_mentions) > 0:
+            target = message.channel_mentions[0]
+            if not message.author.permissions_in(target).manage_webhooks:
+                logger.warning("SSMF: Forbidden to set slowmode without target admin privileges")
+                return
+        else:
+            target = message.channel
+        await target.edit(slowmode_delay=int(args[0]))
         await message.add_reaction("✅")
     except Exception as e:
         exc_type, exc_obj, exc_tb = exc_info()
         logger.error(f"SSMF[{exc_tb.tb_lineno}]: {type(e).__name__} {e}")
+        await message.add_reaction("🚫")
 
 
 def autoload(ch):
