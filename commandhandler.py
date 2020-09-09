@@ -382,7 +382,9 @@ class CommandHandler:
                         if metuple is not None:
                             fromGuild = self.client.get_guild(metuple[0])
                             fromChannel = fromGuild.get_channel(metuple[1])
-                            fromMessage = await fromChannel.fetch_message_fast(metuple[2])
+                            fromMessage = await fromChannel.fetch_message_fast(
+                                metuple[2]
+                            )
                             if fromMessage.author.id in config.get(
                                 section="moderation",
                                 key="blacklist-user-usage",

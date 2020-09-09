@@ -176,7 +176,7 @@ async def load_webhooks(ch=None):
                     ):
                         logger.debug(f"LWH: * {webhook.name}")
                         toChannelName = (
-                                f"{guild.name}:{guild.get_channel(webhook.channel_id).name}"
+                            f"{guild.name}:{guild.get_channel(webhook.channel_id).name}"
                         )
                         fromTuple = webhook.name.split("(")[1].split(")")[0].split(":")
                         fromTuple[0] = messagefuncs.expand_guild_name(
