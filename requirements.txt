@@ -84,7 +84,7 @@ uritemplate==3.0.0
 urllib3==1.25.6
 wcwidth==0.1.7
 webencodings==0.5.1
-websockets==8.0.2
+websockets==9.1
 xerox==0.4.1
 yarl==1.3.0
 zalgotext==0.2.0
